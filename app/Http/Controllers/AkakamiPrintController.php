@@ -118,7 +118,9 @@ class AkakamiPrintController extends Controller
             ? DB::table('tblsequence')->where('id_seq', $akakami->id_depts)->value('nm_sequence')
             : null;
         $handlerName = $akakami->pic_handler
-            ? DB::table('tblkaryawan')->where('nik', $akakami->pic_handler)->value('nama_kary')
+            ? (DB::table('tblkaryawan')->where('nik', $akakami->pic_handler)->value('nama_kary')
+                ?? DB::table('tbl_user')->where('id_user', $akakami->pic_handler)->value('username')
+                ?? (string) $akakami->pic_handler)
             : null;
         $loggedInUser = auth()->user();
 

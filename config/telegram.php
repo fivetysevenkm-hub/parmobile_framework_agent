@@ -19,6 +19,9 @@ return [
         'rank_a' => [
             'token' => env('TELEGRAM_BOT_TOKEN_RANK_A'),
         ],
+        'carb_temper' => [
+            'token' => env('TELEGRAM_BOT_TOKEN_CARB_TEMPER'),
+        ],
     ],
 
     'chat_ids' => [

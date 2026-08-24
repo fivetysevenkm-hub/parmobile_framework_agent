@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\AkakamiTelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -243,11 +244,13 @@ class AkakamiApproval extends Component
         $isApproved = $this->judgmentType === 'ok';
         $now = now('Asia/Jakarta');
         $user = auth()->user();
-        $userName = (string) ($user->username ?? $user->name ?? 'System');
+        // pic_handler is a legacy identifier field (VARCHAR(12)), not a display-name field.
+        // The login flow maps the legacy id_user to session nik, so keep that identifier here.
+        $handlerId = (string) ($user->id_user ?? session('nik') ?? auth()->id() ?? '');
         $approverNames = [];
         $rankNumber = null;
 
-        DB::transaction(function () use ($noflpp, $isApproved, $now, $userName, &$approverNames, &$rankNumber) {
+        DB::transaction(function () use ($noflpp, $isApproved, $now, $handlerId, &$approverNames, &$rankNumber) {
             DB::table('tblakakami')->where('noflpp', $noflpp)->update([
                 'status_flpp' => $isApproved ? 'approved' : 'eskalasi',
                 'pic_dept' => $this->picDept,
@@ -260,7 +263,7 @@ class AkakamiApproval extends Component
                 'analisa' => $this->analisa,
                 'fish_bone' => $this->fishbone,
                 'rank_a' => $this->rankA ? '1' : '0',
-                'pic_handler' => $userName,
+                'pic_handler' => $handlerId,
                 'tgl_approved' => $now,
             ]);
 
@@ -337,7 +340,15 @@ class AkakamiApproval extends Component
             $this->releaseLot($detail);
         });
 
-        $telegram->send($this->formatTelegramMessage('RELEASED & APPROVED'), 'approval_flpp');
+        $messageDetail = $this->findActiveDetail($noflpp) ?? [
+            'no_flpp' => $detail->noflpp,
+            'no_lots' => $detail->no_lots,
+            'nm_part' => '-',
+            'qty_problem' => $detail->qty_problem,
+            'nm_customer' => '-',
+            'deskripsi_problem' => $detail->deskripsi_problem,
+        ];
+        $telegram->send($this->formatTelegramMessage('RELEASED & APPROVED', false, '', false, null, $messageDetail), 'approval_flpp');
         $this->resetPage();
         session()->flash('success', 'FLPP berhasil di-approve dan hold dilepas.');
     }
@@ -385,31 +396,21 @@ class AkakamiApproval extends Component
         DB::table('tbl_seq_all')->where('no_lot', $lot)->where('id_seq', $department)->update(['hold' => 'no']);
     }
 
-    private function formatTelegramMessage(string $status, bool $isEscalation = false, string $targetApprovers = '', bool $isRankA = false, ?string $rankNumber = null): string
+    private function formatTelegramMessage(string $status, bool $isEscalation = false, string $targetApprovers = '', bool $isRankA = false, ?string $rankNumber = null, ?array $detailOverride = null): string
     {
-        $detail = $this->activeDetail ?: ($this->findActiveDetail($this->selectedNoflpp) ?? []);
-        $title = $isRankA ? '<b>PENGAJUAN RANK A</b>' : '<b>PAR MOBILE NOTIFICATION</b>';
-        $message = $title."\n━━━━━━━━━━━━━━━━━━━━━━\n";
-        if ($isRankA && $rankNumber) {
-            $message .= '<b>No. Rank :</b> '.$rankNumber."\n";
-            $message .= '<b>Ref FLPP :</b> '.($detail['no_flpp'] ?? $this->selectedNoflpp)."\n";
-        } else {
-            $message .= '<b>No. FLPP :</b> '.($detail['no_flpp'] ?? $this->selectedNoflpp)."\n";
-        }
-        $message .= '<b>No. Lot :</b> '.($detail['no_lots'] ?? '-')."\n";
-        $message .= '<b>Part Name:</b> '.($detail['nm_part'] ?? '-')."\n";
-        $message .= '<b>Quantity :</b> '.($detail['qty_problem'] ?? '-')."\n";
-        $message .= '<b>Customer :</b> '.($detail['nm_customer'] ?? '-')."\n";
-        $message .= '<b>Problem :</b> <i>'.($detail['deskripsi_problem'] ?? '-')."</i>\n━━━━━━━━━━━━━━━━━━━━━━\n";
-        if ($isRankA) {
-            $message .= '<b>STATUS: MENUNGGU TINDAKAN RANK A</b>';
-        } elseif ($isEscalation) {
-            $message .= '<b>STATUS: PENGAJUAN APPROVAL</b>\n<b>Ditujukan Ke:</b> '.$targetApprovers;
-        } else {
-            $message .= '<b>STATUS: '.$status.'</b>\n<b>Keterangan:</b> Lot telah dialirkan &amp; boleh lanjut proses.';
-        }
-        $message .= "\n<b>Oleh :</b> ".(auth()->user()->username ?? auth()->user()->name ?? 'System');
-        return $message;
+        $detail = $detailOverride ?? ($this->activeDetail ?: ($this->findActiveDetail($this->selectedNoflpp) ?? []));
+        $user = auth()->user();
+        $userName = (string) ($user->username ?? $user->name ?? session('username') ?? 'System');
+
+        return app(AkakamiTelegramMessage::class)->format(
+            $detail,
+            $status,
+            $userName,
+            $isEscalation,
+            $targetApprovers,
+            $isRankA,
+            (string) ($rankNumber ?? ''),
+        );
     }
 
     private function findActiveDetail(string $noflpp): ?array

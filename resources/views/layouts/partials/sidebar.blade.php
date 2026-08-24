@@ -1,6 +1,6 @@
 @php
     $approvalOpen = request()->routeIs('akakami.qaqc', 'akakami.approval');
-    $monitoringOpen = request()->routeIs('last.sequence', 'incoming.trace', 'realtime.production', 'productivity.process', 'manpower.productivity');
+    $monitoringOpen = request()->routeIs('last.sequence', 'incoming.trace', 'realtime.production', 'productivity.process', 'manpower.productivity', 'carb.temper');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -58,7 +58,7 @@
                 <a href="{{ route('productivity.process') }}" class="sidebar-link {{ request()->routeIs('productivity.process') ? 'active' : '' }}">
                     <span class="nav-icon">⚙</span><span class="nav-label">Perf. Prod.Process</span>
                 </a>
-                <a href="#" class="sidebar-link is-placeholder" data-placeholder="Transisi Carb-Temper">
+                <a href="{{ route('carb.temper') }}" class="sidebar-link {{ request()->routeIs('carb.temper') ? 'active' : '' }}">
                     <span class="nav-icon">♨</span><span class="nav-label">Transisi Carb-Temper</span>
                 </a>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\AkakamiTelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -241,19 +242,7 @@ class AkakamiApprovalReview extends Component
 
     private function formatTelegramMessage(array $detail, string $status, string $userName): string
     {
-        $escape = static fn ($value): string => htmlspecialchars((string) ($value ?? '-'), ENT_XML1 | ENT_QUOTES, 'UTF-8');
-
-        return '<b>PAR MOBILE APPROVAL-AKAKAMI</b>'
-            ."\n━━━━━━━━━━━━━━━━━━━━━━\n"
-            .'<b>No. FLPP :</b> '.$escape($detail['no_flpp'] ?? $this->selectedFlpp)."\n"
-            .'<b>No. Lot :</b> '.$escape($detail['no_lots'] ?? '-')."\n"
-            .'<b>Part Name :</b> '.$escape($detail['nm_part'] ?? '-')."\n"
-            .'<b>Quantity :</b> '.$escape($detail['qty_problem'] ?? '-')."\n"
-            .'<b>Customer :</b> '.$escape($detail['nm_customer'] ?? '-')."\n"
-            .'<b>Problem :</b> <i>'.$escape($detail['deskripsi_problem'] ?? $detail['nmproblem'] ?? '-')."</i>\n"
-            ."━━━━━━━━━━━━━━━━━━━━━━\n"
-            .'<b>STATUS :</b> '.$escape($status)."\n"
-            .'<b>Oleh :</b> '.$escape($userName);
+        return app(AkakamiTelegramMessage::class)->format($detail, $status, $userName);
     }
 
     private function resetSelection(): void

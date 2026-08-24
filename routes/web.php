@@ -19,6 +19,7 @@ use App\Livewire\IncomingTrace;
 use App\Livewire\RealtimeProduction;
 use App\Livewire\ManpowerProductivity;
 use App\Livewire\ProcessProductivity;
+use App\Livewire\CarbTemperMonitoring;
 use App\Livewire\Login;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');
     Route::get('/manpower-productivity/certificate', ManpowerCertificateController::class)->name('manpower.productivity.certificate');
+    Route::get('/carb-temper', CarbTemperMonitoring::class)->name('carb.temper');
     Route::get('/akakami-dashboard', AkakamiDashboard::class)->name('akakami.dashboard');
     Route::get('/export-excel', ExportExcelController::class)->name('export.excel');
 
