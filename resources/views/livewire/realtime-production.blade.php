@@ -60,7 +60,7 @@
     <div class="rt-header">
         <div>
             <div class="eyebrow">PAR Mobile / Monitoring</div>
-            <h1>Real Time <span class="cyan">Prod.</span></h1>
+            <h1>Real Time <span class="cyan">Production</span></h1>
             <div class="muted">Monitoring posisi proses produksi secara real-time.</div>
         </div>
     </div>

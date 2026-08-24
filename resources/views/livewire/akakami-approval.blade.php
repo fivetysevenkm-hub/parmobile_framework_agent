@@ -62,7 +62,7 @@
     <div class="topbar">
         <div>
             <div class="eyebrow">PAR Mobile / Quality Control</div>
-            <h1>Proses <span class="cyan">Akakami QAQC</span></h1>
+            <h1>Proses <span class="cyan">Proses Akakami</span></h1>
             <div class="muted">Kelola pengajuan, approval, eskalasi, dan release FLPP</div>
         </div>
         <div class="toolbar">

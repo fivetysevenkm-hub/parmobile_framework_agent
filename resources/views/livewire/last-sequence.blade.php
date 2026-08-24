@@ -42,7 +42,7 @@
     <div class="sequence-header">
         <div>
             <div class="eyebrow">PAR Mobile / Monitoring</div>
-            <h1>List <span class="cyan">Proses Terakhir</span></h1>
+            <h1>List Lot <span class="cyan">Proses Terakhir</span></h1>
             <div class="muted">Menampilkan posisi terakhir sequence dari setiap lot produksi.</div>
         </div>
     </div>

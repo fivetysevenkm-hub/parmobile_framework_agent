@@ -54,7 +54,7 @@
     <div class="review-header">
         <div>
             <div class="eyebrow">PAR Mobile / Report Approval</div>
-            <h1>Prv. <span class="cyan">Akakami</span></h1>
+            <h1>Approval <span class="cyan">Akakami</span></h1>
             <div class="muted">Antrean approval Akakami sesuai NIK approver yang sedang login.</div>
         </div>
     </div>

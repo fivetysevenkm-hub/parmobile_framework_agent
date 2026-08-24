@@ -4,7 +4,7 @@
             <span class="hamburger"><span></span><span></span><span></span></span>
         </button>
         <a href="{{ route('dashboard') }}" class="brand-link" aria-label="PAR Mobile Dashboard">
-            <span class="brand-logo">PAR</span>
+            <img class="brand-logo" src="{{ asset('images/DOWA-LOGO.png') }}" alt="DOWA logo">
             <span class="brand-name">PAR MOBILE</span>
         </a>
     </div>

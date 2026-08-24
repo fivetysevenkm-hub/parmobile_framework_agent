@@ -38,7 +38,7 @@
     <div class="trace-header">
         <div>
             <div class="eyebrow">PAR Mobile / Monitoring</div>
-            <h1>Incoming <span class="cyan">Trace</span></h1>
+            <h1>Incoming <span class="cyan">Traceability</span></h1>
             <div class="muted">Monitoring incoming sebelum data masuk ke proses produksi utama.</div>
         </div>
     </div>

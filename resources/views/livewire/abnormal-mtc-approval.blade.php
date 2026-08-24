@@ -6,7 +6,7 @@
     <div class="abn-header">
         <div>
             <div class="eyebrow">PAR Mobile / Report Approval</div>
-            <h1>Aprv. <span class="cyan">Abnormal Mtc</span></h1>
+            <h1>Approval <span class="cyan">Abnormal Mtc</span></h1>
             <div class="muted">Antrean approval abnormal maintenance berdasarkan NIK approver yang sedang login.</div>
         </div>
     </div>

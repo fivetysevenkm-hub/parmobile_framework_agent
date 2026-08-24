@@ -6,8 +6,8 @@
 
 <aside class="site-sidebar" id="appSidebar" aria-label="Navigasi utama">
     <div class="sidebar-brand">
-        <span class="brand-logo">PAR</span>
-        <span class="brand-text">PAR MOBILE</span>
+      
+        <span class="brand-text"></span>
     </div>
 
     <nav class="sidebar-nav">

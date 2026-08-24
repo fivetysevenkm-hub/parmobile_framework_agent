@@ -2,7 +2,7 @@
     <div class="topbar">
         <div>
             <div class="eyebrow">PAR Mobile / Monthly Analytics</div>
-            <h1>Monthly <span class="cyan">Monitoring</span></h1>
+            <h1>Monthly Report <span class="cyan">Dashboard</span></h1>
             <div class="muted">Analisa performa produksi bulanan — tahun {{ $selectedYear }}</div>
         </div>
         <div class="toolbar">

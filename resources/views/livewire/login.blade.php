@@ -1,6 +1,6 @@
 <div class="login-box">
     <div class="brand">
-        <div class="brand-mark">PAR</div>
+        <img class="brand-logo" src="{{ asset('images/DOWA-LOGO.png') }}" alt="DOWA logo">
         <h1><strong>PAR</strong><span>Mobile</span></h1>
     </div>
 

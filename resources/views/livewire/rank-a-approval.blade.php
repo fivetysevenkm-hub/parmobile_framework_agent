@@ -6,7 +6,7 @@
     <div class="rank-header">
         <div>
             <div class="eyebrow">PAR Mobile / Report Approval</div>
-            <h1>Aprv. <span class="cyan">Rank A</span></h1>
+            <h1>Approval <span class="cyan">Rank A</span></h1>
             <div class="muted">Antrean approval Rank A berdasarkan NIK approver yang sedang login.</div>
         </div>
     </div>

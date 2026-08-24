@@ -2,7 +2,7 @@
     <div class="topbar">
         <div>
             <div class="eyebrow">PAR Mobile / Operations Intelligence</div>
-            <h1>Production <span class="cyan">Dashboard</span></h1>
+            <h1>Daily Report <span class="cyan">Dashboard</span></h1>
             <div class="muted">Monitoring real time seluruh proses produksi</div>
         </div>
         <div class="toolbar">
