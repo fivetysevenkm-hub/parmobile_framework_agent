@@ -12,6 +12,7 @@ use App\Http\Controllers\IncomingTraceExportController;
 use App\Http\Controllers\RealtimeProductionExportController;
 use App\Http\Controllers\ProductivityProcessExportController;
 use App\Http\Controllers\ProcessProductivityExportController;
+use App\Http\Controllers\ManpowerCertificateController;
 use App\Livewire\MonthlyDashboard;
 use App\Livewire\LastSequence;
 use App\Livewire\IncomingTrace;
@@ -47,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/manpower-productivity', ManpowerProductivity::class)->name('manpower.productivity');
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');
+    Route::get('/manpower-productivity/certificate', ManpowerCertificateController::class)->name('manpower.productivity.certificate');
     Route::get('/akakami-dashboard', AkakamiDashboard::class)->name('akakami.dashboard');
     Route::get('/export-excel', ExportExcelController::class)->name('export.excel');
 
