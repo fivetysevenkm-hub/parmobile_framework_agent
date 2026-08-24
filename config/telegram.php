@@ -19,6 +19,9 @@ return [
         'rank_a' => [
             'token' => env('TELEGRAM_BOT_TOKEN_RANK_A'),
         ],
+        'abnormal_mtc' => [
+            'token' => env('TELEGRAM_BOT_TOKEN_APPROVAL_ABNORMAL_MTC'),
+        ],
         'carb_temper' => [
             'token' => env('TELEGRAM_BOT_TOKEN_CARB_TEMPER'),
         ],

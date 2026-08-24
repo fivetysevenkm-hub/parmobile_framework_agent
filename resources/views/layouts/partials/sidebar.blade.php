@@ -1,5 +1,5 @@
 @php
-    $approvalOpen = request()->routeIs('akakami.qaqc', 'akakami.approval');
+    $approvalOpen = request()->routeIs('akakami.qaqc', 'akakami.approval', 'ranka.approval', 'abnormal.mtc.approval');
     $monitoringOpen = request()->routeIs('last.sequence', 'incoming.trace', 'realtime.production', 'productivity.process', 'manpower.productivity', 'carb.temper');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
@@ -29,10 +29,10 @@
                 <a href="{{ route('akakami.approval') }}" class="sidebar-link {{ request()->routeIs('akakami.approval') ? 'active' : '' }}">
                     <span class="nav-icon">✓</span><span class="nav-label">Aprv. Akakami</span>
                 </a>
-                <a href="#" class="sidebar-link is-placeholder" data-placeholder="Aprv. Abnormal Mtc">
+                <a href="{{ route('abnormal.mtc.approval') }}" class="sidebar-link {{ request()->routeIs('abnormal.mtc.approval') ? 'active' : '' }}">
                     <span class="nav-icon">!</span><span class="nav-label">Aprv. Abnormal Mtc</span>
                 </a>
-                <a href="#" class="sidebar-link is-placeholder" data-placeholder="Aprv. Rank A">
+                <a href="{{ route('ranka.approval') }}" class="sidebar-link {{ request()->routeIs('ranka.approval') ? 'active' : '' }}">
                     <span class="nav-icon">★</span><span class="nav-label">Aprv. Rank A</span>
                 </a>
             </div>
