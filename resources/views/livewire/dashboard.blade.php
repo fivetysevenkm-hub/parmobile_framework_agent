@@ -29,7 +29,7 @@
         <div class="stat"><span class="stat-label">Total Akakami (Case)</span><span class="stat-value red">{{ number_format($summary['grand_total_aka']) }}</span></div>
     </section>
 
-    <section class="charts" wire:ignore>
+    <section class="charts" data-chart-ready="false" wire:ignore>
         <div class="panel"><h2>Quantity by sequence (Pcs)</h2><div class="chart-wrap"><canvas id="qtyChart"></canvas></div></div>
         <div class="panel"><h2>Lot count by sequence (Lot)</h2><div class="chart-wrap"><canvas id="lotChart"></canvas></div></div>
         <div class="panel"><h2>Akakami count by sequence (Case)</h2><div class="chart-wrap"><canvas id="akaChart"></canvas></div></div>
@@ -169,9 +169,42 @@
             });
         }
 
-        drawCharts(initialData);
+        const chartsSection = document.querySelector('.charts');
+
+        function resizeDashboardCharts() {
+            requestAnimationFrame(() => {
+                Object.values(dashboardCharts).forEach(chart => chart?.resize());
+            });
+        }
+
+        function markChartsReady() {
+            if (chartsSection) chartsSection.dataset.chartReady = 'true';
+        }
+
+        function initializeDashboardCharts() {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    drawCharts(initialData);
+                    resizeDashboardCharts();
+                    markChartsReady();
+                });
+            });
+        }
+
+        initializeDashboardCharts();
         initializeDateRangePicker();
-        $wire.on('dashboard-updated', event => drawCharts(event.data));
+        window.addEventListener('load', resizeDashboardCharts, { once: true });
+        window.addEventListener('resize', resizeDashboardCharts);
+        window.addEventListener('layout-resized', resizeDashboardCharts);
+        const chartsContainer = document.querySelector('.dashboard-shell .charts, .charts');
+        if (chartsContainer && typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(resizeDashboardCharts).observe(chartsContainer);
+        }
+        $wire.on('dashboard-updated', event => {
+            drawCharts(event.data);
+            resizeDashboardCharts();
+            markChartsReady();
+        });
 
         let timeLeft = 600;
         setInterval(() => {

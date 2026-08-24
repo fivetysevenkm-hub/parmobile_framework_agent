@@ -27,6 +27,6 @@
             </button>
         </form>
 
-        <div class="footer">© {{ now()->year }} PT Dowa Thermotech Indonesia</div>
+        <div class="footer">Version_02 | {{ now()->year }} PT Dowa Thermotech Indonesia</div>
     </div>
 </div>
