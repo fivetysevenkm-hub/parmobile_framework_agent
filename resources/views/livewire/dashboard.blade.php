@@ -1,4 +1,4 @@
-<div class="app-shell" wire:poll.10m="loadData">
+<div class="app-shell">
     <div class="topbar">
         <div>
             <div class="eyebrow">PAR Mobile / Operations Intelligence</div>
@@ -6,7 +6,7 @@
             <div class="muted">Monitoring real time seluruh proses produksi</div>
         </div>
         <div class="toolbar">
-            <div class="timer">AUTO REFRESH <span id="refresh-countdown" class="cyan">10:00</span></div>
+            <div class="timer">AUTO REFRESH <span id="refresh-countdown" class="cyan">600</span> DETIK</div>
         </div>
     </div>
 
@@ -200,18 +200,72 @@
         if (chartsContainer && typeof ResizeObserver !== 'undefined') {
             new ResizeObserver(resizeDashboardCharts).observe(chartsContainer);
         }
+        const refreshIntervalSeconds = 600;
+        const countdownState = window.__parDailyReportCountdownState || (window.__parDailyReportCountdownState = {});
+        if (!Number.isFinite(Number(countdownState.deadline)) || Number(countdownState.deadline) <= Date.now()) {
+            countdownState.deadline = Date.now() + (refreshIntervalSeconds * 1000);
+        }
+
+        function renderRefreshCountdown() {
+            const remaining = Math.max(0, Math.ceil((Number(countdownState.deadline) - Date.now()) / 1000));
+            const el = document.getElementById('refresh-countdown');
+            if (el) el.textContent = String(remaining);
+        }
+
+        function resetRefreshCountdown() {
+            countdownState.deadline = Date.now() + (refreshIntervalSeconds * 1000);
+            renderRefreshCountdown();
+        }
+
+        function requestScheduledRefresh() {
+            if (countdownState.refreshing) return;
+
+            countdownState.refreshing = true;
+            Promise.resolve($wire.refreshData())
+                .then(() => {
+                    resetRefreshCountdown();
+                })
+                .catch(() => {
+                    // Retry shortly after a transient request failure without
+                    // resetting the countdown as if the data had refreshed.
+                    countdownState.deadline = Date.now() + 5000;
+                    renderRefreshCountdown();
+                })
+                .finally(() => {
+                    countdownState.refreshing = false;
+                });
+        }
+
         $wire.on('dashboard-updated', event => {
             drawCharts(event.data);
             resizeDashboardCharts();
             markChartsReady();
         });
 
-        let timeLeft = 600;
-        setInterval(() => {
-            timeLeft = timeLeft <= 0 ? 600 : timeLeft - 1;
-            const el = document.getElementById('refresh-countdown');
-            if (el) el.textContent = `${String(Math.floor(timeLeft / 60)).padStart(2, '0')}:${String(timeLeft % 60).padStart(2, '0')}`;
-        }, 1000);
+        $wire.on('dashboard-filter-updated', event => {
+            const dateRange = event?.data?.dateRange ?? event?.detail?.dateRange ?? event?.dateRange;
+            if (!dateRange) return;
+
+            requestAnimationFrame(() => {
+                const input = document.getElementById('dateRange');
+                if (!input) return;
+
+                input.value = dateRange;
+                if (input._flatpickr) {
+                    input._flatpickr.setDate(dateRange.split(' to '), false);
+                }
+            });
+        });
+
+        renderRefreshCountdown();
+        if (!window.__parDailyReportCountdownTimer) {
+            window.__parDailyReportCountdownTimer = window.setInterval(() => {
+                renderRefreshCountdown();
+
+                const remaining = Math.max(0, Math.ceil((Number(countdownState.deadline) - Date.now()) / 1000));
+                if (remaining === 0) requestScheduledRefresh();
+            }, 1000);
+        }
 
         document.getElementById('btnExport')?.addEventListener('click', event => {
             event.preventDefault();

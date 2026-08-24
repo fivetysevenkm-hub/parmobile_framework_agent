@@ -52,6 +52,20 @@ class Dashboard extends Component
         $this->loadData();
     }
 
+    public function refreshData(): void
+    {
+        $now = Carbon::now('Asia/Jakarta')->seconds(0);
+
+        // Every automatic refresh follows today's live window, from 00:00
+        // through the current Jakarta time, including after midnight rollover.
+        $start = $now->copy()->startOfDay();
+        $this->dateRange = $start->format('Y-m-d H:i').' to '.$now->format('Y-m-d H:i');
+
+        $this->loadData();
+        $this->dispatch('dashboard-filter-updated', dateRange: $this->dateRange);
+        $this->dispatch('dashboard-refreshed');
+    }
+
     public function loadData(): void
     {
         $dateRange = $this->parseDateRange();
