@@ -44,6 +44,7 @@ use App\Livewire\AbnormalMtcApproval;
 use App\Livewire\AbnormalReport;
 use App\Livewire\CarbTemperMonitoring;
 use App\Livewire\Login;
+use App\Livewire\Home;
 use App\Livewire\ChangePassword;
 use App\Livewire\MenuAuthorization;
 use App\Http\Middleware\EnsurePasswordChanged;
@@ -52,7 +53,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route(Auth::check() ? 'dashboard' : 'login');
+    return redirect()->route(Auth::check() ? 'home' : 'login');
 });
 
 Route::middleware('guest')->group(function () {
@@ -60,6 +61,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class])->group(function () {
+    Route::get('/home', Home::class)->name('home');
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/akakami-qaqc', AkakamiApproval::class)->name('akakami.qaqc');
     Route::get('/prv-akakami', AkakamiApprovalReview::class)->name('akakami.approval');

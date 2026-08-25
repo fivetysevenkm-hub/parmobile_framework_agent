@@ -83,7 +83,7 @@ class Login extends Component
         }
 
         request()->session()->forget('must_change_password');
-        $this->redirectRoute('dashboard', navigate: true);
+        $this->redirectRoute('home', navigate: true);
     }
 
     private function throttleKeys(string $username): array

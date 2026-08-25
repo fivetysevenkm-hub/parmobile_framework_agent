@@ -30,6 +30,7 @@
     <div class="sidebar-brand"><span class="brand-text"></span></div>
 
     <nav class="sidebar-nav">
+        {!! $menuLink('home', 'home', 'Home', '⌂') !!}
         {!! $menuLink('daily-report', 'dashboard', 'Daily Report', '▦') !!}
         {!! $menuLink('monthly-report', 'monthly.report', 'Monthly Report', '▤') !!}
         {!! $menuLink('akakami-dashboard', 'akakami.dashboard', 'Akakami Dashboard', '◈') !!}
