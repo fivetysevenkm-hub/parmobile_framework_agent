@@ -6,6 +6,7 @@
     $manpowerOpen = request()->routeIs('manpower.control');
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
+    $documentProcessOpen = request()->routeIs('document.process.upload');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -79,6 +80,17 @@
             <div class="sidebar-group-items" {{ $cycleTimeOpen ? '' : 'hidden' }}>
                 <a href="{{ route('cycle-time.adjust') }}" class="sidebar-link {{ request()->routeIs('cycle-time.adjust') ? 'active' : '' }}">
                     <span class="nav-icon">◴</span><span class="nav-label">Adjust Cycle Time</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $documentProcessOpen ? 'is-open' : '' }}" data-sidebar-group="document-process">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $documentProcessOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">DOCUMENT PROCESS</span>
+            </button>
+            <div class="sidebar-group-items" {{ $documentProcessOpen ? '' : 'hidden' }}>
+                <a href="{{ route('document.process.upload') }}" class="sidebar-link {{ request()->routeIs('document.process.upload') ? 'active' : '' }}">
+                    <span class="nav-icon">▱</span><span class="nav-label">Upload WI Proses</span>
                 </a>
             </div>
         </div>
