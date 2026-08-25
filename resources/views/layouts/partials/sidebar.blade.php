@@ -8,6 +8,7 @@
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
     $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker', 'pttn.pairing.srp');
+    $pttnOperatorOpen = request()->routeIs('pttn.omes.input');
     $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
@@ -146,6 +147,17 @@
                 </a>
                 <a href="{{ route('pttn.pairing.srp') }}" class="sidebar-link {{ request()->routeIs('pttn.pairing.srp') ? 'active' : '' }}">
                     <span class="nav-icon">⇆</span><span class="nav-label">Pairing PTTN to SRP</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $pttnOperatorOpen ? 'is-open' : '' }}" data-sidebar-group="pttn-operator-mesin">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnOperatorOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">PTTN OPERATOR MESIN</span>
+            </button>
+            <div class="sidebar-group-items" {{ $pttnOperatorOpen ? '' : 'hidden' }}>
+                <a href="{{ route('pttn.omes.input') }}" class="sidebar-link {{ request()->routeIs('pttn.omes.input') ? 'active' : '' }}">
+                    <span class="nav-icon">⌁</span><span class="nav-label">Input PTTN Omes</span>
                 </a>
             </div>
         </div>
