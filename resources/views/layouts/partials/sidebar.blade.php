@@ -3,6 +3,8 @@
     $monitoringOpen = request()->routeIs('last.sequence', 'incoming.trace', 'realtime.production', 'productivity.process', 'manpower.productivity', 'carb.temper');
     $abnormalOpen = request()->routeIs('abnormal.report');
     $instructionOpen = request()->routeIs('instruction.rank.a');
+    $manpowerOpen = request()->routeIs('manpower.control');
+    $routingOpen = request()->routeIs('routing.process');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -40,6 +42,28 @@
             <div class="sidebar-group-items" {{ $instructionOpen ? '' : 'hidden' }}>
                 <a href="{{ route('instruction.rank.a') }}" class="sidebar-link {{ request()->routeIs('instruction.rank.a') ? 'active' : '' }}">
                     <span class="nav-icon">★</span><span class="nav-label">Rank A</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $manpowerOpen ? 'is-open' : '' }}" data-sidebar-group="manpower">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $manpowerOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">MAN POWER</span>
+            </button>
+            <div class="sidebar-group-items" {{ $manpowerOpen ? '' : 'hidden' }}>
+                <a href="{{ route('manpower.control') }}" class="sidebar-link {{ request()->routeIs('manpower.control') ? 'active' : '' }}">
+                    <span class="nav-icon">♟</span><span class="nav-label">Man Power Control</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $routingOpen ? 'is-open' : '' }}" data-sidebar-group="routing">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $routingOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">ROUTING</span>
+            </button>
+            <div class="sidebar-group-items" {{ $routingOpen ? '' : 'hidden' }}>
+                <a href="{{ route('routing.process') }}" class="sidebar-link {{ request()->routeIs('routing.process') ? 'active' : '' }}">
+                    <span class="nav-icon">⇄</span><span class="nav-label">Susun Routing Proses</span>
                 </a>
             </div>
         </div>
