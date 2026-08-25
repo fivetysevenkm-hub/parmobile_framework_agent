@@ -115,6 +115,7 @@ class UploadWiProses extends Component
 
     public function updatedUpload(): void
     {
+        $this->resetErrorBag('upload');
         $this->resetValidation('upload');
     }
 

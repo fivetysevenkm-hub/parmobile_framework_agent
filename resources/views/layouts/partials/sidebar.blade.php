@@ -26,6 +26,24 @@
         <a href="{{ route('akakami.dashboard') }}" class="sidebar-link {{ request()->routeIs('akakami.dashboard') ? 'active' : '' }}">
             <span class="nav-icon">◈</span><span class="nav-label">Akakami Dashboard</span>
         </a>
+<div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }}" data-sidebar-group="approval">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $approvalOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">REPORT APPROVAL</span>
+            </button>
+            <div class="sidebar-group-items" {{ $approvalOpen ? '' : 'hidden' }}>
+                <a href="{{ route('akakami.approval') }}" class="sidebar-link {{ request()->routeIs('akakami.approval') ? 'active' : '' }}">
+                    <span class="nav-icon">✓</span><span class="nav-label">Aprv. Akakami</span>
+                </a>
+                <a href="{{ route('abnormal.mtc.approval') }}" class="sidebar-link {{ request()->routeIs('abnormal.mtc.approval') ? 'active' : '' }}">
+                    <span class="nav-icon">!</span><span class="nav-label">Aprv. Abnormal Mtc</span>
+                </a>
+                <a href="{{ route('ranka.approval') }}" class="sidebar-link {{ request()->routeIs('ranka.approval') ? 'active' : '' }}">
+                    <span class="nav-icon">★</span><span class="nav-label">Aprv. Rank A</span>
+                </a>
+            </div>
+        </div>
+
+
         <div class="sidebar-group {{ $abnormalOpen ? 'is-open' : '' }}" data-sidebar-group="abnormal-report">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $abnormalOpen ? 'true' : 'false' }}">
                 <span class="group-chevron">›</span><span class="nav-label">ABNORMAL REPORT</span>
@@ -39,7 +57,7 @@
 
         <div class="sidebar-group {{ $instructionOpen ? 'is-open' : '' }}" data-sidebar-group="instruction-sheet">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $instructionOpen ? 'true' : 'false' }}">
-                <span class="group-chevron">›</span><span class="nav-label">LEMBAR INSTRUKSI PERBAIKAN</span>
+                <span class="group-chevron">›</span><span class="nav-label">LEMBAR Rank A</span>
             </button>
             <div class="sidebar-group-items" {{ $instructionOpen ? '' : 'hidden' }}>
                 <a href="{{ route('instruction.rank.a') }}" class="sidebar-link {{ request()->routeIs('instruction.rank.a') ? 'active' : '' }}">
@@ -95,23 +113,7 @@
             </div>
         </div>
 
-        <div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }}" data-sidebar-group="approval">
-            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $approvalOpen ? 'true' : 'false' }}">
-                <span class="group-chevron">›</span><span class="nav-label">REPORT APPROVAL</span>
-            </button>
-            <div class="sidebar-group-items" {{ $approvalOpen ? '' : 'hidden' }}>
-                <a href="{{ route('akakami.approval') }}" class="sidebar-link {{ request()->routeIs('akakami.approval') ? 'active' : '' }}">
-                    <span class="nav-icon">✓</span><span class="nav-label">Aprv. Akakami</span>
-                </a>
-                <a href="{{ route('abnormal.mtc.approval') }}" class="sidebar-link {{ request()->routeIs('abnormal.mtc.approval') ? 'active' : '' }}">
-                    <span class="nav-icon">!</span><span class="nav-label">Aprv. Abnormal Mtc</span>
-                </a>
-                <a href="{{ route('ranka.approval') }}" class="sidebar-link {{ request()->routeIs('ranka.approval') ? 'active' : '' }}">
-                    <span class="nav-icon">★</span><span class="nav-label">Aprv. Rank A</span>
-                </a>
-            </div>
-        </div>
-
+        
         <div class="sidebar-group {{ $monitoringOpen ? 'is-open' : '' }}" data-sidebar-group="monitoring">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $monitoringOpen ? 'true' : 'false' }}">
                 <span class="group-chevron">›</span><span class="nav-label">MONITORING</span>
