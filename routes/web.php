@@ -45,7 +45,9 @@ use App\Livewire\AbnormalReport;
 use App\Livewire\CarbTemperMonitoring;
 use App\Livewire\Login;
 use App\Livewire\ChangePassword;
+use App\Livewire\MenuAuthorization;
 use App\Http\Middleware\EnsurePasswordChanged;
+use App\Http\Middleware\EnsureMenuAccess;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -57,7 +59,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
 });
 
-Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
+Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/akakami-qaqc', AkakamiApproval::class)->name('akakami.qaqc');
     Route::get('/prv-akakami', AkakamiApprovalReview::class)->name('akakami.approval');
@@ -88,6 +90,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/user-management/role-akses', RoleAkses::class)->name('user-management.role-akses');
     Route::get('/user-management/user-control', UserControl::class)->name('user-management.user-control');
     Route::get('/user-management/qr-code', UserQrCode::class)->name('user-management.qr-code');
+    Route::get('/user-management/menu-authorization', MenuAuthorization::class)->name('user-management.menu-authorization');
     Route::get('/user-management/qr-code/print', UserQrCodePrintController::class)->name('user-management.qr-code.print');
     Route::get('/pttn-engineering/add-item-satuan', AddItemSatuan::class)->name('pttn.add-item-satuan');
     Route::get('/pttn-engineering/pttn-maker', PttnMaker::class)->name('pttn.maker');

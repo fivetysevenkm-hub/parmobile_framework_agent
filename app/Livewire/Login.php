@@ -54,7 +54,6 @@ class Login extends Component
         $user = LegacyUser::query()
             ->where('username', $credentials['pengguna'])
             ->where('is_active', 1)
-            ->whereIn('id_role', [1, 3, 5])
             ->first();
 
         if (! $user || ! $passwords->matches($credentials['password'], $user->getAuthPassword())) {
