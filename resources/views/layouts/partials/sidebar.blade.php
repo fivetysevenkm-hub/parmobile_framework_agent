@@ -7,7 +7,7 @@
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
-    $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan');
+    $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker');
     $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
@@ -140,6 +140,9 @@
             <div class="sidebar-group-items" {{ $pttnEngineeringOpen ? '' : 'hidden' }}>
                 <a href="{{ route('pttn.add-item-satuan') }}" class="sidebar-link {{ request()->routeIs('pttn.add-item-satuan') ? 'active' : '' }}">
                     <span class="nav-icon">▤</span><span class="nav-label">Add Item Satuan</span>
+                </a>
+                <a href="{{ route('pttn.maker') }}" class="sidebar-link {{ request()->routeIs('pttn.maker') ? 'active' : '' }}">
+                    <span class="nav-icon">▣</span><span class="nav-label">PTTN Maker</span>
                 </a>
             </div>
         </div>
