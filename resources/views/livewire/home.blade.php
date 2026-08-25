@@ -1,6 +1,6 @@
 <div class="home-page" style="font-family:Tahoma,Arial,sans-serif;color:#f4f7f8;">
     <style>
-        .home-page{max-width:1180px;margin:0 auto;padding:8px 4px 28px}
+        .home-page{width:100%;max-width:1180px;margin:0 auto;padding:8px 4px 28px;box-sizing:border-box;overflow-x:hidden}
         .home-hero{background:linear-gradient(135deg,#112c36,#123f4b 58%,#0b2028);border:1px solid #1d5b68;border-radius:12px;padding:22px 24px;box-shadow:0 10px 24px rgba(0,0,0,.22);margin-bottom:16px}
         .home-kicker{font-size:12px;letter-spacing:1.5px;color:#71d9e6;font-weight:700;text-transform:uppercase;margin-bottom:9px}
         .home-title{font-size:25px;line-height:1.2;margin:0 0 8px;color:#fff;font-weight:700}
@@ -8,21 +8,21 @@
         .home-panel{background:#101c20;border:1px solid #263b40;border-radius:10px;padding:16px;box-shadow:0 7px 18px rgba(0,0,0,.16)}
         .home-panel-title{font-size:17px;color:#fff;margin:0 0 4px;font-weight:700}
         .home-panel-intro{font-size:13px;color:#aebfc3;margin:0 0 13px;line-height:1.5}
-        .home-table-wrap{overflow-x:auto;border:1px solid #30464b;border-radius:8px}
-        .home-table{width:100%;min-width:700px;border-collapse:collapse;font-size:13px}
+        .home-table-wrap{width:100%;max-width:100%;overflow-x:auto;border:1px solid #30464b;border-radius:8px;box-sizing:border-box}
+        .home-table{width:100%;min-width:0;border-collapse:collapse;font-size:13px;table-layout:fixed}
         .home-table th{background:#183b48;color:#e9fcff;text-align:left;font-size:12px;letter-spacing:.25px;padding:11px 12px;border-bottom:1px solid #3e6973;white-space:nowrap}
-        .home-table td{padding:10px 12px;vertical-align:top;border-bottom:1px solid #26383d;color:#e6eef0;line-height:1.45}
+        .home-table td{padding:10px 12px;vertical-align:top;border-bottom:1px solid #26383d;color:#e6eef0;line-height:1.45;overflow-wrap:anywhere;word-break:break-word}
         .home-table tr:last-child td{border-bottom:0}
         .home-table tr:nth-child(even) td{background:#142126}
         .home-table tr:hover td{background:#1b3036}
-        .home-menu-name{font-weight:700;color:#fff;white-space:nowrap}
+        .home-menu-name{font-weight:700;color:#fff;white-space:normal;overflow-wrap:anywhere}
         .home-group{display:inline-block;font-size:11px;color:#8de3ec;background:#164552;border:1px solid #276a76;border-radius:12px;padding:3px 8px;margin-bottom:5px;white-space:nowrap}
         .home-function{color:#d0dddf}
         .home-open{display:inline-block;color:#69dce8;text-decoration:none;font-size:12px;margin-top:4px}
         .home-open:hover{text-decoration:underline}
         .home-note{margin-top:16px;border-left:4px solid #e0ad55;background:#2a2418;border-radius:7px;padding:12px 14px;color:#f4dfb4;font-size:13px;line-height:1.55}
         .home-note strong{color:#ffe7ad}
-        @media(max-width:650px){.home-page{padding:4px 0 22px}.home-hero{padding:18px 16px}.home-title{font-size:21px}.home-subtitle{font-size:13px}.home-panel{padding:12px}.home-panel-title{font-size:16px}.home-table{font-size:12px}.home-table th,.home-table td{padding:9px 10px}}
+        @media(max-width:650px){.home-page{width:100%;padding:4px 0 22px}.home-hero{padding:17px 14px;border-radius:9px}.home-kicker{font-size:11px;letter-spacing:1px}.home-title{font-size:20px;line-height:1.25;overflow-wrap:anywhere}.home-subtitle{font-size:13px;line-height:1.5}.home-panel{padding:11px 10px;border-radius:9px}.home-panel-title{font-size:16px}.home-panel-intro{font-size:12px;line-height:1.45}.home-table-wrap{overflow:visible;border:0}.home-table,.home-table tbody{display:block;width:100%;max-width:100%;min-width:0;font-size:13px;box-sizing:border-box}.home-table thead{display:none}.home-table tr{display:block;width:100%;max-width:100%;min-width:0;margin:0 0 10px;padding:8px 10px;background:#142126;border:1px solid #30464b;border-radius:8px;box-sizing:border-box;overflow:hidden}.home-table tr:nth-child(even) td,.home-table tr:hover td{background:transparent}.home-table td,.home-table td.home-function{display:block!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:7px 0;border:0;line-height:1.4;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;overflow:hidden}.home-table td::before{display:block;margin-bottom:3px;color:#83aeb5;font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;white-space:normal}.home-table td[data-label="Menu"]::before{content:'Menu'}.home-table td[data-label="Kelompok"]::before{content:'Kelompok'}.home-table td[data-label="Fungsi Menu"]::before{content:'Fungsi Menu'}.home-table td[data-label="Fungsi Menu"]{padding-top:8px}.home-group{font-size:10px;padding:3px 7px;white-space:normal}.home-open{font-size:12px}.home-note{margin-top:12px;padding:11px 12px;font-size:12px;line-height:1.5}}
     </style>
 
     <section class="home-hero">
@@ -47,14 +47,14 @@
                 <tbody>
                     @forelse($accessibleMenus as $menu)
                         <tr>
-                            <td>
+                            <td data-label="Menu">
                                 <div class="home-menu-name">{{ $menu['name'] }}</div>
                                 @if($menu['route'] !== '')
                                     <a class="home-open" href="{{ route($menu['route']) }}">Buka menu &rarr;</a>
                                 @endif
                             </td>
-                            <td><span class="home-group">{{ $menu['group'] }}</span></td>
-                            <td class="home-function">{{ $menu['description'] }}</td>
+                            <td data-label="Kelompok"><span class="home-group">{{ $menu['group'] }}</span></td>
+                            <td data-label="Fungsi Menu" class="home-function">{{ $menu['description'] }}</td>
                         </tr>
                     @empty
                         <tr>
