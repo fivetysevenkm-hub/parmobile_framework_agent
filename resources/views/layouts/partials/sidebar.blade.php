@@ -4,7 +4,8 @@
     $abnormalOpen = request()->routeIs('abnormal.report');
     $instructionOpen = request()->routeIs('instruction.rank.a');
     $manpowerOpen = request()->routeIs('manpower.control');
-    $routingOpen = request()->routeIs('routing.process');
+    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
+    $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -67,6 +68,17 @@
                 </a>
                 <a href="{{ route('routing.pairing.srp') }}" class="sidebar-link {{ request()->routeIs('routing.pairing.srp') ? 'active' : '' }}">
                     <span class="nav-icon">⇆</span><span class="nav-label">Pairing Routing &amp; SRP</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $cycleTimeOpen ? 'is-open' : '' }}" data-sidebar-group="cycle-time">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $cycleTimeOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">CYCLE TIME</span>
+            </button>
+            <div class="sidebar-group-items" {{ $cycleTimeOpen ? '' : 'hidden' }}>
+                <a href="{{ route('cycle-time.adjust') }}" class="sidebar-link {{ request()->routeIs('cycle-time.adjust') ? 'active' : '' }}">
+                    <span class="nav-icon">◴</span><span class="nav-label">Adjust Cycle Time</span>
                 </a>
             </div>
         </div>
