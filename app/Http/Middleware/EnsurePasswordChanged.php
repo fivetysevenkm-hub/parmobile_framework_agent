@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsurePasswordChanged
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (
+            $request->user()
+            && (bool) $request->session()->get('must_change_password', false)
+            && ! $request->routeIs('password.change', 'logout')
+        ) {
+            return redirect()->route('password.change');
+        }
+
+        return $next($request);
+    }
+}

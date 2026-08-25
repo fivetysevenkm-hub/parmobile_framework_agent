@@ -24,6 +24,8 @@ use App\Livewire\RankAApproval;
 use App\Livewire\AbnormalMtcApproval;
 use App\Livewire\CarbTemperMonitoring;
 use App\Livewire\Login;
+use App\Livewire\ChangePassword;
+use App\Http\Middleware\EnsurePasswordChanged;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -35,7 +37,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/akakami-qaqc', AkakamiApproval::class)->name('akakami.qaqc');
     Route::get('/prv-akakami', AkakamiApprovalReview::class)->name('akakami.approval');
@@ -59,6 +61,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/carb-temper', CarbTemperMonitoring::class)->name('carb.temper');
     Route::get('/akakami-dashboard', AkakamiDashboard::class)->name('akakami.dashboard');
     Route::get('/export-excel', ExportExcelController::class)->name('export.excel');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/change-password', ChangePassword::class)->name('password.change');
 
     Route::post('/logout', function () {
         Auth::logout();

@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     @livewireStyles
     <style>
         :root { color-scheme:dark; --ink:#f5f7f8; --accent:#2dd4bf; --accent-strong:#00e5ff; --bg:#0b1013; --panel:#111820; --panel-deep:#0d1418; --line:#26333a; --muted:#9aa9b0; }
@@ -30,6 +31,8 @@
         .submit:active { transform:scale(.98); }
         .submit[disabled] { opacity:.65; cursor:wait; }
         .error { color:#ff9eaa; font-size:.74rem; margin-top:6px; }
+        .captcha-field { min-height:66px; }
+        .captcha-field .cf-turnstile { min-height:65px; }
         .footer { border-top:1px solid var(--line); margin-top:25px; padding-top:18px; color:#65747b; text-align:center; font-size:.7rem; }
         @media (max-width:480px) { body { padding:16px; } .login-box { width:100%; } .brand-logo { width:min(184px,68vw); } .card { padding:25px 20px; } .card h2 { font-size:.92rem; margin-bottom:22px; } }
     </style>

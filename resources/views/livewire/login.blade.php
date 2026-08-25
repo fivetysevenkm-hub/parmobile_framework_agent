@@ -20,6 +20,17 @@
                 @error('password') <div class="error">{{ $message }}</div> @enderror
             </div>
 
+            <div class="field captcha-field">
+                <div
+                    class="cf-turnstile"
+                    data-sitekey="{{ config('services.turnstile.site_key') }}"
+                    data-callback="parTurnstileCompleted"
+                    data-expired-callback="parTurnstileExpired"
+                    data-error-callback="parTurnstileError"
+                ></div>
+                <input id="turnstileToken" type="hidden" wire:model="turnstileToken">
+                @error('turnstileToken') <div class="error">{{ $message }}</div> @enderror
+            </div>
 
             <button type="submit" class="submit" wire:loading.attr="disabled" wire:target="authenticate">
                 <span wire:loading.remove wire:target="authenticate">MASUK</span>
@@ -30,3 +41,27 @@
         <div class="footer">Version_02 | {{ now()->year }} PT Dowa Thermotech Indonesia</div>
     </div>
 </div>
+
+@script
+<script>
+    window.parTurnstileCompleted = token => {
+        const input = document.getElementById('turnstileToken');
+        if (!input) return;
+        input.value = token;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    window.parTurnstileExpired = () => {
+        const input = document.getElementById('turnstileToken');
+        if (!input) return;
+        input.value = '';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    window.parTurnstileError = window.parTurnstileExpired;
+
+    $wire.on('turnstile-reset', () => {
+        window.turnstile?.reset();
+    });
+</script>
+@endscript
