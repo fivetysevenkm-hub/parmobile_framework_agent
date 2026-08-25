@@ -24,6 +24,7 @@ use App\Livewire\RealtimeProduction;
 use App\Livewire\ManpowerProductivity;
 use App\Livewire\ManPowerControl;
 use App\Livewire\SusunRoutingProses;
+use App\Livewire\PairingRoutingSrp;
 use App\Livewire\ProcessProductivity;
 use App\Livewire\RankAApproval;
 use App\Livewire\RankAInstructionSheet;
@@ -69,6 +70,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/manpower-productivity', ManpowerProductivity::class)->name('manpower.productivity');
     Route::get('/man-power/control', ManPowerControl::class)->name('manpower.control');
     Route::get('/routing/susun-routing-proses', SusunRoutingProses::class)->name('routing.process');
+    Route::get('/routing/pairing-routing-srp', PairingRoutingSrp::class)->name('routing.pairing.srp');
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');
     Route::get('/manpower-productivity/certificate', ManpowerCertificateController::class)->name('manpower.productivity.certificate');

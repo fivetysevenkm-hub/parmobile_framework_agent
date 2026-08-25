@@ -65,6 +65,9 @@
                 <a href="{{ route('routing.process') }}" class="sidebar-link {{ request()->routeIs('routing.process') ? 'active' : '' }}">
                     <span class="nav-icon">⇄</span><span class="nav-label">Susun Routing Proses</span>
                 </a>
+                <a href="{{ route('routing.pairing.srp') }}" class="sidebar-link {{ request()->routeIs('routing.pairing.srp') ? 'active' : '' }}">
+                    <span class="nav-icon">⇆</span><span class="nav-label">Pairing Routing &amp; SRP</span>
+                </a>
             </div>
         </div>
 
