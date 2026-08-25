@@ -1,6 +1,8 @@
 @php
     $approvalOpen = request()->routeIs('akakami.qaqc', 'akakami.approval', 'ranka.approval', 'abnormal.mtc.approval');
     $monitoringOpen = request()->routeIs('last.sequence', 'incoming.trace', 'realtime.production', 'productivity.process', 'manpower.productivity', 'carb.temper');
+    $abnormalOpen = request()->routeIs('abnormal.report');
+    $instructionOpen = request()->routeIs('instruction.rank.a');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -20,6 +22,27 @@
         <a href="{{ route('akakami.dashboard') }}" class="sidebar-link {{ request()->routeIs('akakami.dashboard') ? 'active' : '' }}">
             <span class="nav-icon">◈</span><span class="nav-label">Akakami Dashboard</span>
         </a>
+        <div class="sidebar-group {{ $abnormalOpen ? 'is-open' : '' }}" data-sidebar-group="abnormal-report">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $abnormalOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">ABNORMAL REPORT</span>
+            </button>
+            <div class="sidebar-group-items" {{ $abnormalOpen ? '' : 'hidden' }}>
+                <a href="{{ route('abnormal.report') }}" class="sidebar-link {{ request()->routeIs('abnormal.report') ? 'active' : '' }}">
+                    <span class="nav-icon">!</span><span class="nav-label">Handling Abn. Report</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $instructionOpen ? 'is-open' : '' }}" data-sidebar-group="instruction-sheet">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $instructionOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">LEMBAR INSTRUKSI PERBAIKAN</span>
+            </button>
+            <div class="sidebar-group-items" {{ $instructionOpen ? '' : 'hidden' }}>
+                <a href="{{ route('instruction.rank.a') }}" class="sidebar-link {{ request()->routeIs('instruction.rank.a') ? 'active' : '' }}">
+                    <span class="nav-icon">★</span><span class="nav-label">Rank A</span>
+                </a>
+            </div>
+        </div>
 
         <div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }}" data-sidebar-group="approval">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $approvalOpen ? 'true' : 'false' }}">

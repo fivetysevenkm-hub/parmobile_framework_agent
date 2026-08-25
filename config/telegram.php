@@ -32,11 +32,14 @@ return [
         'approval_flpp' => env('TELEGRAM_CHAT_ID_APPROVAL_FLPP', '-1003862441020'),
 
         // Menu Approval Rank A.
-        'rank_a' => env('TELEGRAM_CHAT_ID_RANK_A', '-1003708795829'),
+        'rank_a' => env('TELEGRAM_CHAT_ID_RANK_A'),
 
         // Menu lain dapat diisi tanpa mengubah service atau komponen.
         'monthly_report' => env('TELEGRAM_CHAT_ID_MONTHLY_REPORT'),
         'approval_abnormal_mtc' => env('TELEGRAM_CHAT_ID_APPROVAL_ABNORMAL_MTC'),
+        // Pengajuan Abnormal Report memakai tujuan legacy Abnormal Mtc jika override khusus belum diisi.
+        'abnormal_report' => env('TELEGRAM_CHAT_ID_ABNORMAL_REPORT', env('TELEGRAM_CHAT_ID_APPROVAL_ABNORMAL_MTC')),
+
         'incoming_trace' => env('TELEGRAM_CHAT_ID_INCOMING_TRACE'),
         'realtime_production' => env('TELEGRAM_CHAT_ID_REALTIME_PRODUCTION'),
         'last_sequence' => env('TELEGRAM_CHAT_ID_LAST_SEQUENCE'),
