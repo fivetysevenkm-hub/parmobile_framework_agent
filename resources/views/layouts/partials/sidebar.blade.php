@@ -7,7 +7,7 @@
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
-    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control');
+    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -37,6 +37,9 @@
                 </a>
                 <a href="{{ route('user-management.user-control') }}" class="sidebar-link {{ request()->routeIs('user-management.user-control') ? 'active' : '' }}">
                     <span class="nav-icon">♟</span><span class="nav-label">User Control</span>
+                </a>
+                <a href="{{ route('user-management.qr-code') }}" class="sidebar-link {{ request()->routeIs('user-management.qr-code') ? 'active' : '' }}">
+                    <span class="nav-icon">▣</span><span class="nav-label">Buat QR Code User</span>
                 </a>
             </div>
         </div>

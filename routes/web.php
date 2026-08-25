@@ -29,7 +29,9 @@ use App\Livewire\AdjustCycleTime;
 use App\Livewire\UploadWiProses;
 use App\Livewire\RoleAkses;
 use App\Livewire\UserControl;
+use App\Livewire\UserQrCode;
 use App\Http\Controllers\DocumentProcessPdfController;
+use App\Http\Controllers\UserQrCodePrintController;
 use App\Livewire\ProcessProductivity;
 use App\Livewire\RankAApproval;
 use App\Livewire\RankAInstructionSheet;
@@ -80,6 +82,8 @@ Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/document-process/upload-wi', UploadWiProses::class)->name('document.process.upload');
     Route::get('/user-management/role-akses', RoleAkses::class)->name('user-management.role-akses');
     Route::get('/user-management/user-control', UserControl::class)->name('user-management.user-control');
+    Route::get('/user-management/qr-code', UserQrCode::class)->name('user-management.qr-code');
+    Route::get('/user-management/qr-code/print', UserQrCodePrintController::class)->name('user-management.qr-code.print');
     Route::get('/document-process/pdf/{id}', DocumentProcessPdfController::class)->name('document.process.pdf');
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');
