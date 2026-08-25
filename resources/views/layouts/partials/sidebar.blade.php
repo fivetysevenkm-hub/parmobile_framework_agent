@@ -7,7 +7,7 @@
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
-    $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker');
+    $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker', 'pttn.pairing.srp');
     $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
@@ -143,6 +143,9 @@
                 </a>
                 <a href="{{ route('pttn.maker') }}" class="sidebar-link {{ request()->routeIs('pttn.maker') ? 'active' : '' }}">
                     <span class="nav-icon">▣</span><span class="nav-label">PTTN Maker</span>
+                </a>
+                <a href="{{ route('pttn.pairing.srp') }}" class="sidebar-link {{ request()->routeIs('pttn.pairing.srp') ? 'active' : '' }}">
+                    <span class="nav-icon">⇆</span><span class="nav-label">Pairing PTTN to SRP</span>
                 </a>
             </div>
         </div>

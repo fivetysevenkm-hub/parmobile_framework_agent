@@ -32,6 +32,7 @@ use App\Livewire\UserControl;
 use App\Livewire\UserQrCode;
 use App\Livewire\AddItemSatuan;
 use App\Livewire\PttnMaker;
+use App\Livewire\PairingPttnToSrp;
 use App\Http\Controllers\DocumentProcessPdfController;
 use App\Http\Controllers\UserQrCodePrintController;
 use App\Http\Controllers\PttnImageController;
@@ -90,6 +91,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/pttn-engineering/add-item-satuan', AddItemSatuan::class)->name('pttn.add-item-satuan');
     Route::get('/pttn-engineering/pttn-maker', PttnMaker::class)->name('pttn.maker');
     Route::get('/pttn-engineering/pttn-maker/{id}/image', PttnImageController::class)->name('pttn.image');
+    Route::get('/pttn-engineering/pairing-pttn-to-srp', PairingPttnToSrp::class)->name('pttn.pairing.srp');
     Route::get('/document-process/pdf/{id}', DocumentProcessPdfController::class)->name('document.process.pdf');
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');
