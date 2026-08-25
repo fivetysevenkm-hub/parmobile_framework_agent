@@ -7,6 +7,7 @@
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
+    $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan');
     $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
@@ -132,6 +133,17 @@
         </div>
 
         
+        <div class="sidebar-group {{ $pttnEngineeringOpen ? 'is-open' : '' }}" data-sidebar-group="pttn-engineering">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnEngineeringOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">PTTN ENGINEERING</span>
+            </button>
+            <div class="sidebar-group-items" {{ $pttnEngineeringOpen ? '' : 'hidden' }}>
+                <a href="{{ route('pttn.add-item-satuan') }}" class="sidebar-link {{ request()->routeIs('pttn.add-item-satuan') ? 'active' : '' }}">
+                    <span class="nav-icon">▤</span><span class="nav-label">Add Item Satuan</span>
+                </a>
+            </div>
+        </div>
+
         <div class="sidebar-group {{ $monitoringOpen ? 'is-open' : '' }}" data-sidebar-group="monitoring">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $monitoringOpen ? 'true' : 'false' }}">
                 <span class="group-chevron">›</span><span class="nav-label">MONITORING</span>
