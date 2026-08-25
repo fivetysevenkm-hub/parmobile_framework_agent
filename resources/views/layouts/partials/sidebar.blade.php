@@ -7,6 +7,7 @@
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
+    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 @endphp
 
@@ -26,7 +27,21 @@
         <a href="{{ route('akakami.dashboard') }}" class="sidebar-link {{ request()->routeIs('akakami.dashboard') ? 'active' : '' }}">
             <span class="nav-icon">◈</span><span class="nav-label">Akakami Dashboard</span>
         </a>
-<div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }}" data-sidebar-group="approval">
+        <div class="sidebar-group {{ $userManagementOpen ? 'is-open' : '' }}" data-sidebar-group="user-management">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $userManagementOpen ? 'true' : 'false' }}">
+                <span class="group-chevron">›</span><span class="nav-label">USER MANAGEMENT</span>
+            </button>
+            <div class="sidebar-group-items" {{ $userManagementOpen ? '' : 'hidden' }}>
+                <a href="{{ route('user-management.role-akses') }}" class="sidebar-link {{ request()->routeIs('user-management.role-akses') ? 'active' : '' }}">
+                    <span class="nav-icon">♙</span><span class="nav-label">Role Akses</span>
+                </a>
+                <a href="{{ route('user-management.user-control') }}" class="sidebar-link {{ request()->routeIs('user-management.user-control') ? 'active' : '' }}">
+                    <span class="nav-icon">♟</span><span class="nav-label">User Control</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }}" data-sidebar-group="approval">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $approvalOpen ? 'true' : 'false' }}">
                 <span class="group-chevron">›</span><span class="nav-label">REPORT APPROVAL</span>
             </button>

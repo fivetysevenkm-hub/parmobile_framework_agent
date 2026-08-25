@@ -27,6 +27,8 @@ use App\Livewire\SusunRoutingProses;
 use App\Livewire\PairingRoutingSrp;
 use App\Livewire\AdjustCycleTime;
 use App\Livewire\UploadWiProses;
+use App\Livewire\RoleAkses;
+use App\Livewire\UserControl;
 use App\Http\Controllers\DocumentProcessPdfController;
 use App\Livewire\ProcessProductivity;
 use App\Livewire\RankAApproval;
@@ -76,6 +78,8 @@ Route::middleware(['auth', EnsurePasswordChanged::class])->group(function () {
     Route::get('/routing/pairing-routing-srp', PairingRoutingSrp::class)->name('routing.pairing.srp');
     Route::get('/cycle-time/adjust', AdjustCycleTime::class)->name('cycle-time.adjust');
     Route::get('/document-process/upload-wi', UploadWiProses::class)->name('document.process.upload');
+    Route::get('/user-management/role-akses', RoleAkses::class)->name('user-management.role-akses');
+    Route::get('/user-management/user-control', UserControl::class)->name('user-management.user-control');
     Route::get('/document-process/pdf/{id}', DocumentProcessPdfController::class)->name('document.process.pdf');
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');
