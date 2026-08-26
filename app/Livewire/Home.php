@@ -20,11 +20,14 @@ class Home extends Component
         $this->username = (string) ($user?->username ?: session('username') ?: 'Pengguna');
         $idUser = $user ? (int) $user->getAuthIdentifier() : (int) (session('id_user') ?: 0);
         $accessMap = $authorization->accessMap($idUser, $this->username);
+        $visibilityMap = $authorization->visibilityMap($idUser, $this->username);
 
         $this->accessibleMenus = collect($authorization->registry())
-            ->filter(function (array $menu) use ($accessMap): bool {
+            ->filter(function (array $menu) use ($accessMap, $visibilityMap): bool {
                 $key = (string) ($menu['key'] ?? '');
-                return $key !== '' && (bool) ($accessMap[$key] ?? false);
+                return $key !== ''
+                    && (bool) ($accessMap[$key] ?? false)
+                    && (bool) ($visibilityMap[$key] ?? true);
             })
             ->map(function (array $menu): array {
                 return [

@@ -33,7 +33,7 @@
 
     <section class="home-panel">
         <h2 class="home-panel-title">Menu yang dapat diakses</h2>
-        <p class="home-panel-intro">Gunakan tabel berikut sebagai panduan fungsi setiap menu. Daftar akan menyesuaikan hak akses user yang sedang login.</p>
+        <p class="home-panel-intro">Gunakan tabel berikut sebagai panduan fungsi setiap menu. Daftar menyesuaikan hak akses dan pengaturan Hide Menu user yang sedang login.</p>
 
         <div class="home-table-wrap">
             <table class="home-table">

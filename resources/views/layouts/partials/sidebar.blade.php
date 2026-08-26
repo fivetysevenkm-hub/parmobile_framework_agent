@@ -9,14 +9,21 @@
     $documentProcessOpen = request()->routeIs('document.process.upload');
     $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker', 'pttn.pairing.srp');
     $pttnOperatorOpen = request()->routeIs('pttn.omes.input');
-    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization');
+    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization', 'user-management.hide-menu');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 
     $sessionUser = auth()->user();
     $sessionUserId = $sessionUser ? (int) $sessionUser->getAuthIdentifier() : (int) (session('id_user') ?: 0);
     $sessionUsername = $sessionUser?->username ?: session('username');
-    $menuAccess = app(\App\Services\MenuAuthorizationService::class)->accessMap($sessionUserId, $sessionUsername);
-    $menuLink = function (string $key, string $route, string $label, string $icon) use ($menuAccess): string {
+    $authorizationService = app(\App\Services\MenuAuthorizationService::class);
+    $menuAccess = $authorizationService->accessMap($sessionUserId, $sessionUsername);
+    $menuVisibility = $authorizationService->visibilityMap($sessionUserId, $sessionUsername);
+    $parentVisible = fn (string $groupName): bool => (bool) ($menuVisibility[$authorizationService->groupKey($groupName)] ?? true)
+        && $authorizationService->groupHasVisibleChild($groupName, $menuVisibility);
+    $menuLink = function (string $key, string $route, string $label, string $icon) use ($menuAccess, $menuVisibility): string {
+        if (! (bool) ($menuVisibility[$key] ?? true)) {
+            return '';
+        }
         $allowed = (bool) ($menuAccess[$key] ?? false);
         $href = $allowed ? e(route($route)) : '#';
         $active = $allowed && request()->routeIs($route) ? ' active' : '';
@@ -36,77 +43,77 @@
         {!! $menuLink('monthly-report', 'monthly.report', 'Monthly Report', '▤') !!}
         {!! $menuLink('akakami-dashboard', 'akakami.dashboard', 'Akakami Dashboard', '◈') !!}
 
-        <div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }}" data-sidebar-group="approval">
+        <div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }} {{ $parentVisible('REPORT APPROVAL') ? '' : 'parent-hidden' }}" data-sidebar-group="approval">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $approvalOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">REPORT APPROVAL</span></button>
-            <div class="sidebar-group-items" {{ $approvalOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $approvalOpen || ! $parentVisible('REPORT APPROVAL') ? '' : 'hidden' }}>
                 {!! $menuLink('akakami-approval', 'akakami.approval', 'Aprv. Akakami', '✓') !!}
                 {!! $menuLink('abnormal-mtc-approval', 'abnormal.mtc.approval', 'Aprv. Abnormal Mtc', '!') !!}
                 {!! $menuLink('ranka-approval', 'ranka.approval', 'Aprv. Rank A', '★') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $abnormalOpen ? 'is-open' : '' }}" data-sidebar-group="abnormal-report">
+        <div class="sidebar-group {{ $abnormalOpen ? 'is-open' : '' }} {{ $parentVisible('ABNORMAL REPORT') ? '' : 'parent-hidden' }}" data-sidebar-group="abnormal-report">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $abnormalOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">ABNORMAL REPORT</span></button>
-            <div class="sidebar-group-items" {{ $abnormalOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $abnormalOpen || ! $parentVisible('ABNORMAL REPORT') ? '' : 'hidden' }}>
                 {!! $menuLink('abnormal-report', 'abnormal.report', 'Handling Abn. Report', '!') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $instructionOpen ? 'is-open' : '' }}" data-sidebar-group="instruction-sheet">
+        <div class="sidebar-group {{ $instructionOpen ? 'is-open' : '' }} {{ $parentVisible('LEMBAR Rank A') ? '' : 'parent-hidden' }}" data-sidebar-group="instruction-sheet">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $instructionOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">LEMBAR Rank A</span></button>
-            <div class="sidebar-group-items" {{ $instructionOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $instructionOpen || ! $parentVisible('LEMBAR Rank A') ? '' : 'hidden' }}>
                 {!! $menuLink('instruction-rank-a', 'instruction.rank.a', 'Rank A', '★') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $manpowerOpen ? 'is-open' : '' }}" data-sidebar-group="manpower">
+        <div class="sidebar-group {{ $manpowerOpen ? 'is-open' : '' }} {{ $parentVisible('MAN POWER') ? '' : 'parent-hidden' }}" data-sidebar-group="manpower">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $manpowerOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">MAN POWER</span></button>
-            <div class="sidebar-group-items" {{ $manpowerOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $manpowerOpen || ! $parentVisible('MAN POWER') ? '' : 'hidden' }}>
                 {!! $menuLink('manpower-control', 'manpower.control', 'Man Power Control', '♟') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $routingOpen ? 'is-open' : '' }}" data-sidebar-group="routing">
+        <div class="sidebar-group {{ $routingOpen ? 'is-open' : '' }} {{ $parentVisible('ROUTING') ? '' : 'parent-hidden' }}" data-sidebar-group="routing">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $routingOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">ROUTING</span></button>
-            <div class="sidebar-group-items" {{ $routingOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $routingOpen || ! $parentVisible('ROUTING') ? '' : 'hidden' }}>
                 {!! $menuLink('routing-process', 'routing.process', 'Susun Routing Proses', '⇄') !!}
                 {!! $menuLink('routing-pairing-srp', 'routing.pairing.srp', 'Pairing Routing & SRP', '⇆') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $cycleTimeOpen ? 'is-open' : '' }}" data-sidebar-group="cycle-time">
+        <div class="sidebar-group {{ $cycleTimeOpen ? 'is-open' : '' }} {{ $parentVisible('CYCLE TIME') ? '' : 'parent-hidden' }}" data-sidebar-group="cycle-time">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $cycleTimeOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">CYCLE TIME</span></button>
-            <div class="sidebar-group-items" {{ $cycleTimeOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $cycleTimeOpen || ! $parentVisible('CYCLE TIME') ? '' : 'hidden' }}>
                 {!! $menuLink('cycle-time-adjust', 'cycle-time.adjust', 'Adjust Cycle Time', '◴') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $documentProcessOpen ? 'is-open' : '' }}" data-sidebar-group="document-process">
+        <div class="sidebar-group {{ $documentProcessOpen ? 'is-open' : '' }} {{ $parentVisible('DOCUMENT PROCESS') ? '' : 'parent-hidden' }}" data-sidebar-group="document-process">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $documentProcessOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">DOCUMENT PROCESS</span></button>
-            <div class="sidebar-group-items" {{ $documentProcessOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $documentProcessOpen || ! $parentVisible('DOCUMENT PROCESS') ? '' : 'hidden' }}>
                 {!! $menuLink('document-process-upload', 'document.process.upload', 'Upload WI Proses', '▱') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $pttnEngineeringOpen ? 'is-open' : '' }}" data-sidebar-group="pttn-engineering">
+        <div class="sidebar-group {{ $pttnEngineeringOpen ? 'is-open' : '' }} {{ $parentVisible('PTTN ENGINEERING') ? '' : 'parent-hidden' }}" data-sidebar-group="pttn-engineering">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnEngineeringOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">PTTN ENGINEERING</span></button>
-            <div class="sidebar-group-items" {{ $pttnEngineeringOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $pttnEngineeringOpen || ! $parentVisible('PTTN ENGINEERING') ? '' : 'hidden' }}>
                 {!! $menuLink('pttn-add-item-satuan', 'pttn.add-item-satuan', 'Add Item Satuan', '▤') !!}
                 {!! $menuLink('pttn-maker', 'pttn.maker', 'PTTN Maker', '▣') !!}
                 {!! $menuLink('pttn-pairing-srp', 'pttn.pairing.srp', 'Pairing PTTN to SRP', '⇆') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $pttnOperatorOpen ? 'is-open' : '' }}" data-sidebar-group="pttn-operator-mesin">
+        <div class="sidebar-group {{ $pttnOperatorOpen ? 'is-open' : '' }} {{ $parentVisible('PTTN OPERATOR MESIN') ? '' : 'parent-hidden' }}" data-sidebar-group="pttn-operator-mesin">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnOperatorOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">PTTN OPERATOR MESIN</span></button>
-            <div class="sidebar-group-items" {{ $pttnOperatorOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $pttnOperatorOpen || ! $parentVisible('PTTN OPERATOR MESIN') ? '' : 'hidden' }}>
                 {!! $menuLink('pttn-omes-input', 'pttn.omes.input', 'Input PTTN Omes', '⌁') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $monitoringOpen ? 'is-open' : '' }}" data-sidebar-group="monitoring">
+        <div class="sidebar-group {{ $monitoringOpen ? 'is-open' : '' }} {{ $parentVisible('MONITORING') ? '' : 'parent-hidden' }}" data-sidebar-group="monitoring">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $monitoringOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">MONITORING</span></button>
-            <div class="sidebar-group-items" {{ $monitoringOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $monitoringOpen || ! $parentVisible('MONITORING') ? '' : 'hidden' }}>
                 {!! $menuLink('incoming-trace', 'incoming.trace', 'Incoming Trace', '△') !!}
                 {!! $menuLink('realtime-production', 'realtime.production', 'Real Time Prod.', '◷') !!}
                 {!! $menuLink('last-sequence', 'last.sequence', 'List Proses Terakhir', '◷') !!}
@@ -116,20 +123,21 @@
             </div>
         </div>
 
-        <div class="sidebar-group {{ $qualityOpen ? 'is-open' : '' }}" data-sidebar-group="quality-control">
+        <div class="sidebar-group {{ $qualityOpen ? 'is-open' : '' }} {{ $parentVisible('QUALITY CONTROL') ? '' : 'parent-hidden' }}" data-sidebar-group="quality-control">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $qualityOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">QUALITY CONTROL</span></button>
-            <div class="sidebar-group-items" {{ $qualityOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $qualityOpen || ! $parentVisible('QUALITY CONTROL') ? '' : 'hidden' }}>
                 {!! $menuLink('akakami-qaqc', 'akakami.qaqc', 'Proses Akakami QAQC', '▣') !!}
             </div>
         </div>
 
-        <div class="sidebar-group {{ $userManagementOpen ? 'is-open' : '' }}" data-sidebar-group="user-management">
+        <div class="sidebar-group {{ $userManagementOpen ? 'is-open' : '' }} {{ $parentVisible('USER MANAGEMENT') ? '' : 'parent-hidden' }}" data-sidebar-group="user-management">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $userManagementOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">USER MANAGEMENT</span></button>
-            <div class="sidebar-group-items" {{ $userManagementOpen ? '' : 'hidden' }}>
+            <div class="sidebar-group-items" {{ $userManagementOpen || ! $parentVisible('USER MANAGEMENT') ? '' : 'hidden' }}>
                 {!! $menuLink('user-management-role', 'user-management.role-akses', 'Role Akses', '♙') !!}
                 {!! $menuLink('user-management-control', 'user-management.user-control', 'User Control', '♟') !!}
                 {!! $menuLink('user-management-qr', 'user-management.qr-code', 'Buat QR Code User', '▣') !!}
                 {!! $menuLink('user-management-authorization', 'user-management.menu-authorization', 'Otorisasi Menu', '☑') !!}
+                {!! $menuLink('user-management-hide-menu', 'user-management.hide-menu', 'Hide Menu', '◌') !!}
             </div>
         </div>
     </nav>

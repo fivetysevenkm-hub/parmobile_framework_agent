@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class MenuAuthorizationService
@@ -95,6 +96,158 @@ class MenuAuthorizationService
             $access[$key] = $fullAccess || in_array($key, $defaultKeys, true) || in_array($key, $stored, true);
         }
         return $access;
+    }
+
+    public function visibilityTableReady(): bool
+    {
+        return Schema::hasTable('tbl_user_menu_visibility');
+    }
+
+    public function groupKey(string $groupName): string
+    {
+        return 'group:'.Str::slug($groupName);
+    }
+
+    public function sidebarGroupNames(): array
+    {
+        return array_values(array_map(
+            fn ($group): string => (string) $group,
+            (array) config('menu_authorization.sidebar_group_names', []),
+        ));
+    }
+
+    public function groupHasVisibleChild(string $groupName, array $visibility): bool
+    {
+        foreach ($this->registry() as $menu) {
+            if ((string) ($menu['group'] ?? 'LAINNYA') !== $groupName) {
+                continue;
+            }
+            $key = (string) ($menu['key'] ?? '');
+            if ($key !== '' && (bool) ($visibility[$key] ?? true)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function visibilityMap(?int $idUser, ?string $username): array
+    {
+        $visibility = [];
+        $groupKeys = [];
+        $sidebarGroups = $this->sidebarGroupNames();
+        foreach ($this->registry() as $menu) {
+            $key = (string) ($menu['key'] ?? '');
+            $group = (string) ($menu['group'] ?? 'LAINNYA');
+            if ($key !== '') {
+                $visibility[$key] = true;
+            }
+            if (in_array($group, $sidebarGroups, true)) {
+                $groupKeys[$this->groupKey($group)] = true;
+            }
+        }
+        $visibility = array_merge($groupKeys, $visibility);
+
+        if ($idUser && $this->visibilityTableReady()) {
+            $hiddenKeys = DB::table('tbl_user_menu_visibility')
+                ->where('id_user', $idUser)
+                ->where('is_visible', 0)
+                ->pluck('menu_key')
+                ->map(fn ($key): string => (string) $key)
+                ->all();
+            foreach ($hiddenKeys as $key) {
+                if (array_key_exists($key, $visibility)) {
+                    $visibility[$key] = false;
+                }
+            }
+        }
+
+        return $visibility;
+    }
+
+    public function visibilityMatrixForUser(int $idUser): array
+    {
+        $user = $this->user($idUser);
+        if (! $user || (int) ($user['is_active'] ?? 0) !== 1) {
+            throw new RuntimeException('User aktif tidak ditemukan.');
+        }
+
+        $visibility = $this->visibilityMap($idUser, (string) $user['username']);
+        $groups = [];
+        foreach ($this->registry() as $menu) {
+            $key = (string) ($menu['key'] ?? '');
+            $groupName = (string) ($menu['group'] ?? 'LAINNYA');
+            if ($key === '') {
+                continue;
+            }
+            $groupKey = in_array($groupName, $this->sidebarGroupNames(), true) ? $this->groupKey($groupName) : '';
+            $groups[$groupName]['parent_key'] = $groupKey;
+            $groups[$groupName]['parent_name'] = $groupName;
+            $groups[$groupName]['parent_visible'] = $groupKey === '' ? true : (bool) ($visibility[$groupKey] ?? true);
+            $groups[$groupName]['items'][] = [
+                'key' => $key,
+                'name' => (string) ($menu['name'] ?? $key),
+                'description' => (string) ($menu['description'] ?? ''),
+                'visible' => (bool) ($visibility[$key] ?? true),
+            ];
+        }
+
+        return [
+            'user' => $user,
+            'groups' => $groups,
+            'table_ready' => $this->visibilityTableReady(),
+        ];
+    }
+
+    public function saveUserVisibility(int $idUser, array $selectedKeys): void
+    {
+        $user = $this->user($idUser);
+        if (! $user || (int) ($user['is_active'] ?? 0) !== 1) {
+            throw new RuntimeException('User aktif tidak ditemukan.');
+        }
+        if (! $this->visibilityTableReady()) {
+            throw new RuntimeException('Tabel visibilitas belum tersedia. Jalankan migration Hide Menu terlebih dahulu.');
+        }
+
+        $validKeys = [];
+        $groups = [];
+        $sidebarGroups = $this->sidebarGroupNames();
+        foreach ($this->registry() as $menu) {
+            $key = (string) ($menu['key'] ?? '');
+            $group = (string) ($menu['group'] ?? 'LAINNYA');
+            if ($key !== '') {
+                $validKeys[] = $key;
+            }
+            if (in_array($group, $sidebarGroups, true)) {
+                $groups[$this->groupKey($group)] = true;
+            }
+        }
+        $validKeys = array_values(array_unique(array_merge(array_keys($groups), $validKeys)));
+        $selectedKeys = collect($selectedKeys)
+            ->map(fn ($key): string => (string) $key)
+            ->filter(fn (string $key): bool => in_array($key, $validKeys, true))
+            ->unique()
+            ->values()
+            ->all();
+        $hiddenKeys = array_values(array_diff($validKeys, $selectedKeys));
+
+        DB::transaction(function () use ($idUser, $validKeys, $hiddenKeys): void {
+            DB::table('tbl_user_menu_visibility')
+                ->where('id_user', $idUser)
+                ->whereIn('menu_key', $validKeys)
+                ->delete();
+
+            if ($hiddenKeys !== []) {
+                DB::table('tbl_user_menu_visibility')->insert(array_map(
+                    fn (string $menuKey): array => [
+                        'id_user' => $idUser,
+                        'menu_key' => $menuKey,
+                        'is_visible' => 0,
+                    ],
+                    $hiddenKeys,
+                ));
+            }
+        });
     }
 
     public function matrixForUser(int $idUser): array

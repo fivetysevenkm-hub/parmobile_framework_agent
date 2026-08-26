@@ -11,6 +11,21 @@ return [
         'custom-theme',
     ],
 
+    'sidebar_group_names' => [
+        'REPORT APPROVAL',
+        'ABNORMAL REPORT',
+        'LEMBAR Rank A',
+        'MAN POWER',
+        'ROUTING',
+        'CYCLE TIME',
+        'DOCUMENT PROCESS',
+        'PTTN ENGINEERING',
+        'PTTN OPERATOR MESIN',
+        'MONITORING',
+        'QUALITY CONTROL',
+        'USER MANAGEMENT',
+    ],
+
     'menus' => [
         ['key' => 'home', 'name' => 'Home', 'group' => 'Dashboard', 'route' => 'home', 'description' => 'Halaman awal setelah login yang menampilkan ucapan pengguna dan daftar menu yang dapat diakses.'],
         ['key' => 'custom-theme', 'name' => 'Custom Tema', 'group' => 'USER PREFERENCE', 'route' => 'theme.custom', 'description' => 'Mengatur preset dan warna elemen PAR Mobile secara personal serta menyimpannya untuk akun yang sedang login.'],
@@ -42,5 +57,6 @@ return [
         ['key' => 'user-management-control', 'name' => 'User Control', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.user-control', 'description' => 'Mengelola user legacy, status aktif, data akun, dan perubahan password kompatibel legacy.'],
         ['key' => 'user-management-qr', 'name' => 'Buat QR Code User', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.qr-code', 'aliases' => ['user-management.qr-code.print'], 'description' => 'Mencari user aktif dan mencetak kartu QR Code NIK dalam layout A4.'],
         ['key' => 'user-management-authorization', 'name' => 'Otorisasi Menu', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.menu-authorization', 'description' => 'Mengatur akses menu dan submenu per user melalui checklist otorisasi.'],
+        ['key' => 'user-management-hide-menu', 'name' => 'Hide Menu', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.hide-menu', 'description' => 'Mengatur visibilitas menu dan submenu per user agar sidebar dan tabel Home tetap sederhana.'],
     ],
 ];

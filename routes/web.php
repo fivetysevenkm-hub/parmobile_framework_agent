@@ -48,6 +48,7 @@ use App\Livewire\Login;
 use App\Livewire\Home;
 use App\Livewire\ChangePassword;
 use App\Livewire\MenuAuthorization;
+use App\Livewire\HideMenu;
 use App\Livewire\CustomTheme;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureMenuAccess;
@@ -97,6 +98,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class
     Route::get('/user-management/user-control', UserControl::class)->name('user-management.user-control');
     Route::get('/user-management/qr-code', UserQrCode::class)->name('user-management.qr-code');
     Route::get('/user-management/menu-authorization', MenuAuthorization::class)->name('user-management.menu-authorization');
+    Route::get('/user-management/hide-menu', HideMenu::class)->name('user-management.hide-menu');
     Route::get('/user-management/qr-code/print', UserQrCodePrintController::class)->name('user-management.qr-code.print');
     Route::get('/pttn-engineering/add-item-satuan', AddItemSatuan::class)->name('pttn.add-item-satuan');
     Route::get('/pttn-engineering/pttn-maker', PttnMaker::class)->name('pttn.maker');
