@@ -47,6 +47,7 @@ use App\Livewire\Login;
 use App\Livewire\Home;
 use App\Livewire\ChangePassword;
 use App\Livewire\MenuAuthorization;
+use App\Livewire\CustomTheme;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureMenuAccess;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class])->group(function () {
     Route::get('/home', Home::class)->name('home');
+    Route::get('/custom-theme', CustomTheme::class)->name('theme.custom');
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     Route::get('/akakami-qaqc', AkakamiApproval::class)->name('akakami.qaqc');
     Route::get('/prv-akakami', AkakamiApprovalReview::class)->name('akakami.approval');

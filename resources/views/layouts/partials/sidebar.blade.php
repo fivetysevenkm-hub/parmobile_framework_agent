@@ -31,6 +31,7 @@
 
     <nav class="sidebar-nav">
         {!! $menuLink('home', 'home', 'Home', '⌂') !!}
+        {!! $menuLink('custom-theme', 'theme.custom', 'Custom Tema', '◉') !!}
         {!! $menuLink('daily-report', 'dashboard', 'Daily Report', '▦') !!}
         {!! $menuLink('monthly-report', 'monthly.report', 'Monthly Report', '▤') !!}
         {!! $menuLink('akakami-dashboard', 'akakami.dashboard', 'Akakami Dashboard', '◈') !!}

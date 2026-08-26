@@ -8,10 +8,12 @@ return [
         'daily-report',
         'monthly-report',
         'akakami-dashboard',
+        'custom-theme',
     ],
 
     'menus' => [
         ['key' => 'home', 'name' => 'Home', 'group' => 'Dashboard', 'route' => 'home', 'description' => 'Halaman awal setelah login yang menampilkan ucapan pengguna dan daftar menu yang dapat diakses.'],
+        ['key' => 'custom-theme', 'name' => 'Custom Tema', 'group' => 'USER PREFERENCE', 'route' => 'theme.custom', 'description' => 'Mengatur preset dan warna elemen PAR Mobile secara personal serta menyimpannya untuk akun yang sedang login.'],
         ['key' => 'daily-report', 'name' => 'Daily Report', 'group' => 'Dashboard', 'route' => 'dashboard', 'aliases' => ['export.excel'], 'description' => 'Menampilkan ringkasan laporan produksi harian, filter tanggal, grafik, dan data detail produksi.'],
         ['key' => 'monthly-report', 'name' => 'Monthly Report', 'group' => 'Dashboard', 'route' => 'monthly.report', 'description' => 'Menampilkan laporan produksi berdasarkan bulan dan tahun dengan ringkasan performa.'],
         ['key' => 'akakami-dashboard', 'name' => 'Akakami Dashboard', 'group' => 'Dashboard', 'route' => 'akakami.dashboard', 'description' => 'Menampilkan dashboard trend masalah Akakami berdasarkan customer, part, proses, operator, 4M, dan rank.'],
