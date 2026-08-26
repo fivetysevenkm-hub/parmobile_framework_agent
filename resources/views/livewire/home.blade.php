@@ -10,14 +10,14 @@
         .home-panel-intro{font-size:13px;color:#aebfc3;margin:0 0 13px;line-height:1.5}
         .home-table-wrap{width:100%;max-width:100%;overflow-x:auto;border:1px solid #30464b;border-radius:8px;box-sizing:border-box}
         .home-table{width:100%;min-width:0;border-collapse:collapse;font-size:13px;table-layout:fixed}
-        .home-table th{background:#183b48;color:#e9fcff;text-align:left;font-size:12px;letter-spacing:.25px;padding:11px 12px;border-bottom:1px solid #3e6973;white-space:nowrap}
-        .home-table td{padding:10px 12px;vertical-align:top;border-bottom:1px solid #26383d;color:#e6eef0;line-height:1.45;overflow-wrap:anywhere;word-break:break-word}
+        .home-table th{background:#183b48;color:#e9fcff;text-align:left;font-size:12px;letter-spacing:.25px;padding:11px 12px;border-bottom:1px solid #3e6973;white-space:normal;overflow-wrap:anywhere}
+        .home-table td{padding:10px 12px;vertical-align:top;border-bottom:1px solid #26383d;color:#e6eef0;line-height:1.45;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;text-align:left!important}
         .home-table tr:last-child td{border-bottom:0}
         .home-table tr:nth-child(even) td{background:#142126}
-        .home-table tr:hover td{background:#1b3036}
+        .home-table tr:hover td{background:#1b3036}.home-table th:last-child{width:55%}
         .home-menu-name{font-weight:700;color:#fff;white-space:normal;overflow-wrap:anywhere}
         .home-group{display:inline-block;font-size:11px;color:#8de3ec;background:#164552;border:1px solid #276a76;border-radius:12px;padding:3px 8px;margin-bottom:5px;white-space:nowrap}
-        .home-function{color:#d0dddf}
+        .home-function{width:55%;max-width:55%;color:#d0dddf;white-space:normal!important;overflow-wrap:anywhere;word-break:normal;text-align:left!important}
         .home-open{display:inline-block;color:#69dce8;text-decoration:none;font-size:12px;margin-top:4px}
         .home-open:hover{text-decoration:underline}
         .home-note{margin-top:16px;border-left:4px solid #e0ad55;background:#2a2418;border-radius:7px;padding:12px 14px;color:#f4dfb4;font-size:13px;line-height:1.55}

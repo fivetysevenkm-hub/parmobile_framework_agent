@@ -21,7 +21,7 @@
         .akakami-page .pagination .page-link { background:#182228; cursor:pointer; }
         .akakami-page .pagination .page-link:hover { border-color:var(--cyan); color:var(--cyan); }
         .akakami-page .pagination .page-current { background:var(--cyan); color:#041014; border-color:var(--cyan); font-weight:700; }
-        .akakami-page .pagination .page-disabled { opacity:.4; }
+        .akakami-page .pagination .page-disabled { opacity:.4; } .akakami-page .sort-toggle{min-width:150px;white-space:nowrap}
         .akakami-page .action-cell { width:104px; min-width:104px; text-align:center; vertical-align:middle; }
         .akakami-page .action-cell .btn { display:inline-flex; width:82px; min-height:32px; align-items:center; justify-content:center; padding:7px 8px; white-space:nowrap; font-size:.7rem; line-height:1; }
         .akakami-page .action-cell .akakami-print-btn { width:108px; }
@@ -100,7 +100,7 @@
                         <label for="approvalSearch">Cari FLPP, lot, atau problem</label>
                         <input id="approvalSearch" class="dark-control" type="search" wire:model.live.debounce.400ms="search" placeholder="Ketik kata pencarian...">
                     </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost" type="button" wire:click="refreshGrid" wire:loading.attr="disabled" wire:target="refreshGrid">Muat ulang</button><button class="btn btn-cyan" type="button" wire:click="openExportModal">Export Excel</button></div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-ghost sort-toggle" type="button" wire:click="toggleSortOrder" wire:loading.attr="disabled" wire:target="toggleSortOrder">Urutan: {{ $sortDirection === 'desc' ? 'Terbaru' : 'Terlama' }}</button><button class="btn btn-ghost" type="button" wire:click="refreshGrid" wire:loading.attr="disabled" wire:target="refreshGrid">Muat ulang</button><button class="btn btn-cyan" type="button" wire:click="openExportModal">Export Excel</button></div>
                 </div>
             @endif
 
@@ -171,8 +171,10 @@
                     @if ($rows->hasPages())
                         <nav class="pagination" aria-label="Pagination Akakami QAQC">
                             @if ($rows->onFirstPage())
+                                <span class="page-disabled">« Awal</span>
                                 <span class="page-disabled">‹ Sebelumnya</span>
                             @else
+                                <button type="button" class="page-link" wire:click="gotoPage(1)" wire:loading.attr="disabled">« Awal</button>
                                 <button type="button" class="page-link" wire:click="previousPage" wire:loading.attr="disabled">‹ Sebelumnya</button>
                             @endif
 
@@ -190,8 +192,10 @@
 
                             @if ($rows->currentPage() === $rows->lastPage())
                                 <span class="page-disabled">Berikutnya ›</span>
+                                <span class="page-disabled">Akhir »</span>
                             @else
                                 <button type="button" class="page-link" wire:click="nextPage" wire:loading.attr="disabled">Berikutnya ›</button>
+                                <button type="button" class="page-link" wire:click="gotoPage({{ $rows->lastPage() }})" wire:loading.attr="disabled">Akhir »</button>
                             @endif
                         </nav>
                     @endif

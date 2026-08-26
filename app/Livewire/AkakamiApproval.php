@@ -21,6 +21,8 @@ class AkakamiApproval extends Component
 
     public int $perPage = 20;
 
+    public string $sortDirection = 'desc';
+
     public array $exportYears = [];
 
     public array $exportMonthsByYear = [];
@@ -94,6 +96,12 @@ class AkakamiApproval extends Component
         $this->resetPage();
     }
 
+    public function toggleSortOrder(): void
+    {
+        $this->sortDirection = $this->sortDirection === 'desc' ? 'asc' : 'desc';
+        $this->resetPage();
+    }
+
     private function gridQuery()
     {
         return DB::table('vw_flpp_list_hold')
@@ -107,7 +115,8 @@ class AkakamiApproval extends Component
                         ->orWhere('nmproblem', 'like', $term);
                 });
             })
-            ->orderByDesc('tgl_problem');
+            ->orderBy('tgl_problem', $this->sortDirection === 'asc' ? 'asc' : 'desc')
+            ->orderBy('noflpp', $this->sortDirection === 'asc' ? 'asc' : 'desc');
     }
 
     private function loadExportPeriods(): void
