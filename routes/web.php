@@ -11,6 +11,7 @@ use App\Http\Controllers\ExportExcelController;
 use App\Http\Controllers\LastSequenceExportController;
 use App\Http\Controllers\IncomingTraceExportController;
 use App\Http\Controllers\RealtimeProductionExportController;
+use App\Http\Controllers\RealtimeProductionCertificateController;
 use App\Http\Controllers\ProductivityProcessExportController;
 use App\Http\Controllers\ProcessProductivityExportController;
 use App\Http\Controllers\ManpowerCertificateController;
@@ -83,6 +84,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class
     Route::get('/incoming-trace', IncomingTrace::class)->name('incoming.trace');
     Route::get('/incoming-trace/export', IncomingTraceExportController::class)->name('incoming.trace.export');
     Route::get('/realtime-production', RealtimeProduction::class)->name('realtime.production');
+    Route::get('/realtime-production/{noLot}/certificate', RealtimeProductionCertificateController::class)->name('realtime.production.certificate');
     Route::get('/realtime-production/export', RealtimeProductionExportController::class)->name('realtime.production.export');
     Route::get('/productivity-process', ProcessProductivity::class)->name('productivity.process');
     Route::get('/manpower-productivity', ManpowerProductivity::class)->name('manpower.productivity');

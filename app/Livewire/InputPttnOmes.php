@@ -11,6 +11,7 @@ class InputPttnOmes extends Component
     public array $lotContext = [];
     public array $mappings = [];
     public string $selectedMappingIndex = '';
+    public array $selectedMappingData = [];
     public array $pattern = [];
     public array $rows = [];
     public int $currentStepNo = 1;
@@ -53,7 +54,7 @@ class InputPttnOmes extends Component
         }
 
         $this->lotContext = $context;
-        $this->mappings = $service->mappingsForSrp((string) ($context['no_srp'] ?? ''));
+        $this->mappings = $service->mappingsForLot($this->noLot, (string) ($context['no_srp'] ?? ''));
         if ($this->mappings === []) {
             $this->clearLoadedData(false);
             $this->addError('noLot', 'PTTN belum diinput oleh Engineering untuk SRP ini.');
@@ -78,6 +79,7 @@ class InputPttnOmes extends Component
             return;
         }
         $mapping = $this->mappings[(int) $this->selectedMappingIndex];
+        $this->selectedMappingData = $mapping;
         $header = $service->patternHeader((string) $mapping['pattern_code']);
         if (! $header) {
             $this->addError('form', 'Pattern PTTN tidak ditemukan.');
@@ -136,7 +138,7 @@ class InputPttnOmes extends Component
         $this->rows[$index]['actual_check'] = $actual;
         try {
             if ($actual === '') {
-                $service->clearPic1Row($this->noLot, $this->currentStepNo, (string) $this->rows[$index]['point'], $this->currentUser);
+                $service->clearPic1Row($this->noLot, $this->currentStepNo, (string) $this->rows[$index]['point'], $this->currentUser, $this->selectedMappingData);
                 $this->rows[$index]['status_check'] = '';
                 $this->rows[$index]['pic1'] = '';
                 $this->rows[$index]['datetime1'] = '';
@@ -160,7 +162,7 @@ class InputPttnOmes extends Component
                 default => '',
             };
             $this->rows[$index]['pic1'] = $this->currentUser;
-            $service->savePic1Row($this->noLot, $this->pattern, $this->currentStepNo, $this->rows[$index], $this->currentUser);
+            $service->savePic1Row($this->noLot, $this->pattern, $this->currentStepNo, $this->rows[$index], $this->currentUser, $this->selectedMappingData);
             $this->lotPic1Name = $this->lotPic1Name !== '' ? $this->lotPic1Name : $this->currentUser;
             $this->pic1 = $this->lotPic1Name;
             $this->updateAccessFlags();
@@ -189,12 +191,12 @@ class InputPttnOmes extends Component
             if ($checked) {
                 $this->rows[$index]['status_check'] = 'OK';
                 $this->rows[$index]['pic1'] = $this->currentUser;
-                $service->savePic1Row($this->noLot, $this->pattern, $this->currentStepNo, $this->rows[$index], $this->currentUser);
+                $service->savePic1Row($this->noLot, $this->pattern, $this->currentStepNo, $this->rows[$index], $this->currentUser, $this->selectedMappingData);
                 $this->lotPic1Name = $this->lotPic1Name !== '' ? $this->lotPic1Name : $this->currentUser;
                 $this->pic1 = $this->lotPic1Name;
                 $this->autoSaveStatus = 'PIC 1: checkpoint tersimpan otomatis.';
             } else {
-                $service->clearPic1Row($this->noLot, $this->currentStepNo, (string) $this->rows[$index]['point'], $this->currentUser);
+                $service->clearPic1Row($this->noLot, $this->currentStepNo, (string) $this->rows[$index]['point'], $this->currentUser, $this->selectedMappingData);
                 $this->rows[$index]['status_check'] = '';
                 $this->rows[$index]['pic1'] = '';
                 $this->rows[$index]['datetime1'] = '';
@@ -220,7 +222,7 @@ class InputPttnOmes extends Component
         try {
             $checked = (bool) $checked;
             $this->rows[$index]['double_check'] = $checked;
-            $service->setDoubleCheckRow($this->noLot, $this->currentStepNo, (string) $this->rows[$index]['point'], $this->currentUser, $checked);
+            $service->setDoubleCheckRow($this->noLot, $this->currentStepNo, (string) $this->rows[$index]['point'], $this->currentUser, $checked, $this->selectedMappingData);
             $this->rows[$index]['pic2'] = $checked ? $this->currentUser : '';
             $this->rows[$index]['datetime2'] = $checked ? (string) now() : '';
             $this->autoSaveStatus = 'PIC 2: verifikasi tersimpan otomatis.';
@@ -271,7 +273,8 @@ class InputPttnOmes extends Component
     private function loadStep(PttnOmesService $service): void
     {
         if (! empty($this->pattern['id_pattern']) && $this->noLot !== '') {
-            $this->rows = $service->stepRows((int) $this->pattern['id_pattern'], $this->currentStepNo, $this->noLot);
+            $relationId = $this->selectedMappingData === [] ? null : $service->relationIdForMapping($this->noLot, $this->selectedMappingData);
+            $this->rows = $service->stepRows((int) $this->pattern['id_pattern'], $this->currentStepNo, $this->noLot, $relationId);
         }
     }
 
@@ -309,6 +312,7 @@ class InputPttnOmes extends Component
         }
         $this->mappings = [];
         $this->selectedMappingIndex = '';
+        $this->selectedMappingData = [];
         $this->pattern = [];
         $this->rows = [];
         $this->currentStepNo = 1;
