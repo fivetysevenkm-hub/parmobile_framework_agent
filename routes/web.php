@@ -109,7 +109,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class
     Route::get('/pttn-engineering/pttn-maker', PttnMaker::class)->name('pttn.maker');
     Route::get('/pttn-engineering/pttn-maker/{id}/image', PttnImageController::class)->name('pttn.image');
     Route::get('/pttn-engineering/pairing-pttn-to-srp', PairingPttnToSrp::class)->name('pttn.pairing.srp');
-    Route::get('/pttn-operator-mesin/input-pttn-omes', InputPttnOmes::class)->name('pttn.omes.input');
+    Route::get('/pttn-operator-mesin/input-pttn-omes/{noLot?}/{sequenceNo?}', InputPttnOmes::class)->name('pttn.omes.input');
     Route::get('/document-process/pdf/{id}', DocumentProcessPdfController::class)->name('document.process.pdf');
     Route::get('/productivity-process/export', ProcessProductivityExportController::class)->name('productivity.process.export');
     Route::get('/manpower-productivity/export', ProductivityProcessExportController::class)->name('manpower.productivity.export');

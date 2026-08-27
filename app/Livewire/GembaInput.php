@@ -7,6 +7,7 @@ use App\Services\AbnormalReportTelegramMessage;
 use App\Services\AkakamiTelegramMessage;
 use App\Services\GembaInputService;
 use App\Services\LotVerifikatorService;
+use App\Services\PttnOmesService;
 use App\Services\TelegramService;
 use Livewire\Component;
 
@@ -24,6 +25,7 @@ class GembaInput extends Component
     public array $problemCategories = [];
     public array $problemRanks = [];
     public bool $requiresMachine = false;
+    public bool $hasPttn = false;
 
     public string $operatorNik = '';
     public string $employeeSearch = '';
@@ -372,6 +374,30 @@ class GembaInput extends Component
             && ! $this->isProcessFinished();
     }
 
+    public function canInputPttn(): bool
+    {
+        return $this->context !== [] && $this->hasPttn;
+    }
+
+    public function openPttnInput(PttnOmesService $service): void
+    {
+        if (! $this->canInputPttn()) {
+            $this->flash('PTTN belum terpasang pada proses aktif ini.', 'warning');
+            return;
+        }
+
+        $sessionNik = $this->sessionNik();
+        if (! $service->operatorIsCompetent($sessionNik, (string) ($this->process['id_seq'] ?? ''))) {
+            $this->flash('Akses Input PTTN ditolak. Operator yang login tidak kompeten untuk proses ini.', 'warning');
+            return;
+        }
+
+        $this->redirectRoute('pttn.omes.input', [
+            'noLot' => $this->noLot,
+            'sequenceNo' => $this->sequenceNo,
+        ]);
+    }
+
     private function isProcessStarted(): bool
     {
         return trim((string) ($this->state['start_time'] ?? '')) !== '';
@@ -428,6 +454,7 @@ class GembaInput extends Component
         $this->lotContext = [];
         $this->process = [];
         $this->requiresMachine = false;
+        $this->hasPttn = false;
         $this->scanInput = '';
         $this->operatorNik = '';
         $this->employeeSearch = '';
@@ -470,6 +497,7 @@ class GembaInput extends Component
             $this->lotContext = [];
             $this->process = [];
             $this->requiresMachine = false;
+            $this->hasPttn = false;
             $this->state = [];
             $this->operators = [];
             return;
@@ -478,6 +506,16 @@ class GembaInput extends Component
         $this->lotContext = $service->lotContext($this->noLot) ?? [];
         $this->process = $this->context['process'] ?? [];
         $this->requiresMachine = $service->requiresMachine($this->process);
+        try {
+            $this->hasPttn = app(PttnOmesService::class)->mappingForLotSequence(
+                $this->noLot,
+                (string) ($this->lotContext['no_srp'] ?? ''),
+                $this->sequenceNo
+            ) !== null;
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->hasPttn = false;
+        }
         $this->state = $service->currentState($this->noLot, $this->sequenceNo);
         $this->operators = $service->operators($this->noLot, $this->sequenceNo);
         $this->trayNo = $this->state['tray_no'] ?? '';
@@ -492,6 +530,11 @@ class GembaInput extends Component
         $this->traySmall = $this->state['tray_nokecil'] ?? $this->traySmall;
         $this->machineNo = $this->state['no_mesin'] ?? $this->machineNo;
         $this->operators = $service->operators($this->noLot, $this->sequenceNo) ?: $this->operators;
+    }
+
+    private function sessionNik(): string
+    {
+        return trim((string) (session('nik') ?: session('id_user') ?: auth()->user()?->id_user ?: ''));
     }
 
     private function flash(string $message, string $type): void

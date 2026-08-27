@@ -1,18 +1,16 @@
 <div class="lot-verifikator-page">
     <style>
-        .lot-verifikator-page{width:100%;max-width:1500px;margin:0 auto;font-family:Tahoma,Arial,sans-serif;color:var(--text-body)}
-        .lot-verifikator-page .tabs{display:flex;gap:2px;margin:-4px 0 0;border-bottom:1px solid var(--line)}
-        .lot-verifikator-page .tab{padding:8px 13px;background:var(--panel-2);border:1px solid var(--line);border-bottom:0;border-radius:6px 6px 0 0;color:var(--text-body);font-size:14px}
-        .lot-verifikator-page .tab.active{background:var(--panel);color:var(--text-title);font-weight:700}
-        .lot-verifikator-page .panel{border:1px solid var(--line);border-radius:0 8px 8px 8px;background:var(--panel);padding:16px;margin-bottom:14px}
+        .lot-verifikator-page{width:100%;max-width:none;margin:0;padding:0;font-family:Tahoma,Arial,sans-serif;color:var(--text-body)}
+        .lot-verifikator-page .page-header{width:100%;margin:0 0 14px;padding:14px 18px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text-title);font-size:20px;font-weight:700;letter-spacing:.02em}
+        .lot-verifikator-page .panel{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:16px;margin-bottom:14px}
         .lot-verifikator-page .panel-title{margin:0 0 14px;color:var(--text-title);font-size:16px;font-weight:700}
         .lot-verifikator-page .scan-panel{background:color-mix(in srgb,var(--cyan) 12%,var(--panel));border-color:color-mix(in srgb,var(--cyan) 38%,var(--line))}
-        .lot-verifikator-page .scan-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end}
         .lot-verifikator-page .field-label{display:block;margin-bottom:6px;color:var(--text-body);font-size:14px;font-weight:700}
+        .lot-verifikator-page .scan-control-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
         .lot-verifikator-page .lot-input{width:100%;height:47px;border:1px solid var(--line);border-radius:7px;background:var(--input-bg);color:var(--text-title);padding:8px 12px;font-size:22px;letter-spacing:.03em;outline:none}
         .lot-verifikator-page .lot-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px color-mix(in srgb,var(--cyan) 18%,transparent)}
-        .lot-verifikator-page .scan-actions{display:flex;gap:8px}
-        .lot-verifikator-page .scan-button,.lot-verifikator-page .clear-button{height:47px;padding:0 18px;border-radius:7px;font-family:Tahoma,Arial,sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+        .lot-verifikator-page .scan-actions{display:flex;gap:8px;align-items:center}
+        .lot-verifikator-page .scan-button,.lot-verifikator-page .clear-button{height:47px;padding:0 18px;border-radius:7px;font-family:Tahoma,Arial,sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
         .lot-verifikator-page .scan-button{border:1px solid var(--cyan);background:var(--cyan);color:var(--text-button)}
         .lot-verifikator-page .clear-button{border:1px solid var(--line);background:transparent;color:var(--text-header)}
         .lot-verifikator-page .hint{margin:8px 0 0;color:var(--text-footer);font-size:12px}
@@ -30,27 +28,30 @@
         .lot-verifikator-page .process-box.is-next{background:var(--cyan);color:var(--text-button);border-color:var(--text-header);box-shadow:0 0 0 2px color-mix(in srgb,var(--cyan) 22%,transparent),0 8px 18px color-mix(in srgb,var(--cyan) 18%,transparent);cursor:pointer;opacity:1}
         .lot-verifikator-page .process-box.is-next:hover{filter:brightness(1.08);transform:translateY(-2px)}
         .lot-verifikator-page .process-box.is-next:active{transform:scale(.98)}
-        @media(max-width:760px){.lot-verifikator-page .panel{padding:12px}.lot-verifikator-page .scan-grid{grid-template-columns:1fr}.lot-verifikator-page .scan-actions{display:grid;grid-template-columns:1fr 1fr}.lot-verifikator-page .scan-button,.lot-verifikator-page .clear-button{width:100%}.lot-verifikator-page .lot-input{font-size:20px}.lot-verifikator-page .flow-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.lot-verifikator-page .process-box{min-height:78px;padding:10px 7px}}
-        @media(max-width:390px){.lot-verifikator-page .flow-grid{grid-template-columns:1fr}.lot-verifikator-page .scan-actions{grid-template-columns:1fr}.lot-verifikator-page .tabs .tab{font-size:13px}}
+        @media(max-width:760px){.lot-verifikator-page .page-header{padding:12px 14px;font-size:18px}.lot-verifikator-page .panel{padding:12px}.lot-verifikator-page .scan-control-row{grid-template-columns:1fr}.lot-verifikator-page .scan-actions{display:grid;grid-template-columns:1fr 1fr}.lot-verifikator-page .scan-button,.lot-verifikator-page .clear-button{width:100%}.lot-verifikator-page .lot-input{font-size:20px}.lot-verifikator-page .flow-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.lot-verifikator-page .process-box{min-height:78px;padding:10px 7px}}
+        @media(max-width:390px){.lot-verifikator-page .flow-grid{grid-template-columns:1fr}.lot-verifikator-page .scan-actions{grid-template-columns:1fr}}
     </style>
 
-    <div class="tabs" role="tablist"><div class="tab">Select Process</div><div class="tab active">Verifikator</div></div>
+    <header class="page-header">Lot Verifikator</header>
 
     <section class="panel scan-panel">
-        <h1 class="panel-title">Verifikator</h1>
-        <form wire:submit.prevent="loadLot" class="scan-grid">
-            <div>
-                <label class="field-label" for="lot-verifikator-input">No Lot</label>
+        <h1 class="panel-title">Verifikasi No Lot</h1>
+        <label class="field-label" for="lot-verifikator-input">No Lot</label>
+        <form wire:submit.prevent="loadLot">
+            <div class="scan-control-row">
                 <input id="lot-verifikator-input" type="text" class="lot-input" wire:model="noLot" wire:keydown.enter="loadLot" autocomplete="off" autofocus placeholder="Scan barcode No Lot atau ketik lalu Enter">
-                <p class="hint">Scanner barcode biasanya mengirimkan tombol Enter secara otomatis. Enter manual juga dapat digunakan.</p>
-                @error('noLot')<div class="error">{{ $message }}</div>@enderror
+                <div class="scan-actions">
+                    <button type="submit" class="scan-button" wire:loading.attr="disabled" wire:target="loadLot">TAMPILKAN FLOW</button>
+                    <button type="button" class="clear-button" wire:click="clearLot">RESET</button>
+                </div>
             </div>
-            <div class="scan-actions"><button type="submit" class="scan-button" wire:loading.attr="disabled" wire:target="loadLot">TAMPILKAN FLOW</button><button type="button" class="clear-button" wire:click="clearLot">RESET</button></div>
+            <p class="hint">Scanner barcode biasanya mengirimkan tombol Enter secara otomatis. Enter manual juga dapat digunakan.</p>
+            @error('noLot')<div class="error">{{ $message }}</div>@enderror
         </form>
     </section>
 
     <section class="panel">
-        <h2 class="panel-title">Hasil Verifikasi</h2>
+        <h2 class="panel-title">HASIL VERIFIKASI</h2>
         @if(! $hasSearched)
             <div class="flow-empty">Flow proses masih tersembunyi. Scan atau masukkan No Lot, lalu tekan Enter untuk menampilkan routing lot.</div>
         @elseif(($result['finished'] ?? false))

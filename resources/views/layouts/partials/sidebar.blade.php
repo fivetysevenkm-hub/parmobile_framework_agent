@@ -43,7 +43,20 @@
         {!! $menuLink('daily-report', 'dashboard', 'Daily Report', '▦') !!}
         {!! $menuLink('monthly-report', 'monthly.report', 'Monthly Report', '▤') !!}
         {!! $menuLink('akakami-dashboard', 'akakami.dashboard', 'Akakami Dashboard', '◈') !!}
+<div class="sidebar-group {{ $lotVerifikatorOpen ? 'is-open' : '' }} {{ $parentVisible('INPUT LOT') ? '' : 'parent-hidden' }}" data-sidebar-group="input-lot">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $lotVerifikatorOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">INPUT LOT</span></button>
+            <div class="sidebar-group-items" {{ $lotVerifikatorOpen || ! $parentVisible('INPUT LOT') ? '' : 'hidden' }}>
+                {!! $menuLink('lot-verifikator', 'lot.verifikator', 'Lot Verifikator', '▣') !!}
+                {!! $menuLink('gemba-input', 'gemba.input', 'Gemba Input', '⚙') !!}
+            </div>
+        </div>
 
+          <div class="sidebar-group {{ $pttnOperatorOpen ? 'is-open' : '' }} {{ $parentVisible('PTTN OPERATOR MESIN') ? '' : 'parent-hidden' }}" data-sidebar-group="pttn-operator-mesin">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnOperatorOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">PTTN OPERATOR MESIN</span></button>
+            <div class="sidebar-group-items" {{ $pttnOperatorOpen || ! $parentVisible('PTTN OPERATOR MESIN') ? '' : 'hidden' }}>
+                {!! $menuLink('pttn-omes-input', 'pttn.omes.input', 'Input PTTN Omes', '⌁') !!}
+            </div>
+        </div>
         <div class="sidebar-group {{ $approvalOpen ? 'is-open' : '' }} {{ $parentVisible('REPORT APPROVAL') ? '' : 'parent-hidden' }}" data-sidebar-group="approval">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $approvalOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">REPORT APPROVAL</span></button>
             <div class="sidebar-group-items" {{ $approvalOpen || ! $parentVisible('REPORT APPROVAL') ? '' : 'hidden' }}>
@@ -96,13 +109,7 @@
             </div>
         </div>
 
-        <div class="sidebar-group {{ $lotVerifikatorOpen ? 'is-open' : '' }} {{ $parentVisible('INPUT LOT') ? '' : 'parent-hidden' }}" data-sidebar-group="input-lot">
-            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $lotVerifikatorOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">INPUT LOT</span></button>
-            <div class="sidebar-group-items" {{ $lotVerifikatorOpen || ! $parentVisible('INPUT LOT') ? '' : 'hidden' }}>
-                {!! $menuLink('lot-verifikator', 'lot.verifikator', 'Lot Verifikator', '▣') !!}
-                {!! $menuLink('gemba-input', 'gemba.input', 'Gemba Input', '⚙') !!}
-            </div>
-        </div>
+        
 
         <div class="sidebar-group {{ $pttnEngineeringOpen ? 'is-open' : '' }} {{ $parentVisible('PTTN ENGINEERING') ? '' : 'parent-hidden' }}" data-sidebar-group="pttn-engineering">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnEngineeringOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">PTTN ENGINEERING</span></button>
@@ -113,12 +120,7 @@
             </div>
         </div>
 
-        <div class="sidebar-group {{ $pttnOperatorOpen ? 'is-open' : '' }} {{ $parentVisible('PTTN OPERATOR MESIN') ? '' : 'parent-hidden' }}" data-sidebar-group="pttn-operator-mesin">
-            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $pttnOperatorOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">PTTN OPERATOR MESIN</span></button>
-            <div class="sidebar-group-items" {{ $pttnOperatorOpen || ! $parentVisible('PTTN OPERATOR MESIN') ? '' : 'hidden' }}>
-                {!! $menuLink('pttn-omes-input', 'pttn.omes.input', 'Input PTTN Omes', '⌁') !!}
-            </div>
-        </div>
+      
 
         <div class="sidebar-group {{ $monitoringOpen ? 'is-open' : '' }} {{ $parentVisible('MONITORING') ? '' : 'parent-hidden' }}" data-sidebar-group="monitoring">
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $monitoringOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">MONITORING</span></button>

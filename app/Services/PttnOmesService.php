@@ -75,6 +75,46 @@ class PttnOmesService
             ->all();
     }
 
+    public function mappingForLotProcess(string $noLot, string $noSrp, int $sequenceNo, string $processCode): ?array
+    {
+        $mapping = collect($this->mappingsForLot($noLot, $noSrp))
+            ->first(fn (array $item): bool => (int) ($item['sequence_no'] ?? 0) === $sequenceNo
+                && (string) ($item['process_code'] ?? '') === trim($processCode));
+
+        return $mapping ?: null;
+    }
+
+    public function mappingForLotSequence(string $noLot, string $noSrp, int $sequenceNo): ?array
+    {
+        $mapping = collect($this->mappingsForLot($noLot, $noSrp))
+            ->first(fn (array $item): bool => (int) ($item['sequence_no'] ?? 0) === $sequenceNo);
+
+        return $mapping ?: null;
+    }
+
+    public function operatorIsCompetent(string $nik, string $processCode): bool
+    {
+        $nik = trim($nik);
+        $processCode = strtolower(trim($processCode));
+        if ($nik === '' || $processCode === '' || ! DB::getSchemaBuilder()->hasTable('tblkaryawan')) {
+            return false;
+        }
+
+        $employee = DB::table('tblkaryawan')->where('nik', $nik)->first();
+        if (! $employee) {
+            return false;
+        }
+
+        foreach (get_object_vars($employee) as $key => $value) {
+            if (str_starts_with(strtolower((string) $key), 'class_')
+                && strtolower(trim((string) $value)) === $processCode) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function relationIdForMapping(string $noLot, array $mapping): ?int
     {
         $id = DB::table('tbl_lot_pttn_process')

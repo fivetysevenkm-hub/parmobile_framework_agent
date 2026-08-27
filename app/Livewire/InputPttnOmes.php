@@ -8,6 +8,10 @@ use Livewire\Component;
 class InputPttnOmes extends Component
 {
     public string $noLot = '';
+    public int $sequenceNo = 0;
+    public bool $contextLocked = false;
+    public bool $accessDenied = false;
+    public string $accessMessage = '';
     public array $lotContext = [];
     public array $mappings = [];
     public string $selectedMappingIndex = '';
@@ -27,15 +31,24 @@ class InputPttnOmes extends Component
     public string $autoSaveStatus = '';
     public bool $cameraHint = true;
 
-    public function mount(): void
+    public function mount(?string $noLot = null, ?int $sequenceNo = null): void
     {
         $this->currentUser = $this->sessionUser();
         $this->pic1 = $this->currentUser;
+        $this->noLot = trim((string) ($noLot ?? ''));
+        $this->sequenceNo = (int) ($sequenceNo ?? 0);
+        $this->contextLocked = $this->noLot !== '' && $this->sequenceNo > 0;
+
+        if ($this->contextLocked && $this->noLot !== '') {
+            $this->loadLot(app(PttnOmesService::class));
+        }
     }
 
     public function loadLot(PttnOmesService $service): void
     {
         $this->resetValidation();
+        $this->accessDenied = false;
+        $this->accessMessage = '';
         $this->noLot = trim($this->noLot);
         $this->doubleCheckMode = false;
         $this->pic2 = '';
@@ -64,7 +77,20 @@ class InputPttnOmes extends Component
         $this->lotPic1Name = (string) ($service->lotPic1($this->noLot) ?? '');
         $this->pic1 = $this->lotPic1Name !== '' ? $this->lotPic1Name : $this->currentUser;
         $this->updateAccessFlags();
-        $this->selectedMappingIndex = '0';
+
+        if ($this->contextLocked) {
+            $target = $service->mappingForLotSequence($this->noLot, (string) ($context['no_srp'] ?? ''), $this->sequenceNo);
+            if (! $target) {
+                $this->accessDenied = true;
+                $this->accessMessage = 'Proses dari Gemba tidak memiliki PTTN yang terpasang untuk sequence ini.';
+                $this->clearPttnData(false);
+                return;
+            }
+            $this->selectedMappingIndex = (string) array_search($target, $this->mappings, true);
+        } else {
+            $this->selectedMappingIndex = '0';
+        }
+
         $this->selectMapping($service);
     }
 
@@ -79,6 +105,21 @@ class InputPttnOmes extends Component
             return;
         }
         $mapping = $this->mappings[(int) $this->selectedMappingIndex];
+        if ($this->contextLocked && (int) ($mapping['sequence_no'] ?? 0) !== $this->sequenceNo) {
+            $this->accessDenied = true;
+            $this->accessMessage = 'PTTN dikunci pada sequence proses yang dipilih dari Gemba.';
+            $this->clearPttnData(false);
+            return;
+        }
+        if (! $service->operatorIsCompetent($this->sessionNik(), (string) ($mapping['process_code'] ?? ''))) {
+            $this->accessDenied = true;
+            $this->accessMessage = 'Akses ditolak. Operator OMES yang login tidak memiliki kompetensi pada proses PTTN ini.';
+            $this->clearPttnData(false);
+            return;
+        }
+
+        $this->accessDenied = false;
+        $this->accessMessage = '';
         $this->selectedMappingData = $mapping;
         $header = $service->patternHeader((string) $mapping['pattern_code']);
         if (! $header) {
@@ -260,6 +301,10 @@ class InputPttnOmes extends Component
     public function clearForm(): void
     {
         $this->noLot = '';
+        $this->sequenceNo = 0;
+        $this->contextLocked = false;
+        $this->accessDenied = false;
+        $this->accessMessage = '';
         $this->clearLoadedData();
         $this->resetValidation();
         session()->forget('success');
@@ -305,9 +350,9 @@ class InputPttnOmes extends Component
         $this->canDoubleCheck = $this->lotPic1Name !== '' && ! $this->sameIdentity($this->lotPic1Name, $this->currentUser);
     }
 
-    private function clearLoadedData(bool $clearLot = true): void
+    private function clearPttnData(bool $clearLotContext = true): void
     {
-        if ($clearLot) {
+        if ($clearLotContext) {
             $this->lotContext = [];
         }
         $this->mappings = [];
@@ -317,6 +362,11 @@ class InputPttnOmes extends Component
         $this->rows = [];
         $this->currentStepNo = 1;
         $this->totalSteps = 0;
+    }
+
+    private function clearLoadedData(bool $clearLot = true): void
+    {
+        $this->clearPttnData($clearLot);
         $this->lotPic1Name = '';
         $this->pic1 = $this->currentUser;
         $this->pic2 = '';
@@ -329,6 +379,11 @@ class InputPttnOmes extends Component
     private function sessionUser(): string
     {
         return trim((string) (session('username') ?: auth()->user()?->username ?: auth()->id() ?: ''));
+    }
+
+    private function sessionNik(): string
+    {
+        return trim((string) (session('nik') ?: session('id_user') ?: auth()->user()?->id_user ?: ''));
     }
 
     private function sameIdentity(string $left, string $right): bool
