@@ -16,6 +16,12 @@ return [
         'standard' => [
             'token' => env('TELEGRAM_BOT_TOKEN'),
         ],
+        'akakami' => [
+            'token' => env('TELEGRAM_BOT_TOKEN_AKAKAMI'),
+        ],
+        'abnormal_report_mtc' => [
+            'token' => env('TELEGRAM_BOT_TOKEN_ABNORMAL_REPORT_MTC'),
+        ],
         'rank_a' => [
             'token' => env('TELEGRAM_BOT_TOKEN_RANK_A'),
         ],

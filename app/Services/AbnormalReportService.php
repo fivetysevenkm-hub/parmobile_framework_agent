@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 class AbnormalReportService
@@ -145,6 +146,40 @@ class AbnormalReportService
             ])
             ->map(fn ($row) => (array) $row)
             ->all();
+    }
+
+    public function createFromGemba(array $data): array
+    {
+        if (! Schema::hasTable('tblabnreport')) {
+            throw new RuntimeException('Tabel Abnormal Report belum tersedia.');
+        }
+
+        $noAbn = trim((string) ($data['noabn'] ?? ''));
+        if ($noAbn === '') {
+            $noAbn = 'ABN'.now('Asia/Jakarta')->format('YmdHisv');
+        }
+
+        $payload = [
+            'noabn' => $noAbn,
+            'tgl_problem' => (string) ($data['tgl_problem'] ?? now('Asia/Jakarta')->format('Y-m-d H:i:s')),
+            'category' => trim((string) ($data['category'] ?? '')),
+            'area' => trim((string) ($data['area'] ?? '')),
+            'nm_object' => trim((string) ($data['nm_object'] ?? '')),
+            'found_by' => trim((string) ($data['found_by'] ?? '')),
+            'ref_lot' => trim((string) ($data['ref_lot'] ?? '')),
+            'detail_problem' => trim((string) ($data['detail_problem'] ?? '')),
+            'analisa' => '',
+            'correction' => '',
+            'corrective' => '',
+            'pic_handler' => '',
+            'pic_dept' => '',
+            'status' => 'open',
+        ];
+        $payload = array_filter($payload, fn ($value, $key): bool => Schema::hasColumn('tblabnreport', $key), ARRAY_FILTER_USE_BOTH);
+
+        DB::table('tblabnreport')->insert($payload);
+
+        return $this->detail($noAbn) ?? $payload + ['noabn' => $noAbn, 'status' => 'open'];
     }
 
     public function commit(array $data, array $approverNiks, string $handlerId): array

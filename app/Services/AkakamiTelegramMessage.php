@@ -46,4 +46,29 @@ class AkakamiTelegramMessage
 
         return $message;
     }
+
+    public function formatGemba(array $detail, ?string $reportedAt = null): string
+    {
+        $value = static fn ($item): string => htmlspecialchars(trim((string) ($item ?? '-')), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $date = $reportedAt !== null && $reportedAt !== ''
+            ? $reportedAt
+            : now('Asia/Jakarta')->format('Y-m-d H:i:s');
+
+        return "📌 NOTIFIKASI AKAKAMI\n"
+            ."--------------------------------------\n\n"
+            .'No FLPP : '.$value($detail['noflpp'] ?? $detail['no_flpp'] ?? '-')."\n"
+            .'Tgl: '.$date."\n"
+            .'Area: '.$value($detail['area'] ?? $detail['nm_sequence'] ?? $detail['id_depts'] ?? '-')."\n"
+            .'No Lot: '.$value($detail['no_lots'] ?? '-')."\n"
+            .'Nama Part: '.$value($detail['nmpart'] ?? $detail['nm_part'] ?? '-')."\n"
+            .'Tanggal Pelaporan: '.$date."\n"
+            .'Jumlah Produk: '.$value($detail['qty_problem'] ?? $detail['qty'] ?? '-')."\n"
+            .'PIC Pelapor: '.$value($detail['pic_name'] ?? $detail['pic'] ?? '-')."\n"
+            .'Deskripsi Masalah: '.$value($detail['deskripsi_problem'] ?? '-')."\n\n"
+            ."-------------------------------------\n\n"
+            ."⚠️ Mohon QA/QC Dept untuk segera memverifikasi dan menindaklanjuti, Lakukan Genba ke Lapangan. Terima kasih atas perhatiannya.\n"
+            ."Pastikan data Laporan FLPP (AKAKAMI) pada system PAR dilengkapi.\n"
+            ."Jika Ditemukan Abnormal, Lakukan STOP-CALL-WAIT.\n"
+            ."-------------------\n\n";
+    }
 }

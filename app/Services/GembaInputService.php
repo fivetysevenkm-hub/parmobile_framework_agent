@@ -1,0 +1,717 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
+
+class GembaInputService
+{
+    public function __construct(private readonly LotVerifikatorService $lotVerifikator)
+    {
+    }
+
+    public function lotContext(string $noLot): ?array
+    {
+        if (! Schema::hasTable('tbllotdaily') || ! Schema::hasTable('tblsrp')) {
+            return null;
+        }
+
+        $query = DB::table('tbllotdaily as lot')
+            ->leftJoin('tblsrp as srp', 'lot.no_srps', '=', 'srp.no_srp')
+            ->where('lot.no_lot', trim($noLot));
+
+        if (Schema::hasTable('tblpart')) {
+            $query->leftJoin('tblpart as part', 'srp.no_parts', '=', 'part.no_part');
+        }
+        if (Schema::hasTable('tblcustomer')) {
+            $query->leftJoin('tblcustomer as customer', 'srp.no_customers', '=', 'customer.no_customer');
+        }
+        if (Schema::hasTable('tblproses')) {
+            $query->leftJoin('tblproses as proses', 'srp.no_process', '=', 'proses.no_proses');
+        }
+
+        $columns = [
+            'lot.no_lot',
+            'lot.no_lot_cust',
+            'lot.no_srps as no_srp',
+            'lot.no_sj_cust',
+            'lot.qty',
+            'srp.id_routing',
+        ];
+        if (Schema::hasTable('tblpart')) {
+            $columns[] = 'part.no_brg_asli as no_part';
+            $columns[] = 'part.nm_part';
+        }
+        if (Schema::hasTable('tblcustomer')) {
+            $columns[] = 'customer.nm_customer as customer';
+        }
+        if (Schema::hasTable('tblproses')) {
+            $columns[] = 'proses.proses as proses';
+        }
+
+        $row = $query->first($columns);
+        if (! $row) {
+            return null;
+        }
+
+        return [
+            'no_lot' => (string) ($row->no_lot ?? $noLot),
+            'no_srp' => (string) ($row->no_srp ?? ''),
+            'no_part' => (string) ($row->no_part ?? ''),
+            'nm_part' => (string) ($row->nm_part ?? ''),
+            'no_sj_cust' => (string) ($row->no_sj_cust ?? ''),
+            'no_lot_cust' => (string) ($row->no_lot_cust ?? ''),
+            'qty' => (string) ($row->qty ?? ''),
+            'customer' => (string) ($row->customer ?? ''),
+            'proses' => (string) ($row->proses ?? ''),
+            'id_routing' => (string) ($row->id_routing ?? ''),
+        ];
+    }
+
+    public function processContext(string $noLot, int $sequenceNo): ?array
+    {
+        $result = $this->lotVerifikator->verify($noLot);
+        if (! ($result['ok'] ?? false)) {
+            return null;
+        }
+
+        foreach (($result['processes'] ?? []) as $process) {
+            if ((int) ($process['sequence_no'] ?? 0) === $sequenceNo) {
+                return [
+                    'no_lot' => (string) $result['no_lot'],
+                    'no_srp' => (string) $result['no_srp'],
+                    'id_routing' => (string) $result['id_routing'],
+                    'process' => $process,
+                    'next_process' => (string) ($result['next_process'] ?? ''),
+                    'finished' => (bool) ($result['finished'] ?? false),
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    public function currentState(string $noLot, int $sequenceNo): array
+    {
+        $table = $this->processTable($sequenceNo);
+        if (! Schema::hasTable($table)) {
+            return $this->emptyState();
+        }
+
+        $row = DB::table($table)->where('no_lot', $noLot)->orderByDesc('no_lot')->first();
+        if (! $row) {
+            return $this->emptyState();
+        }
+
+        return [
+            'start_time' => $this->value($row, 'start_time'),
+            'finish_time' => $this->value($row, 'finish_time'),
+            'duration' => $this->value($row, 'duration'),
+            'tray_no' => $this->value($row, 'tray_no'),
+            'tray_nokecil' => $this->value($row, 'tray_nokecil'),
+            'no_mesin' => $this->value($row, 'no_mesin'),
+            'pic_01' => $this->value($row, 'pic_01'),
+            'pic_02' => $this->value($row, 'pic_02'),
+            'pic_03' => $this->value($row, 'pic_03'),
+            'pic_04' => $this->value($row, 'pic_04'),
+            'akakami' => $this->value($row, 'akakami'),
+            'ojt' => $this->value($row, 'ojt'),
+            'hold' => $this->value($row, 'hold'),
+            'finish' => $this->value($row, 'finish'),
+        ];
+    }
+
+    public function operators(string $noLot, int $sequenceNo): array
+    {
+        $state = $this->currentState($noLot, $sequenceNo);
+        $niks = [];
+        for ($slot = 1; $slot <= (int) config('gemba.max_operator_slots', 4); $slot++) {
+            $nik = trim((string) ($state['pic_0'.$slot] ?? ''));
+            if ($nik !== '') {
+                $niks[] = $nik;
+            }
+        }
+
+        if ($niks === [] || ! Schema::hasTable('tblkaryawan')) {
+            return [];
+        }
+
+        $employees = DB::table('tblkaryawan')->whereIn('nik', $niks)->get(['nik', 'nama_kary', 'ojt_a']);
+        $byNik = [];
+        foreach ($employees as $employee) {
+            $byNik[(string) $employee->nik] = [
+                'nik' => (string) $employee->nik,
+                'name' => (string) ($employee->nama_kary ?? ''),
+                'ojt' => strtolower(trim((string) ($employee->ojt_a ?? ''))),
+            ];
+        }
+
+        $operators = [];
+        foreach ($niks as $nik) {
+            $operators[] = $byNik[$nik] ?? ['nik' => $nik, 'name' => $nik, 'ojt' => ''];
+        }
+
+        return $operators;
+    }
+
+    public function findOperator(string $nik, array $process): ?array
+    {
+        $nik = trim($nik);
+        if ($nik === '' || ! Schema::hasTable('tblkaryawan')) {
+            return null;
+        }
+
+        $columns = ['nik', 'nama_kary', 'ojt_a'];
+        for ($index = 1; $index <= 39; $index++) {
+            $column = 'class_'.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+            if (Schema::hasColumn('tblkaryawan', $column)) {
+                $columns[] = $column;
+            }
+        }
+
+        $employee = DB::table('tblkaryawan')->where('nik', $nik)->first($columns);
+        if (! $employee) {
+            return null;
+        }
+
+        $skills = [];
+        foreach (get_object_vars($employee) as $key => $value) {
+            if (str_starts_with(strtolower((string) $key), 'class_') && trim((string) $value) !== '') {
+                $skills[] = strtolower(trim((string) $value));
+            }
+        }
+
+        $processCode = strtolower(trim((string) ($process['id_seq'] ?? '')));
+        if ($processCode === '' || ! in_array($processCode, $skills, true)) {
+            return [
+                'allowed' => false,
+                'nik' => (string) $employee->nik,
+                'name' => (string) ($employee->nama_kary ?? ''),
+                'ojt' => strtolower(trim((string) ($employee->ojt_a ?? ''))),
+            ];
+        }
+
+        return [
+            'allowed' => true,
+            'nik' => (string) $employee->nik,
+            'name' => (string) ($employee->nama_kary ?? ''),
+            'ojt' => strtolower(trim((string) ($employee->ojt_a ?? ''))),
+        ];
+    }
+
+    public function searchOperators(string $keyword, array $process): array
+    {
+        if (! Schema::hasTable('tblkaryawan')) {
+            return [];
+        }
+
+        $columns = ['nik', 'nama_kary', 'ojt_a'];
+        for ($index = 1; $index <= 39; $index++) {
+            $column = 'class_'.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+            if (Schema::hasColumn('tblkaryawan', $column)) {
+                $columns[] = $column;
+            }
+        }
+
+        $keyword = trim($keyword);
+        $rows = DB::table('tblkaryawan')
+            ->when($keyword !== '', function (Builder $query) use ($keyword): void {
+                $query->where(function (Builder $nested) use ($keyword): void {
+                    $nested->where('nik', 'like', '%'.$keyword.'%')
+                        ->orWhere('nama_kary', 'like', '%'.$keyword.'%');
+                });
+            })
+            ->orderBy('nama_kary')
+            ->limit(50)
+            ->get($columns);
+
+        $results = [];
+        foreach ($rows as $employee) {
+            $skills = [];
+            foreach (get_object_vars($employee) as $key => $value) {
+                if (str_starts_with(strtolower((string) $key), 'class_') && trim((string) $value) !== '') {
+                    $skills[] = strtolower(trim((string) $value));
+                }
+            }
+            $processCode = strtolower(trim((string) ($process['id_seq'] ?? '')));
+            $allowed = $processCode !== '' && in_array($processCode, $skills, true);
+            $results[] = [
+                'nik' => (string) ($employee->nik ?? ''),
+                'name' => (string) ($employee->nama_kary ?? ''),
+                'ojt' => strtolower(trim((string) ($employee->ojt_a ?? ''))),
+                'allowed' => $allowed,
+                'reason' => $allowed ? '' : 'Skill tidak sesuai dengan process code aktif.',
+            ];
+        }
+
+        return $results;
+    }
+
+    public function machines(): array
+    {
+        if (! Schema::hasTable('tblmesin')) {
+            return [];
+        }
+
+        return DB::table('tblmesin')
+            ->orderBy('mesin')
+            ->get(['no_mesin', 'mesin'])
+            ->map(fn ($row): array => [
+                'no_mesin' => (string) ($row->no_mesin ?? ''),
+                'mesin' => (string) ($row->mesin ?? ''),
+            ])
+            ->all();
+    }
+
+    public function requiresMachine(array $process): bool
+    {
+        $haystack = strtolower(trim((string) ($process['name'] ?? '').' '.($process['id_seq'] ?? '')));
+        foreach ((array) config('gemba.machine_process_keywords', []) as $keyword) {
+            if ($keyword !== '' && str_contains($haystack, strtolower((string) $keyword))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function problemCategories(): array
+    {
+        if (! Schema::hasTable('tblproblem')) {
+            return [];
+        }
+
+        return DB::table('tblproblem')
+            ->orderBy('nmproblem')
+            ->get(['idproblem', 'nmproblem'])
+            ->map(fn ($row): array => [
+                'idproblem' => (string) ($row->idproblem ?? ''),
+                'nmproblem' => (string) ($row->nmproblem ?? ''),
+            ])
+            ->all();
+    }
+
+    public function problemRanks(): array
+    {
+        if (! Schema::hasTable('tblrankproblem')) {
+            return [];
+        }
+
+        return DB::table('tblrankproblem')
+            ->orderBy('nmrankproblem')
+            ->get(['idrankproblem', 'nmrankproblem'])
+            ->map(fn ($row): array => [
+                'idrankproblem' => (string) ($row->idrankproblem ?? ''),
+                'nmrankproblem' => (string) ($row->nmrankproblem ?? ''),
+            ])
+            ->all();
+    }
+
+    public function submitAkakami(array $context, array $data): array
+    {
+        $noLot = trim((string) ($context['no_lot'] ?? ''));
+        $sequenceNo = (int) ($context['process']['sequence_no'] ?? 0);
+        $process = $context['process'] ?? [];
+        $table = $this->processTable($sequenceNo);
+        $noReg = trim((string) ($data['no_reg'] ?? ''));
+        $category = trim((string) ($data['category'] ?? ''));
+        $description = trim((string) ($data['description'] ?? ''));
+        $reporterNik = trim((string) ($data['reporter_nik'] ?? ''));
+
+        if ($noLot === '' || $noReg === '' || $category === '' || $description === '' || $reporterNik === '') {
+            return ['ok' => false, 'message' => 'No Reg, kategori, pelapor, dan isi masalah wajib diisi.'];
+        }
+        if (! Schema::hasTable('tblakakami')) {
+            return ['ok' => false, 'message' => 'Tabel Akakami belum tersedia.'];
+        }
+        if (! Schema::hasTable('tblproblem')) {
+            return ['ok' => false, 'message' => 'Master kategori masalah tblproblem belum tersedia.'];
+        }
+        if (! DB::table('tblproblem')->where('idproblem', $category)->exists()) {
+            return ['ok' => false, 'message' => 'Kategori masalah yang dipilih tidak valid.'];
+        }
+        $rank = trim((string) ($data['rank'] ?? ''));
+        if ($rank === '') {
+            return ['ok' => false, 'message' => 'Rank masalah wajib dipilih.'];
+        }
+        if (! Schema::hasTable('tblrankproblem') || ! DB::table('tblrankproblem')->where('idrankproblem', $rank)->exists()) {
+            return ['ok' => false, 'message' => 'Rank masalah yang dipilih tidak valid.'];
+        }
+        if (! Schema::hasTable($table)) {
+            return ['ok' => false, 'message' => "Tabel proses {$table} tidak tersedia."];
+        }
+        if (DB::table('tblakakami')->where('noflpp', $noReg)->exists()) {
+            return ['ok' => false, 'message' => 'No Reg Akakami tersebut sudah digunakan.'];
+        }
+
+        $now = now('Asia/Jakarta')->format('Y-m-d H:i:s');
+        $lot = $this->lotContext($noLot) ?? [];
+        $payload = [
+            'noflpp' => $noReg,
+            'no_lots' => $noLot,
+            'tgl_problem' => $now,
+            'idproblems' => $category,
+            'qty_problem' => trim((string) ($data['qty'] ?? ($lot['qty'] ?? ''))),
+            'id_depts' => (string) ($process['id_seq'] ?? ''),
+            'nm_tabel' => 'tbl_seq_'.str_pad((string) $sequenceNo, 2, '0', STR_PAD_LEFT),
+            'deskripsi_problem' => $description,
+            'rank' => trim((string) ($data['rank'] ?? '')),
+            'temp_action' => '',
+            'fish_bone' => '',
+            'analisa' => '',
+            'corrective_act' => '',
+            'judgment_level' => '',
+            'rank_a' => '',
+            'pic_handler' => '',
+            'pic_dept' => '',
+            'pic' => $reporterNik,
+            'tgl_approved' => null,
+            'status_flpp' => 'hold',
+        ];
+        $payload = $this->onlyExistingColumns('tblakakami', $payload);
+
+        DB::transaction(function () use ($payload, $noReg, $table, $noLot, $sequenceNo, $now): void {
+            DB::table('tblakakami')->insert($payload);
+            $statusPayload = $this->onlyExistingColumns($table, ['hold' => 'yes', 'akakami' => 'yes']);
+            DB::table($table)->where('no_lot', $noLot)->update($statusPayload);
+            if (Schema::hasTable('tbl_seq_all')) {
+                DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update([
+                    'hold' => 'yes',
+                    'akakami' => 'yes',
+                    'updated_at' => $now,
+                ]);
+            }
+        });
+
+        return [
+            'ok' => true,
+            'message' => 'Data Akakami berhasil dilaporkan dan proses diubah ke HOLD.',
+            'no_reg' => $noReg,
+            'payload' => $payload,
+        ];
+    }
+
+    public function start(array $context, array $operators, string $trayNo, string $traySmall, ?string $machineNo): array
+    {
+        $noLot = trim((string) ($context['no_lot'] ?? ''));
+        $sequenceNo = (int) ($context['process']['sequence_no'] ?? 0);
+        $canonical = $this->processContext($noLot, $sequenceNo);
+        if (! $canonical || ! ($canonical['process']['clickable'] ?? false)) {
+            return ['ok' => false, 'message' => 'Proses aktif tidak valid atau sudah berubah. Muat ulang No Lot terlebih dahulu.'];
+        }
+        $context = $canonical;
+        $process = $context['process'] ?? [];
+        $noSrp = trim((string) ($context['no_srp'] ?? ''));
+        $idRouting = trim((string) ($context['id_routing'] ?? ''));
+        $idSeq = trim((string) ($process['id_seq'] ?? ''));
+        $name = trim((string) ($process['name'] ?? ''));
+
+        if ($noLot === '' || $sequenceNo < 1 || $idSeq === '') {
+            return ['ok' => false, 'message' => 'Konteks proses belum lengkap.'];
+        }
+        if ($operators === []) {
+            return ['ok' => false, 'message' => 'Input minimal satu operator terlebih dahulu.'];
+        }
+        $existingState = $this->currentState($noLot, $sequenceNo);
+        if ($existingState['start_time'] !== '' && strtolower($existingState['finish']) !== 'yes') {
+            return ['ok' => false, 'message' => 'Proses ini sudah berjalan dan belum finish.'];
+        }
+        if (strtolower($existingState['finish']) === 'yes') {
+            return ['ok' => false, 'message' => 'Proses ini sudah selesai.'];
+        }
+        if (trim($trayNo) === '') {
+            return ['ok' => false, 'message' => 'No Tray wajib diisi.'];
+        }
+        if ($this->requiresMachine($process) && trim((string) $machineNo) === '') {
+            return ['ok' => false, 'message' => 'Mesin wajib dipilih untuk proses ini.'];
+        }
+
+        $processTable = $this->processTable($sequenceNo);
+        if (! Schema::hasTable($processTable)) {
+            return ['ok' => false, 'message' => "Tabel proses {$processTable} tidak tersedia."];
+        }
+
+        $sequenceCode = 'seq_'.str_pad((string) $sequenceNo, 2, '0', STR_PAD_LEFT);
+        $validatorResult = $this->validateAndAdvanceValidator($noLot, $noSrp, $idRouting, $sequenceCode);
+        if (! ($validatorResult['ok'] ?? false)) {
+            return $validatorResult;
+        }
+
+        $now = now()->format('Y-m-d H:i:s');
+        $ojt = collect($operators)->contains(fn (array $operator): bool => strtolower((string) ($operator['ojt'] ?? '')) === 'yes') ? 'yes' : 'no';
+        $operatorNiks = [];
+        $operatorNames = [];
+        for ($slot = 0; $slot < (int) config('gemba.max_operator_slots', 4); $slot++) {
+            $operatorNiks[$slot] = (string) ($operators[$slot]['nik'] ?? '');
+            $operatorNames[$slot] = (string) ($operators[$slot]['name'] ?? '');
+        }
+
+        DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $sequenceCode, $now, $trayNo, $traySmall, $machineNo, $ojt, $operatorNiks, $context, $sequenceNo): void {
+            $processPayload = $this->onlyExistingColumns($processTable, [
+                'no_lot' => $noLot,
+                'no_srp' => $noSrp,
+                'sequence' => $idSeq,
+                'start_time' => $now,
+                'finish_time' => null,
+                'tray_no' => $trayNo,
+                'tray_nokecil' => $traySmall !== '' ? $traySmall : null,
+                'duration' => 0,
+                'pic_01' => $operatorNiks[0] !== '' ? $operatorNiks[0] : null,
+                'pic_02' => $operatorNiks[1] !== '' ? $operatorNiks[1] : null,
+                'pic_03' => $operatorNiks[2] !== '' ? $operatorNiks[2] : null,
+                'pic_04' => $operatorNiks[3] !== '' ? $operatorNiks[3] : null,
+                'akakami' => 'no',
+                'ojt' => $ojt,
+                'hold' => 'no',
+                'finish' => 'no',
+                'no_mesin' => $machineNo !== '' ? $machineNo : null,
+            ]);
+            DB::table($processTable)->updateOrInsert(['no_lot' => $noLot], $processPayload);
+
+            if (Schema::hasTable('tbl_seq_all')) {
+                $lot = $this->lotContext($noLot) ?? [];
+                $allPayload = $this->onlyExistingColumns('tbl_seq_all', [
+                    'no_lot' => $noLot,
+                    'no_srp' => $noSrp,
+                    'seq' => $sequenceNo,
+                    'id_seq' => $idSeq,
+                    'nm_seq' => $name,
+                    'id_routing' => (string) ($context['id_routing'] ?? ''),
+                    'start_time' => $now,
+                    'finish_time' => null,
+                    'duration' => 0,
+                    'tray_no' => $trayNo,
+                    'tray_nokecil' => $traySmall !== '' ? $traySmall : null,
+                    'pic_01' => $operatorNiks[0] !== '' ? $operatorNiks[0] : null,
+                    'pic_02' => $operatorNiks[1] !== '' ? $operatorNiks[1] : null,
+                    'pic_03' => $operatorNiks[2] !== '' ? $operatorNiks[2] : null,
+                    'pic_04' => $operatorNiks[3] !== '' ? $operatorNiks[3] : null,
+                    'akakami' => 'no',
+                    'ojt' => $ojt,
+                    'hold' => 'no',
+                    'finish' => 'no',
+                    'no_mesin' => $machineNo !== '' ? $machineNo : null,
+                    'no_part' => $lot['no_part'] ?? null,
+                    'nm_part' => $lot['nm_part'] ?? null,
+                    'customer' => $lot['customer'] ?? null,
+                    'no_sj_cust' => $lot['no_sj_cust'] ?? null,
+                    'no_lot_cust' => $lot['no_lot_cust'] ?? null,
+                    'qty' => $lot['qty'] ?? null,
+                    'updated_at' => $now,
+                ]);
+                DB::table('tbl_seq_all')->updateOrInsert(['no_lot' => $noLot, 'seq' => $sequenceNo], $allPayload);
+            }
+        });
+
+        return ['ok' => true, 'message' => 'Proses berhasil di-start.', 'start_time' => $now];
+    }
+
+    public function finish(array $context): array
+    {
+        $noLot = trim((string) ($context['no_lot'] ?? ''));
+        $sequenceNo = (int) ($context['process']['sequence_no'] ?? 0);
+        $canonical = $this->processContext($noLot, $sequenceNo);
+        if (! $canonical) {
+            return ['ok' => false, 'message' => 'Konteks proses tidak valid. Muat ulang No Lot terlebih dahulu.'];
+        }
+        $context = $canonical;
+        $process = $context['process'] ?? [];
+        $table = $this->processTable($sequenceNo);
+        if ($noLot === '' || ! Schema::hasTable($table)) {
+            return ['ok' => false, 'message' => 'Data proses belum tersedia.'];
+        }
+
+        $state = $this->currentState($noLot, $sequenceNo);
+        if ($state['start_time'] === '') {
+            return ['ok' => false, 'message' => 'Proses belum di-start.'];
+        }
+        if (strtolower($state['finish']) === 'yes') {
+            return ['ok' => false, 'message' => 'Proses sudah selesai.'];
+        }
+        if (strtolower($state['hold']) === 'yes') {
+            return ['ok' => false, 'message' => 'Lot masih dalam status HOLD.'];
+        }
+
+        $finishTime = now();
+        $startTime = date_create($state['start_time']);
+        $duration = $startTime ? round(($finishTime->getTimestamp() - $startTime->getTimestamp()) / 60, 2) : 0;
+        $payload = $this->onlyExistingColumns($table, [
+            'finish_time' => $finishTime->format('Y-m-d H:i:s'),
+            'finish' => 'yes',
+            'duration' => $duration,
+        ]);
+        DB::table($table)->where('no_lot', $noLot)->update($payload);
+
+        if (Schema::hasTable('tbl_seq_all')) {
+            DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update($payload + ['updated_at' => $finishTime->format('Y-m-d H:i:s')]);
+        }
+
+        if (Schema::hasTable('tbl_validator')) {
+            DB::table('tbl_validator')->where('no_lot', $noLot)->update(['finish' => 'yes']);
+            $nextProcess = strtolower(trim((string) ($this->validatorValue(DB::table('tbl_validator')->where('no_lot', $noLot)->first(), 'next_process') ?? '')));
+            if ($nextProcess === 'fin' && Schema::hasTable('tbllotdaily') && Schema::hasColumn('tbllotdaily', 'delv')) {
+                DB::table('tbllotdaily')->where('no_lot', $noLot)->update(['delv' => 1]);
+            }
+        }
+
+        return ['ok' => true, 'message' => 'Proses berhasil di-finish.', 'finish_time' => $finishTime->format('Y-m-d H:i:s'), 'duration' => $duration];
+    }
+
+    public function hold(array $context): array
+    {
+        $noLot = trim((string) ($context['no_lot'] ?? ''));
+        $sequenceNo = (int) (($context['process']['sequence_no'] ?? 0));
+        $canonical = $this->processContext($noLot, $sequenceNo);
+        if (! $canonical) {
+            return ['ok' => false, 'message' => 'Konteks proses tidak valid. Muat ulang No Lot terlebih dahulu.'];
+        }
+        $context = $canonical;
+        $table = $this->processTable($sequenceNo);
+        if ($noLot === '' || ! Schema::hasTable($table)) {
+            return ['ok' => false, 'message' => 'Data proses belum tersedia.'];
+        }
+
+        $state = $this->currentState($noLot, $sequenceNo);
+        if ($state['start_time'] === '') {
+            return ['ok' => false, 'message' => 'Proses belum di-start.'];
+        }
+        DB::table($table)->where('no_lot', $noLot)->update($this->onlyExistingColumns($table, ['hold' => 'yes']));
+        if (Schema::hasTable('tbl_seq_all')) {
+            DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update(['hold' => 'yes', 'updated_at' => now()->format('Y-m-d H:i:s')]);
+        }
+
+        return ['ok' => true, 'message' => 'Lot berhasil diubah ke status HOLD.'];
+    }
+
+    private function validateAndAdvanceValidator(string $noLot, string $noSrp, string $idRouting, string $sequenceCode): array
+    {
+        if (! Schema::hasTable('tbl_validator')) {
+            return ['ok' => false, 'message' => 'Tabel validator tidak tersedia.'];
+        }
+
+        $validator = DB::table('tbl_validator')->where('no_lot', $noLot)->first();
+        $sequenceNo = (int) str_replace('seq_', '', strtolower($sequenceCode));
+        if (! $validator) {
+            if ($sequenceNo !== 1) {
+                return ['ok' => false, 'message' => 'Kamu sedang LOMPAT PROSES. Proses pertama harus dimulai dari sequence 1.'];
+            }
+            $next = $this->routingProcessAt($idRouting, 2);
+            DB::table('tbl_validator')->insert([
+                'no_lot' => $noLot,
+                'no_srp' => $noSrp,
+                'id_routing' => $idRouting,
+                'Current_seq_code' => $sequenceCode,
+                'next_seq_code' => $next ? 'seq_02' : 'seq_02',
+                'Curr_process' => $this->routingProcessAt($idRouting, 1) ?? '',
+                'next_process' => $next ?? 'FIN',
+                'current_seq_count' => 1,
+                'next_seq_count' => 2,
+                'total_seq_count' => $this->routingCount($idRouting),
+                'total_seq_remain' => max(0, $this->routingCount($idRouting) - 1),
+                'finish' => 'no',
+            ]);
+            return ['ok' => true];
+        }
+
+        $expected = strtolower(trim((string) $this->validatorValue($validator, 'next_seq_code')));
+        $finish = strtolower(trim((string) $this->validatorValue($validator, 'finish')));
+        if ($finish === 'no') {
+            return ['ok' => false, 'message' => 'Proses sebelumnya belum finish. Selesaikan proses aktif terlebih dahulu.'];
+        }
+        if ($expected !== strtolower($sequenceCode)) {
+            return ['ok' => false, 'message' => 'Kamu sedang LOMPAT PROSES. Pilih sequence aktif sesuai flow.'];
+        }
+
+        $nextNo = $sequenceNo + 1;
+        $next = $this->routingProcessAt($idRouting, $nextNo);
+        $total = $this->routingCount($idRouting);
+        DB::table('tbl_validator')->where('no_lot', $noLot)->update([
+            'Current_seq_code' => $sequenceCode,
+            'next_seq_code' => 'seq_'.str_pad((string) $nextNo, 2, '0', STR_PAD_LEFT),
+            'Curr_process' => $this->routingProcessAt($idRouting, $sequenceNo) ?? '',
+            'next_process' => $next ?? 'FIN',
+            'current_seq_count' => $sequenceNo,
+            'next_seq_count' => $nextNo,
+            'total_seq_count' => $total,
+            'total_seq_remain' => max(0, $total - $sequenceNo),
+            'finish' => 'no',
+        ]);
+
+        return ['ok' => true];
+    }
+
+    private function routingProcessAt(string $idRouting, int $sequenceNo): ?string
+    {
+        if (! Schema::hasTable('tblrouting') || $sequenceNo < 1 || $sequenceNo > LotVerifikatorService::MAX_SEQUENCE) {
+            return null;
+        }
+
+        $column = 'Seq_'.str_pad((string) $sequenceNo, 2, '0', STR_PAD_LEFT);
+        if (! Schema::hasColumn('tblrouting', $column)) {
+            return null;
+        }
+
+        return trim((string) (DB::table('tblrouting')->where('id_routing', $idRouting)->value($column) ?? '')) ?: null;
+    }
+
+    private function routingCount(string $idRouting): int
+    {
+        $count = 0;
+        for ($index = 1; $index <= LotVerifikatorService::MAX_SEQUENCE; $index++) {
+            if ($this->routingProcessAt($idRouting, $index) !== null) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    private function processTable(int $sequenceNo): string
+    {
+        return 'tbl_seq_'.str_pad((string) max(1, min(LotVerifikatorService::MAX_SEQUENCE, $sequenceNo)), 2, '0', STR_PAD_LEFT);
+    }
+
+    private function onlyExistingColumns(string $table, array $values): array
+    {
+        $result = [];
+        foreach ($values as $column => $value) {
+            if (Schema::hasColumn($table, $column)) {
+                $result[$column] = $value;
+            }
+        }
+        return $result;
+    }
+
+    private function value(?object $row, string $field): string
+    {
+        if (! $row) {
+            return '';
+        }
+        foreach (get_object_vars($row) as $key => $value) {
+            if (strtolower((string) $key) === strtolower($field)) {
+                return trim((string) ($value ?? ''));
+            }
+        }
+        return '';
+    }
+
+    private function validatorValue(?object $row, string $field): mixed
+    {
+        if (! $row) {
+            return null;
+        }
+        foreach (get_object_vars($row) as $key => $value) {
+            if (strtolower((string) $key) === strtolower($field)) {
+                return $value;
+            }
+        }
+        return null;
+    }
+
+    private function emptyState(): array
+    {
+        return array_fill_keys(['start_time', 'finish_time', 'duration', 'tray_no', 'tray_nokecil', 'no_mesin', 'pic_01', 'pic_02', 'pic_03', 'pic_04', 'akakami', 'ojt', 'hold', 'finish'], '');
+    }
+}

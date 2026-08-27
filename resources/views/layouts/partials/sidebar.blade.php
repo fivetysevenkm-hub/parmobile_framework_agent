@@ -7,6 +7,7 @@
     $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
+    $lotVerifikatorOpen = request()->routeIs('lot.verifikator', 'gemba.input');
     $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker', 'pttn.pairing.srp');
     $pttnOperatorOpen = request()->routeIs('pttn.omes.input');
     $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization', 'user-management.hide-menu');
@@ -92,6 +93,14 @@
             <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $documentProcessOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">DOCUMENT PROCESS</span></button>
             <div class="sidebar-group-items" {{ $documentProcessOpen || ! $parentVisible('DOCUMENT PROCESS') ? '' : 'hidden' }}>
                 {!! $menuLink('document-process-upload', 'document.process.upload', 'Upload WI Proses', '▱') !!}
+            </div>
+        </div>
+
+        <div class="sidebar-group {{ $lotVerifikatorOpen ? 'is-open' : '' }} {{ $parentVisible('INPUT LOT') ? '' : 'parent-hidden' }}" data-sidebar-group="input-lot">
+            <button type="button" class="sidebar-group-toggle" aria-expanded="{{ $lotVerifikatorOpen ? 'true' : 'false' }}"><span class="group-chevron">›</span><span class="nav-label">INPUT LOT</span></button>
+            <div class="sidebar-group-items" {{ $lotVerifikatorOpen || ! $parentVisible('INPUT LOT') ? '' : 'hidden' }}>
+                {!! $menuLink('lot-verifikator', 'lot.verifikator', 'Lot Verifikator', '▣') !!}
+                {!! $menuLink('gemba-input', 'gemba.input', 'Gemba Input', '⚙') !!}
             </div>
         </div>
 

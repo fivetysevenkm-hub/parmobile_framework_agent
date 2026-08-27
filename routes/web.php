@@ -49,6 +49,8 @@ use App\Livewire\Home;
 use App\Livewire\ChangePassword;
 use App\Livewire\MenuAuthorization;
 use App\Livewire\HideMenu;
+use App\Livewire\LotVerifikator;
+use App\Livewire\GembaInput;
 use App\Livewire\CustomTheme;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureMenuAccess;
@@ -94,6 +96,9 @@ Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class
     Route::get('/routing/pairing-routing-srp', PairingRoutingSrp::class)->name('routing.pairing.srp');
     Route::get('/cycle-time/adjust', AdjustCycleTime::class)->name('cycle-time.adjust');
     Route::get('/document-process/upload-wi', UploadWiProses::class)->name('document.process.upload');
+    Route::get('/input-lot/lot-verifikator', LotVerifikator::class)->name('lot.verifikator');
+    Route::get('/input-lot/gemba-input', GembaInput::class)->name('gemba.input');
+    Route::get('/input-lot/gemba-input/{noLot}/{sequenceNo}', GembaInput::class)->name('gemba.input.process');
     Route::get('/user-management/role-akses', RoleAkses::class)->name('user-management.role-akses');
     Route::get('/user-management/user-control', UserControl::class)->name('user-management.user-control');
     Route::get('/user-management/qr-code', UserQrCode::class)->name('user-management.qr-code');
