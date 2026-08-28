@@ -4,10 +4,10 @@
 
 <div class="app-shell akakami-dashboard" wire:poll.10m="loadData">
     <style>
-        .akakami-dashboard .analytics-filter { display:flex; align-items:end; flex-wrap:wrap; gap:10px; margin-bottom:18px; padding:14px; background:#050708; border:1px solid var(--line); border-radius:10px; }
+        .akakami-dashboard .analytics-filter { display:flex; align-items:end; flex-wrap:wrap; gap:10px; margin-bottom:18px; padding:14px; background:var(--legacy_050708); border:1px solid var(--line); border-radius:10px; }
         .akakami-dashboard .analytics-filter > div { flex:1 1 180px; }
         .akakami-dashboard .analytics-filter label { display:block; margin-bottom:6px; color:var(--muted); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; }
-        .akakami-dashboard .analytics-filter select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:7px; background:#10171b; color:var(--cyan); color-scheme:dark; }
+        .akakami-dashboard .analytics-filter select { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:7px; background:var(--legacy_10171b); color:var(--cyan); color-scheme:dark; }
         .akakami-dashboard .analytics-filter .btn { min-width:120px; }
         .akakami-dashboard .summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
         .akakami-dashboard .summary-card { position:relative; overflow:hidden; padding:17px 18px; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
@@ -18,7 +18,7 @@
         .akakami-dashboard .chart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
         .akakami-dashboard .chart-panel { min-width:0; padding:16px; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
         .akakami-dashboard .chart-panel.wide { grid-column:1 / -1; }
-        .akakami-dashboard .chart-title { min-height:34px; margin:0 0 10px; color:#e5edf0; font-size:.72rem; letter-spacing:.08em; line-height:1.4; text-transform:uppercase; }
+        .akakami-dashboard .chart-title { min-height:34px; margin:0 0 10px; color:var(--legacy_e5edf0); font-size:.72rem; letter-spacing:.08em; line-height:1.4; text-transform:uppercase; }
         .akakami-dashboard .chart-title span { color:var(--cyan); }
         .akakami-dashboard .chart-box { position:relative; height:260px; }
         .akakami-dashboard .chart-panel.wide .chart-box { height:300px; }
@@ -88,10 +88,11 @@
 
     @script
     <script>
+        const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
         const akakamiInitialCharts = @js($chartData);
         const akakamiCharts = {};
-        const akakamiColors = ['#00e5ff', '#ff9f1c', '#ff5964', '#caff2e', '#a78bfa'];
-        const akakamiWideColors = ['#00e5ff', '#ff9f1c', '#ff5964', '#caff2e', '#a78bfa', '#2dd4bf', '#ff7aa2', '#66a3ff', '#fbbf24', '#fb7185'];
+        const akakamiColors = [1, 2, 3, 4, 5].map(index => cssVar(`--chart-${index}`));
+        const akakamiWideColors = [1, 2, 3, 4, 5, 7, 9, 6, 2, 3].map(index => cssVar(`--chart-${index}`));
 
         function akakamiOptions(indexAxis = 'y', wide = false) {
             return {
@@ -101,8 +102,8 @@
                 animation: { duration: 300 },
                 plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => ` ${Number(context.raw).toLocaleString('id-ID')} case/pcs` } } },
                 scales: {
-                    x: { beginAtZero: true, grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#91a0a6', font: { size: 10 }, callback: value => Number(value).toLocaleString('id-ID') } },
-                    y: { grid: { display: false }, ticks: { color: '#d1dade', font: { size: wide ? 10 : 9 }, autoSkip: false, maxTicksLimit: wide ? 20 : 8 } }
+                    x: { beginAtZero: true, grid: { color: cssVar('--chart-grid') }, ticks: { color: cssVar('--chart-label'), font: { size: 10 }, callback: value => Number(value).toLocaleString('id-ID') } },
+                    y: { grid: { display: false }, ticks: { color: cssVar('--text-table'), font: { size: wide ? 10 : 9 }, autoSkip: false, maxTicksLimit: wide ? 20 : 8 } }
                 },
                 elements: { bar: { borderRadius: 4, borderSkipped: false } }
             };

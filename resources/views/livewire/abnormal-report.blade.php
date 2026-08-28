@@ -10,7 +10,7 @@
         .abnormal-report-page .body { padding:18px; }
         .abnormal-report-page .tools { display:flex; align-items:end; justify-content:space-between; gap:10px; margin-bottom:14px; }
         .abnormal-report-page label { display:block; color:var(--muted); font-size:.68rem; letter-spacing:.07em; margin-bottom:6px; text-transform:uppercase; }
-        .abnormal-report-page .control { width:100%; background:#0d1418; border:1px solid var(--line); border-radius:7px; color:#f5f7f8; padding:10px 11px; outline:none; }
+        .abnormal-report-page .control { width:100%; background:var(--legacy_0d1418); border:1px solid var(--line); border-radius:7px; color:var(--legacy_f5f7f8); padding:10px 11px; outline:none; }
         .abnormal-report-page .control:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,.1); }
         .abnormal-report-page textarea.control { min-height:82px; resize:vertical; }
         .abnormal-report-page select.control { color-scheme:dark; }
@@ -18,22 +18,22 @@
         .abnormal-report-page .table-scroll { max-height:540px; border:1px solid var(--line); border-radius:8px; overflow:auto; -webkit-overflow-scrolling:touch; }
         .abnormal-report-page table { min-width:1050px; }
         .abnormal-report-page th, .abnormal-report-page td { padding:11px 10px; }
-        .abnormal-report-page td { color:#d9e0e3; vertical-align:top; }
+        .abnormal-report-page td { color:var(--legacy_d9e0e3); vertical-align:top; }
         .abnormal-report-page .action-cell { width:110px; min-width:110px; text-align:center; vertical-align:middle; }
         .abnormal-report-page .action-cell .btn { width:88px; min-height:32px; padding:7px 8px; font-size:.7rem; }
         .abnormal-report-page .pagination-wrap { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:12px; color:var(--muted); font-size:.72rem; }
         .abnormal-report-page .pagination { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; align-items:center; list-style:none; padding:0; margin:0; }
-        .abnormal-report-page .page-link, .abnormal-report-page .page-current, .abnormal-report-page .page-disabled { display:grid; min-width:32px; min-height:30px; place-items:center; padding:4px 8px; border:1px solid var(--line); border-radius:6px; color:#d9e0e3; font-size:.72rem; line-height:1; }
-        .abnormal-report-page .page-link { background:#182228; cursor:pointer; }
+        .abnormal-report-page .page-link, .abnormal-report-page .page-current, .abnormal-report-page .page-disabled { display:grid; min-width:32px; min-height:30px; place-items:center; padding:4px 8px; border:1px solid var(--line); border-radius:6px; color:var(--legacy_d9e0e3); font-size:.72rem; line-height:1; }
+        .abnormal-report-page .page-link { background:var(--legacy_182228); cursor:pointer; }
         .abnormal-report-page .page-link:hover { border-color:var(--cyan); color:var(--cyan); }
-        .abnormal-report-page .page-current { background:var(--cyan); color:#041014; border-color:var(--cyan); font-weight:700; }
+        .abnormal-report-page .page-current { background:var(--cyan); color:var(--legacy_041014); border-color:var(--cyan); font-weight:700; }
         .abnormal-report-page .page-disabled { opacity:.4; }
         .abnormal-report-page .empty { padding:36px 20px; color:var(--muted); text-align:center; }
-        .abnormal-report-page .banner { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:14px; margin-bottom:18px; border-radius:8px; background:linear-gradient(100deg,#0754bd,#00a6bf); }
+        .abnormal-report-page .banner { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:14px; margin-bottom:18px; border-radius:8px; background:linear-gradient(100deg,var(--legacy_0754bd),var(--legacy_00a6bf); }
         .abnormal-report-page .banner span { display:block; font-size:.62rem; opacity:.8; text-transform:uppercase; }
         .abnormal-report-page .banner strong { display:block; margin-top:4px; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .abnormal-report-page .columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-        .abnormal-report-page .section { padding:15px; border:1px solid var(--line); border-radius:8px; background:#111a1f; }
+        .abnormal-report-page .section { padding:15px; border:1px solid var(--line); border-radius:8px; background:var(--legacy_111a1f); }
         .abnormal-report-page .section h3 { margin:0 0 14px; color:var(--cyan); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
         .abnormal-report-page .field { margin-bottom:13px; }
         .abnormal-report-page .sequence { padding:13px; border:1px solid var(--line); border-radius:8px; }
@@ -41,13 +41,13 @@
         .abnormal-report-page .sequence-grid select { min-height:170px; }
         .abnormal-report-page .move-buttons { display:grid; gap:8px; }
         .abnormal-report-page .progress { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:.74rem; }
-        .abnormal-report-page .progress-step { color:#f5f7f8; }
-        .abnormal-report-page .progress-step.approved { color:#2dd4bf; }
+        .abnormal-report-page .progress-step { color:var(--legacy_f5f7f8); }
+        .abnormal-report-page .progress-step.approved { color:var(--legacy_2dd4bf); }
         .abnormal-report-page .footer-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
-        .abnormal-report-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid #1e8f6d; border-radius:7px; background:rgba(45,212,191,.12); color:#8ff5df; font-size:.78rem; }
-        .abnormal-report-page .error { color:#ff9eaa; font-size:.74rem; margin-top:6px; }
+        .abnormal-report-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid var(--legacy_1e8f6d); border-radius:7px; background:rgba(45,212,191,.12); color:var(--legacy_8ff5df); font-size:.78rem; }
+        .abnormal-report-page .error { color:var(--legacy_ff9eaa); font-size:.74rem; margin-top:6px; }
         .abnormal-report-page .muted { color:var(--muted); }
-        .abnormal-report-page .success { color:#2dd4bf; } .abnormal-report-page .warning { color:#fbbf24; }
+        .abnormal-report-page .success { color:var(--legacy_2dd4bf); } .abnormal-report-page .warning { color:var(--legacy_fbbf24); }
         @media (max-width:720px) {
             .abnormal-report-page { padding:12px; }
             .abnormal-report-page .body { padding:12px; }

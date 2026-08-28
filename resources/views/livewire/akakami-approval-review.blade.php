@@ -6,20 +6,20 @@
         .akakami-review-page .review-toolbar { display:flex; align-items:end; justify-content:space-between; gap:12px; padding:14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.025); }
         .akakami-review-page .review-toolbar label { display:block; color:var(--muted); font-size:.68rem; letter-spacing:.07em; margin-bottom:6px; text-transform:uppercase; }
         .akakami-review-page .search-box { flex:1 1 380px; max-width:520px; }
-        .akakami-review-page .dark-control { width:100%; background:#0d1418; border:1px solid var(--line); border-radius:7px; color:#f5f7f8; padding:10px 11px; outline:none; }
+        .akakami-review-page .dark-control { width:100%; background:var(--legacy_0d1418); border:1px solid var(--line); border-radius:7px; color:var(--legacy_f5f7f8); padding:10px 11px; outline:none; }
         .akakami-review-page .dark-control:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,.1); }
         .akakami-review-page .queue-scroll { max-height:calc(100vh - 260px); min-height:300px; overflow:auto; -webkit-overflow-scrolling:touch; }
         .akakami-review-page table { width:100%; min-width:780px; border-collapse:collapse; font-size:.76rem; }
-        .akakami-review-page th, .akakami-review-page td { padding:10px 9px; border:1px solid #26333a; text-align:center; white-space:nowrap; vertical-align:middle; }
-        .akakami-review-page th { position:sticky; top:0; z-index:2; background:#0b1013; color:var(--cyan); }
+        .akakami-review-page th, .akakami-review-page td { padding:10px 9px; border:1px solid var(--legacy_26333a); text-align:center; white-space:nowrap; vertical-align:middle; }
+        .akakami-review-page th { position:sticky; top:0; z-index:2; background:var(--legacy_0b1013); color:var(--cyan); }
         .akakami-review-page td:first-child, .akakami-review-page th:first-child { text-align:left; }
         .akakami-review-page .queue-row { cursor:pointer; transition:background .16s ease; }
-        .akakami-review-page .queue-row:hover td { background:#1c3540; }
-        .akakami-review-page .queue-row.selected td { background:#0754bd; color:#fff; }
+        .akakami-review-page .queue-row:hover td { background:var(--legacy_1c3540); }
+        .akakami-review-page .queue-row.selected td { background:var(--legacy_0754bd); color:#fff; }
         .akakami-review-page .flpp-button { display:inline-flex; align-items:center; justify-content:space-between; gap:8px; width:100%; border:0; background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; }
         .akakami-review-page .review-body { padding:16px; }
         .akakami-review-page .empty-state { display:grid; min-height:300px; place-items:center; padding:24px; color:var(--muted); text-align:center; }
-        .akakami-review-page .detail-card { margin-top:16px; border:1px solid var(--line); border-radius:10px; background:#111a1f; overflow:hidden; }
+        .akakami-review-page .detail-card { margin-top:16px; border:1px solid var(--line); border-radius:10px; background:var(--legacy_111a1f); overflow:hidden; }
         .akakami-review-page .detail-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line); background:rgba(45,212,191,.06); }
         .akakami-review-page .detail-heading h2 { margin:0; color:var(--cyan); font-size:.95rem; }
         .akakami-review-page .detail-heading .date { color:var(--muted); font-size:.72rem; }
@@ -28,24 +28,24 @@
         .akakami-review-page .detail-item { min-width:0; }
         .akakami-review-page .detail-item.wide { grid-column:span 2; }
         .akakami-review-page .detail-label { display:block; margin-bottom:5px; color:var(--muted); font-size:.63rem; letter-spacing:.07em; text-transform:uppercase; }
-        .akakami-review-page .detail-value { display:block; min-height:32px; padding:7px 9px; border-bottom:1px solid #34464e; color:#f5f7f8; font-size:.78rem; overflow-wrap:anywhere; }
+        .akakami-review-page .detail-value { display:block; min-height:32px; padding:7px 9px; border-bottom:1px solid var(--legacy_34464e); color:var(--legacy_f5f7f8); font-size:.78rem; overflow-wrap:anywhere; }
         .akakami-review-page .detail-value.accent { color:var(--orange); font-weight:700; }
-        .akakami-review-page .detail-value.problem { color:#ffb4b8; }
+        .akakami-review-page .detail-value.problem { color:var(--legacy_ffb4b8); }
         .akakami-review-page textarea.dark-control { min-height:80px; resize:vertical; }
-        .akakami-review-page .confirm-box { margin-top:18px; padding:14px; border:1px solid #5d4c1e; border-radius:8px; background:rgba(255,159,28,.07); }
-        .akakami-review-page .confirm-label { display:flex; gap:9px; align-items:flex-start; color:#ffd98c; font-size:.78rem; cursor:pointer; }
+        .akakami-review-page .confirm-box { margin-top:18px; padding:14px; border:1px solid var(--legacy_5d4c1e); border-radius:8px; background:rgba(255,159,28,.07); }
+        .akakami-review-page .confirm-label { display:flex; gap:9px; align-items:flex-start; color:var(--legacy_ffd98c); font-size:.78rem; cursor:pointer; }
         .akakami-review-page .confirm-label input { accent-color:var(--cyan); margin-top:3px; }
         .akakami-review-page .decision-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
         .akakami-review-page .decision-actions .btn { width:100%; min-height:40px; }
-        .akakami-review-page .btn-danger { background:#b42335; color:#fff; }
+        .akakami-review-page .btn-danger { background:var(--legacy_b42335); color:#fff; }
         .akakami-review-page .pagination-wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:12px; color:var(--muted); font-size:.72rem; }
         .akakami-review-page .pagination { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
         .akakami-review-page .page-link, .akakami-review-page .page-current, .akakami-review-page .page-disabled { display:grid; min-width:31px; min-height:30px; place-items:center; padding:4px 8px; border:1px solid var(--line); border-radius:6px; font-size:.7rem; line-height:1; }
-        .akakami-review-page .page-link { background:#182228; color:#d9e0e3; cursor:pointer; }
+        .akakami-review-page .page-link { background:var(--legacy_182228); color:var(--legacy_d9e0e3); cursor:pointer; }
         .akakami-review-page .page-link:hover { border-color:var(--cyan); color:var(--cyan); }
-        .akakami-review-page .page-current { background:var(--cyan); border-color:var(--cyan); color:#041014; font-weight:700; }
-        .akakami-review-page .page-disabled { color:#d9e0e3; opacity:.4; }
-        .akakami-review-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid #1e8f6d; border-radius:7px; background:rgba(45,212,191,.12); color:#8ff5df; font-size:.78rem; }
+        .akakami-review-page .page-current { background:var(--cyan); border-color:var(--cyan); color:var(--legacy_041014); font-weight:700; }
+        .akakami-review-page .page-disabled { color:var(--legacy_d9e0e3); opacity:.4; }
+        .akakami-review-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid var(--legacy_1e8f6d); border-radius:7px; background:rgba(45,212,191,.12); color:var(--legacy_8ff5df); font-size:.78rem; }
         @media (max-width:900px) { .akakami-review-page .detail-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         @media (max-width:720px) { .akakami-review-page { padding:14px 12px 24px; } .akakami-review-page .review-header { display:block; } .akakami-review-page .review-toolbar { display:block; } .akakami-review-page .search-box { max-width:none; margin-bottom:10px; } .akakami-review-page .review-toolbar .btn { width:100%; } .akakami-review-page .queue-scroll { max-height:52vh; min-height:240px; } .akakami-review-page .pagination-wrap { display:block; } .akakami-review-page .pagination-wrap > span { display:block; margin-bottom:8px; } .akakami-review-page .pagination { justify-content:flex-start; } .akakami-review-page .detail-content { padding:12px; } .akakami-review-page .detail-grid { grid-template-columns:1fr 1fr; gap:9px; } .akakami-review-page .detail-item.wide { grid-column:span 2; } }
         @media (max-width:430px) { .akakami-review-page .detail-grid { grid-template-columns:1fr; } .akakami-review-page .detail-item.wide { grid-column:span 1; } .akakami-review-page .decision-actions { grid-template-columns:1fr; } .akakami-review-page th, .akakami-review-page td { padding:8px 7px; font-size:.7rem; } }

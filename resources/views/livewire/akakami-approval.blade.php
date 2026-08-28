@@ -9,7 +9,7 @@
         .akakami-page .approval-body { padding:18px; }
         .akakami-page .grid-tools { display:flex; align-items:end; justify-content:space-between; gap:10px; margin-bottom:14px; }
         .akakami-page .grid-tools label, .akakami-page .form-label { display:block; color:var(--muted); font-size:.68rem; letter-spacing:.07em; margin-bottom:6px; text-transform:uppercase; }
-        .akakami-page .dark-control { width:100%; background:#0d1418; border:1px solid var(--line); border-radius:7px; color:#f5f7f8; padding:10px 11px; outline:none; }
+        .akakami-page .dark-control { width:100%; background:var(--legacy_0d1418); border:1px solid var(--line); border-radius:7px; color:var(--legacy_f5f7f8); padding:10px 11px; outline:none; }
         .akakami-page .dark-control:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,.1); }
         .akakami-page textarea.dark-control { min-height:82px; resize:vertical; }
         .akakami-page select.dark-control { color-scheme:dark; }
@@ -17,30 +17,30 @@
         .akakami-page .pagination-wrap { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:12px; color:var(--muted); font-size:.72rem; }
         .akakami-page .results-summary { flex:1 1 auto; }
         .akakami-page .pagination { display:flex; flex:0 0 auto; flex-wrap:wrap; justify-content:flex-end; gap:5px; align-items:center; list-style:none; padding:0; margin:0; }
-        .akakami-page .pagination .page-link, .akakami-page .pagination .page-current, .akakami-page .pagination .page-disabled { display:grid; min-width:32px; min-height:30px; place-items:center; padding:4px 8px; border:1px solid var(--line); border-radius:6px; color:#d9e0e3; font-size:.72rem; line-height:1; }
-        .akakami-page .pagination .page-link { background:#182228; cursor:pointer; }
+        .akakami-page .pagination .page-link, .akakami-page .pagination .page-current, .akakami-page .pagination .page-disabled { display:grid; min-width:32px; min-height:30px; place-items:center; padding:4px 8px; border:1px solid var(--line); border-radius:6px; color:var(--legacy_d9e0e3); font-size:.72rem; line-height:1; }
+        .akakami-page .pagination .page-link { background:var(--legacy_182228); cursor:pointer; }
         .akakami-page .pagination .page-link:hover { border-color:var(--cyan); color:var(--cyan); }
-        .akakami-page .pagination .page-current { background:var(--cyan); color:#041014; border-color:var(--cyan); font-weight:700; }
+        .akakami-page .pagination .page-current { background:var(--cyan); color:var(--legacy_041014); border-color:var(--cyan); font-weight:700; }
         .akakami-page .pagination .page-disabled { opacity:.4; } .akakami-page .sort-toggle{min-width:150px;white-space:nowrap}
         .akakami-page .action-cell { width:104px; min-width:104px; text-align:center; vertical-align:middle; }
         .akakami-page .action-cell .btn { display:inline-flex; width:82px; min-height:32px; align-items:center; justify-content:center; padding:7px 8px; white-space:nowrap; font-size:.7rem; line-height:1; }
         .akakami-page .action-cell .akakami-print-btn { width:108px; }
-        .akakami-page .print-link { color:#8ff5df; text-decoration:none; } .akakami-page .print-link:hover { color:#fff; }
+        .akakami-page .print-link { color:var(--legacy_8ff5df); text-decoration:none; } .akakami-page .print-link:hover { color:#fff; }
         .akakami-page .export-backdrop { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:18px; background:rgba(0,0,0,.72); }
-        .akakami-page .export-modal { width:min(100%,430px); padding:20px; border:1px solid var(--line); border-radius:12px; background:#111a1f; box-shadow:0 20px 70px rgba(0,0,0,.5); }
+        .akakami-page .export-modal { width:min(100%,430px); padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--legacy_111a1f); box-shadow:0 20px 70px rgba(0,0,0,.5); }
         .akakami-page .export-modal h3 { margin:0 0 6px; color:var(--cyan); font-size:1rem; } .akakami-page .export-modal p { margin:0 0 16px; color:var(--muted); font-size:.76rem; } .akakami-page .export-period-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .akakami-page .export-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
         .akakami-page table { min-width:850px; }
         .akakami-page th, .akakami-page td { padding:11px 10px; }
-        .akakami-page td { color:#d9e0e3; }
+        .akakami-page td { color:var(--legacy_d9e0e3); }
         .akakami-page .empty-state { padding:36px 20px; color:var(--muted); text-align:center; }
-        .akakami-page .detail-banner { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; padding:14px; margin-bottom:18px; border-radius:8px; background:linear-gradient(100deg,#0754bd,#00a6bf); }
+        .akakami-page .detail-banner { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; padding:14px; margin-bottom:18px; border-radius:8px; background:linear-gradient(100deg,var(--legacy_0754bd),var(--legacy_00a6bf); }
         .akakami-page .detail-banner span { display:block; font-size:.62rem; opacity:.8; text-transform:uppercase; }
         .akakami-page .detail-banner strong { display:block; margin-top:4px; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .akakami-page .form-columns { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
-        .akakami-page .form-section { padding:15px; border:1px solid var(--line); border-radius:8px; background:#111a1f; }
+        .akakami-page .form-section { padding:15px; border:1px solid var(--line); border-radius:8px; background:var(--legacy_111a1f); }
         .akakami-page .form-section h3 { margin:0 0 14px; color:var(--cyan); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
         .akakami-page .field { margin-bottom:13px; }
-        .akakami-page .radio-line { display:flex; gap:10px; align-items:flex-start; padding:10px 0; color:#f5f7f8; font-size:.78rem; }
+        .akakami-page .radio-line { display:flex; gap:10px; align-items:flex-start; padding:10px 0; color:var(--legacy_f5f7f8); font-size:.78rem; }
         .akakami-page .radio-line input, .akakami-page .rank-check input { accent-color:var(--cyan); margin-top:3px; }
         .akakami-page .radio-line small { display:block; color:var(--muted); margin-top:3px; }
         .akakami-page .sequence-box { margin-top:14px; padding:13px; border:1px solid var(--line); border-radius:8px; }
@@ -49,12 +49,12 @@
         .akakami-page .sequence-grid select { min-height:160px; }
         .akakami-page .move-buttons { display:grid; gap:8px; }
         .akakami-page .progress { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:.74rem; }
-        .akakami-page .progress-step { color:#f5f7f8; }
-        .akakami-page .progress-step.approved { color:#2dd4bf; }
-        .akakami-page .progress-arrow { color:#65747b; }
+        .akakami-page .progress-step { color:var(--legacy_f5f7f8); }
+        .akakami-page .progress-step.approved { color:var(--legacy_2dd4bf); }
+        .akakami-page .progress-arrow { color:var(--legacy_65747b); }
         .akakami-page .action-footer { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
-        .akakami-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid #1e8f6d; border-radius:7px; background:rgba(45,212,191,.12); color:#8ff5df; font-size:.78rem; }
-        .akakami-page .danger-text { color:var(--red); } .akakami-page .warning-text { color:var(--orange); } .akakami-page .success-text { color:#2dd4bf; }
+        .akakami-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid var(--legacy_1e8f6d); border-radius:7px; background:rgba(45,212,191,.12); color:var(--legacy_8ff5df); font-size:.78rem; }
+        .akakami-page .danger-text { color:var(--red); } .akakami-page .warning-text { color:var(--orange); } .akakami-page .success-text { color:var(--legacy_2dd4bf); }
         @media (max-width:720px) { .akakami-page { padding:12px; } .akakami-page .pagination-wrap { display:block; } .akakami-page .results-summary { display:block; margin-bottom:8px; } .akakami-page .pagination { justify-content:flex-start; } .akakami-page .pagination .page-link, .akakami-page .pagination .page-current, .akakami-page .pagination .page-disabled { min-width:30px; } .akakami-page .action-cell { width:92px; min-width:92px; } .akakami-page .action-cell .btn { width:76px; } .akakami-page .action-cell .akakami-print-btn { width:108px; } .akakami-page .export-period-grid { grid-template-columns:1fr; } .akakami-page .export-actions { display:grid; grid-template-columns:1fr 1fr; } .akakami-page .export-actions .btn { width:100%; } .akakami-page .approval-header { align-items:flex-start; padding:14px; } .akakami-page .approval-header h2 { font-size:.82rem; } .akakami-page .approval-body { padding:12px; } .akakami-page .grid-tools { display:block; } .akakami-page .grid-tools > div:first-child { margin-bottom:10px; } .akakami-page .grid-tools .btn { width:100%; } .akakami-page .detail-banner { grid-template-columns:repeat(2,minmax(0,1fr)); } .akakami-page .form-columns { grid-template-columns:1fr; } .akakami-page .sequence-grid { grid-template-columns:1fr; } .akakami-page .move-buttons { grid-template-columns:1fr 1fr; } .akakami-page .move-buttons .btn:first-child { order:0; } .akakami-page .move-buttons .btn:last-child { order:1; } .akakami-page .action-footer { display:grid; grid-template-columns:1fr 1fr; } .akakami-page .action-footer .btn { width:100%; } }
         @media (max-width:430px) { .akakami-page .approval-tabs { padding-left:8px; padding-right:8px; } .akakami-page .approval-tab { padding:9px 10px; font-size:.67rem; } .akakami-page .detail-banner { padding:11px; } .akakami-page .detail-banner strong { font-size:.78rem; } .akakami-page th, .akakami-page td { padding:8px 7px; font-size:.7rem; } }
     </style>
@@ -122,7 +122,7 @@
                             <div class="field"><label class="form-label">Qty Problem</label><input class="dark-control" type="number" wire:model="qty"></div>
                             <div class="field"><label class="form-label">Jenis Problem</label><textarea class="dark-control" readonly>{{ $activeDetail['nmproblem'] ?? '' }}</textarea></div>
                             <div class="field"><label class="form-label">Deskripsi Detail <span class="danger-text">*</span></label><textarea class="dark-control" wire:model="masalah" placeholder="Detail masalah yang ditemukan..."></textarea>@error('masalah')<div class="error">{{ $message }}</div>@enderror</div>
-                            <div class="field"><label class="form-label">Fishbone Category</label><div style="display:flex;flex-wrap:wrap;gap:12px;color:#d9e0e3;font-size:.76rem">@foreach (['Man','Machine','Material','Method'] as $category)<label><input type="radio" wire:model="fishbone" value="{{ $category }}"> {{ $category }}</label>@endforeach</div></div>
+                            <div class="field"><label class="form-label">Fishbone Category</label><div style="display:flex;flex-wrap:wrap;gap:12px;color:var(--legacy_d9e0e3);font-size:.76rem">@foreach (['Man','Machine','Material','Method'] as $category)<label><input type="radio" wire:model="fishbone" value="{{ $category }}"> {{ $category }}</label>@endforeach</div></div>
                             <div class="field"><label class="form-label">Analisa Penyebab <span class="danger-text">*</span></label><textarea class="dark-control" wire:model="analisa" placeholder="Detail analisa penyebab..."></textarea>@error('analisa')<div class="error">{{ $message }}</div>@enderror</div>
                             <div class="field"><label class="form-label">Tindakan Sementara</label><textarea class="dark-control" wire:model="tempAction" placeholder="Apa yang dilakukan saat kejadian?"></textarea></div>
                             <div class="field" style="margin-bottom:0"><label class="form-label">Tindakan Pencegahan</label><textarea class="dark-control" wire:model="correctiveAction" placeholder="Langkah agar tidak terulang kembali..."></textarea></div>

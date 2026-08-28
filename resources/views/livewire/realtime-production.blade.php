@@ -5,51 +5,51 @@
         .realtime-production-page .rt-card { background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
         .realtime-production-page .filter-panel { display:grid; grid-template-columns:minmax(220px,1fr) minmax(400px,2fr) auto; align-items:end; gap:12px; padding:14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.025); }
         .realtime-production-page .field-label { display:block; margin-bottom:6px; color:var(--muted); font-size:.65rem; letter-spacing:.07em; text-transform:uppercase; }
-        .realtime-production-page .dark-control { width:100%; background:#0d1418; border:1px solid var(--line); border-radius:7px; color:#f5f7f8; padding:10px 11px; outline:none; }
+        .realtime-production-page .dark-control { width:100%; background:var(--legacy_0d1418); border:1px solid var(--line); border-radius:7px; color:var(--legacy_f5f7f8); padding:10px 11px; outline:none; }
         .realtime-production-page .dark-control:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,.1); }
         .realtime-production-page .filter-options { display:flex; flex-wrap:wrap; align-items:center; gap:8px 13px; min-height:39px; }
-        .realtime-production-page .filter-option { display:flex; align-items:center; gap:5px; color:#d9e0e3; font-size:.7rem; white-space:nowrap; cursor:pointer; }
+        .realtime-production-page .filter-option { display:flex; align-items:center; gap:5px; color:var(--legacy_d9e0e3); font-size:.7rem; white-space:nowrap; cursor:pointer; }
         .realtime-production-page .filter-option input { accent-color:var(--cyan); }
         .realtime-production-page .filter-actions { display:flex; gap:8px; }
         .realtime-production-page .filter-actions .btn { min-height:39px; white-space:nowrap; text-decoration:none; text-align:center; }
-        .realtime-production-page .tab-bar { display:flex; gap:4px; padding:10px 14px 0; border-bottom:1px solid var(--line); background:#111a1f; }
+        .realtime-production-page .tab-bar { display:flex; gap:4px; padding:10px 14px 0; border-bottom:1px solid var(--line); background:var(--legacy_111a1f); }
         .realtime-production-page .tab-button { padding:10px 14px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--muted); font-size:.73rem; cursor:pointer; }
         .realtime-production-page .tab-button.active { border-bottom-color:var(--cyan); color:var(--cyan); }
         .realtime-production-page .tab-body { padding:14px; }
         .realtime-production-page .table-wrap { max-height:calc(100vh - 330px); min-height:280px; overflow:auto; -webkit-overflow-scrolling:touch; }
         .realtime-production-page table { width:100%; min-width:900px; border-collapse:collapse; font-size:.73rem; }
-        .realtime-production-page th, .realtime-production-page td { padding:9px 8px; border:1px solid #26333a; text-align:center; white-space:nowrap; vertical-align:middle; }
-        .realtime-production-page th { position:sticky; top:0; z-index:2; background:#0b1013; color:var(--cyan); font-size:.67rem; letter-spacing:.04em; text-transform:uppercase; }
-        .realtime-production-page th:first-child, .realtime-production-page td:first-child { position:sticky; left:0; z-index:1; background:#0b1013; text-align:left; }
+        .realtime-production-page th, .realtime-production-page td { padding:9px 8px; border:1px solid var(--legacy_26333a); text-align:center; white-space:nowrap; vertical-align:middle; }
+        .realtime-production-page th { position:sticky; top:0; z-index:2; background:var(--legacy_0b1013); color:var(--cyan); font-size:.67rem; letter-spacing:.04em; text-transform:uppercase; }
+        .realtime-production-page th:first-child, .realtime-production-page td:first-child { position:sticky; left:0; z-index:1; background:var(--legacy_0b1013); text-align:left; }
         .realtime-production-page th:first-child { z-index:3; }
         .realtime-production-page tbody tr { cursor:pointer; }
-        .realtime-production-page tbody tr:hover td { background:#1c3540; }
-        .realtime-production-page .lot-cell { color:#bfeef3; font-weight:700; }
+        .realtime-production-page tbody tr:hover td { background:var(--legacy_1c3540); }
+        .realtime-production-page .lot-cell { color:var(--legacy_bfeef3); font-weight:700; }
         .realtime-production-page .qty-cell { color:var(--orange); font-weight:700; }
         .realtime-production-page .pagination-wrap { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:12px; color:var(--muted); font-size:.72rem; }
         .realtime-production-page .pagination { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; }
         .realtime-production-page .page-link, .realtime-production-page .page-current, .realtime-production-page .page-disabled { display:grid; min-width:31px; min-height:30px; place-items:center; padding:4px 8px; border:1px solid var(--line); border-radius:6px; font-size:.7rem; line-height:1; }
-        .realtime-production-page .page-link { background:#182228; color:#d9e0e3; cursor:pointer; }
+        .realtime-production-page .page-link { background:var(--legacy_182228); color:var(--legacy_d9e0e3); cursor:pointer; }
         .realtime-production-page .page-link:hover { border-color:var(--cyan); color:var(--cyan); }
-        .realtime-production-page .page-current { background:var(--cyan); border-color:var(--cyan); color:#041014; font-weight:700; }
-        .realtime-production-page .page-disabled { color:#d9e0e3; opacity:.4; }
-        .realtime-production-page .master-card { margin-bottom:14px; padding:14px; border:1px solid var(--line); border-left:4px solid var(--cyan); border-radius:8px; background:#111a1f; }
+        .realtime-production-page .page-current { background:var(--cyan); border-color:var(--cyan); color:var(--legacy_041014); font-weight:700; }
+        .realtime-production-page .page-disabled { color:var(--legacy_d9e0e3); opacity:.4; }
+        .realtime-production-page .master-card { margin-bottom:14px; padding:14px; border:1px solid var(--line); border-left:4px solid var(--cyan); border-radius:8px; background:var(--legacy_111a1f); }
         .realtime-production-page .master-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
         .realtime-production-page .master-label { display:block; margin-bottom:4px; color:var(--muted); font-size:.62rem; text-transform:uppercase; }
         .realtime-production-page .master-value { display:block; color:var(--orange); font-size:.84rem; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .realtime-production-page .flow-container { display:flex; flex-wrap:wrap; justify-content:center; gap:12px; }
-        .realtime-production-page .process-box { position:relative; width:100%; max-width:235px; padding:12px; border:1px solid var(--line); border-radius:7px; background:#050708; box-shadow:0 4px 10px rgba(0,0,0,.4); font-size:.73rem; }
-        .realtime-production-page .process-box .flpp-badge { position:absolute; top:8px; right:8px; padding:2px 6px; border-radius:4px; background:#ef233c; color:#fff; font-size:.6rem; font-weight:700; }
-        .realtime-production-page .process-head { display:flex; align-items:center; gap:8px; margin-bottom:9px; padding-bottom:6px; border-bottom:1px solid #26333a; }
-        .realtime-production-page .seq-number { color:#fff700; font-size:1rem; font-weight:700; }
-        .realtime-production-page .seq-name { color:#2dd4bf; font-weight:700; text-transform:uppercase; }
-        .realtime-production-page .process-line { margin:4px 0; color:#f5f7f8; line-height:1.35; }
+        .realtime-production-page .process-box { position:relative; width:100%; max-width:235px; padding:12px; border:1px solid var(--line); border-radius:7px; background:var(--legacy_050708); box-shadow:0 4px 10px rgba(0,0,0,.4); font-size:.73rem; }
+        .realtime-production-page .process-box .flpp-badge { position:absolute; top:8px; right:8px; padding:2px 6px; border-radius:4px; background:var(--legacy_ef233c); color:#fff; font-size:.6rem; font-weight:700; }
+        .realtime-production-page .process-head { display:flex; align-items:center; gap:8px; margin-bottom:9px; padding-bottom:6px; border-bottom:1px solid var(--legacy_26333a); }
+        .realtime-production-page .seq-number { color:var(--legacy_fff700); font-size:1rem; font-weight:700; }
+        .realtime-production-page .seq-name { color:var(--legacy_2dd4bf); font-weight:700; text-transform:uppercase; }
+        .realtime-production-page .process-line { margin:4px 0; color:var(--legacy_f5f7f8); line-height:1.35; }
         .realtime-production-page .process-label { display:inline-block; min-width:64px; color:var(--orange); font-weight:600; }
-        .realtime-production-page .process-divider { margin:7px 0; border-top:1px solid #26333a; }
+        .realtime-production-page .process-divider { margin:7px 0; border-top:1px solid var(--legacy_26333a); }
         .realtime-production-page .tray-unit { display:inline-block; min-width:30px; margin-right:4px; padding:1px 5px; border-radius:3px; background:#fff; color:#000; text-align:center; font-weight:700; }
-        .realtime-production-page .process-status { margin-top:8px; padding-top:6px; border-top:1px solid #26333a; font-weight:700; }
-        .realtime-production-page .status-finish { color:#2dd4bf; } .realtime-production-page .status-progress { color:#3b9cff; } .realtime-production-page .status-hold { color:#ff5964; }
-        .realtime-production-page .ojt-badge { margin-left:5px; padding:1px 5px; border-radius:3px; background:#fff700; color:#000; font-size:.6rem; }
+        .realtime-production-page .process-status { margin-top:8px; padding-top:6px; border-top:1px solid var(--legacy_26333a); font-weight:700; }
+        .realtime-production-page .status-finish { color:var(--legacy_2dd4bf); } .realtime-production-page .status-progress { color:var(--legacy_3b9cff); } .realtime-production-page .status-hold { color:var(--legacy_ff5964); }
+        .realtime-production-page .ojt-badge { margin-left:5px; padding:1px 5px; border-radius:3px; background:var(--legacy_fff700); color:#000; font-size:.6rem; }
         .realtime-production-page .empty-state { display:grid; min-height:280px; place-items:center; padding:24px; color:var(--muted); text-align:center; }
         .realtime-production-page .status-bar { display:flex; justify-content:space-between; gap:12px; margin-top:12px; color:var(--muted); font-size:.68rem; }
         .realtime-production-page .certificate-actions{display:flex;justify-content:flex-end;gap:8px;margin:-3px 0 12px}.realtime-production-page .certificate-actions .btn{text-decoration:none;white-space:nowrap}

@@ -78,7 +78,8 @@
 
     @script
     <script>
-        const monthlyInitialData = @js($this->chartData());
+        const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const monthlyInitialData = @js($chartData);
         const monthlyCharts = {};
 
         function monthlyLineOptions(color) {
@@ -89,11 +90,11 @@
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
-                    datalabels: { anchor: 'end', align: 'top', color: '#fff', font: { size: 9, weight: '700' }, formatter: value => value > 0 ? Number(value).toLocaleString() : '' }
+                    datalabels: { anchor: 'end', align: 'top', color: cssVar('--text-title'), font: { size: 9, weight: '700' }, formatter: value => value > 0 ? Number(value).toLocaleString() : '' }
                 },
                 scales: {
-                    y: { beginAtZero: true, grace: '15%', grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#91a0a6', font: { size: 10 } } },
-                    x: { grid: { display: false }, ticks: { color: '#91a0a6', font: { size: window.innerWidth <= 480 ? 8 : 10 }, maxRotation: window.innerWidth <= 480 ? 45 : 0, minRotation: window.innerWidth <= 480 ? 45 : 0 } }
+                    y: { beginAtZero: true, grace: '15%', grid: { color: cssVar('--chart-grid') }, ticks: { color: cssVar('--chart-label'), font: { size: 10 } } },
+                    x: { grid: { display: false }, ticks: { color: cssVar('--chart-label'), font: { size: window.innerWidth <= 480 ? 8 : 10 }, maxRotation: window.innerWidth <= 480 ? 45 : 0, minRotation: window.innerWidth <= 480 ? 45 : 0 } }
                 },
                 elements: { line: { borderColor: color, backgroundColor: color.replace('1)', '.18)'), tension: .4, fill: true }, point: { radius: window.innerWidth <= 480 ? 2.5 : 4, hoverRadius: 5, backgroundColor: color } }
             };
@@ -113,9 +114,9 @@
 
         function drawMonthlyCharts(data) {
             if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
-            upsertMonthlyChart('monthlyQtyChart', data, data.qty, '#00e5ff');
-            upsertMonthlyChart('monthlyLotChart', data, data.lot, '#ff9f1c');
-            upsertMonthlyChart('monthlyAkaChart', data, data.aka, '#ff5964');
+            upsertMonthlyChart('monthlyQtyChart', data, data.qty, cssVar('--chart-1'));
+            upsertMonthlyChart('monthlyLotChart', data, data.lot, cssVar('--chart-2'));
+            upsertMonthlyChart('monthlyAkaChart', data, data.aka, cssVar('--chart-3'));
         }
 
         drawMonthlyCharts(monthlyInitialData);

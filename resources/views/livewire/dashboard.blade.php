@@ -61,7 +61,8 @@
 
     @script
     <script>
-        const chartColors = ['#00e5ff', '#ff9f1c', '#ff5964', '#caff2e', '#9d50bb', '#2196f3', '#009688', '#795548', '#e91e63', '#673ab7'];
+        const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const chartColors = Array.from({ length: 10 }, (_, index) => cssVar(`--chart-${index + 1}`));
         const initialData = @js($this->chartData());
         const dashboardCharts = {};
         const dateRangeInput = document.getElementById('dateRange');
@@ -76,11 +77,11 @@
                 animation: { duration: 450, easing: 'easeOutQuart' },
                 plugins: {
                     legend: { display: false },
-                    datalabels: { color: '#fff', anchor: 'end', align: 'top', font: { size: 10, weight: '700' }, formatter: value => Number(value).toLocaleString() }
+                    datalabels: { color: cssVar('--text-title'), anchor: 'end', align: 'top', font: { size: 10, weight: '700' }, formatter: value => Number(value).toLocaleString() }
                 },
                 scales: {
-                    y: { beginAtZero: !logarithmic, type: logarithmic ? 'logarithmic' : 'linear', min: logarithmic ? 1 : 0, grid: { color: 'rgba(255,255,255,.06)' }, ticks: { color: '#91a0a6' } },
-                    x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#91a0a6' } }
+                    y: { beginAtZero: !logarithmic, type: logarithmic ? 'logarithmic' : 'linear', min: logarithmic ? 1 : 0, grid: { color: cssVar('--chart-grid') }, ticks: { color: cssVar('--chart-label') } },
+                    x: { grid: { color: cssVar('--chart-grid') }, ticks: { color: cssVar('--chart-label') } }
                 }
             };
         }
@@ -117,24 +118,24 @@
             if (!canvas) return;
             dashboardCharts.customerChart = new Chart(canvas, {
                 type: 'doughnut',
-                data: { labels: data.customerLabels, datasets: [{ data: data.customerData, backgroundColor: chartColors, borderColor: '#182228', borderWidth: 2 }] },
+                data: { labels: data.customerLabels, datasets: [{ data: data.customerData, backgroundColor: chartColors, borderColor: cssVar('--chart-border'), borderWidth: 2 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '68%',
                     animation: { duration: 450, easing: 'easeOutQuart' },
                     plugins: {
-                        legend: { position: window.innerWidth <= 480 ? 'bottom' : 'right', labels: { color: '#91a0a6', usePointStyle: true, padding: 8, font: { size: window.innerWidth <= 480 ? 9 : 10 } } },
-                        datalabels: { color: '#fff', font: { weight: '700', size: 10 }, formatter: (value, ctx) => { const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return sum && value / sum > .05 ? `${Math.round(value / sum * 100)}%` : ''; } }
+                        legend: { position: window.innerWidth <= 480 ? 'bottom' : 'right', labels: { color: cssVar('--chart-label'), usePointStyle: true, padding: 8, font: { size: window.innerWidth <= 480 ? 9 : 10 } } },
+                        datalabels: { color: cssVar('--text-title'), font: { weight: '700', size: 10 }, formatter: (value, ctx) => { const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0); return sum && value / sum > .05 ? `${Math.round(value / sum * 100)}%` : ''; } }
                     }
                 }
             });
         }
 
         function drawCharts(data) {
-            upsertBarChart('qtyChart', data, data.qty, '#00e5ff', true);
-            upsertBarChart('lotChart', data, data.lot, '#ff9f1c', false);
-            upsertBarChart('akaChart', data, data.aka, '#ff5964', false);
+            upsertBarChart('qtyChart', data, data.qty, cssVar('--chart-1'), true);
+            upsertBarChart('lotChart', data, data.lot, cssVar('--chart-2'), false);
+            upsertBarChart('akaChart', data, data.aka, cssVar('--chart-3'), false);
             upsertCustomerChart(data);
         }
 

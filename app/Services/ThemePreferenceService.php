@@ -56,7 +56,7 @@ class ThemePreferenceService
         }
 
         $presetKey = (string) ($saved->preset_key ?? 'par-default');
-        $result['preset_key'] = array_key_exists($presetKey, $this->presets()) ? $presetKey : 'par-default';
+        $result['preset_key'] = ($presetKey === 'custom' || array_key_exists($presetKey, $this->presets())) ? $presetKey : 'par-default';
 
         return $result;
     }
@@ -65,7 +65,7 @@ class ThemePreferenceService
     {
         $defaults = $this->defaults();
         $presets = $this->presets();
-        $presetKey = array_key_exists($presetKey, $presets) ? $presetKey : 'par-default';
+        $presetKey = ($presetKey === 'custom' || array_key_exists($presetKey, $presets)) ? $presetKey : 'par-default';
         $normalized = [];
 
         foreach ($defaults as $key => $default) {
@@ -83,6 +83,52 @@ class ThemePreferenceService
                 'created_at' => $now,
             ],
         );
+    }
+
+    public function contrastViolations(array $colors): array
+    {
+        $pairs = [
+            ['text_body', 'bg', 'Teks body vs latar halaman'],
+            ['text_body', 'panel', 'Teks body vs panel'],
+            ['text_body', 'input_bg', 'Teks input vs latar input'],
+            ['text_table', 'table_row', 'Teks tabel vs baris tabel'],
+            ['text_table', 'table_alt', 'Teks tabel vs baris tabel selang-seling'],
+            ['text_table', 'table_header', 'Teks tabel vs header tabel'],
+            ['text_table', 'table_sticky', 'Teks tabel vs kolom tabel tetap'],
+            ['text_button', 'button_primary', 'Teks tombol vs tombol utama'],
+            ['button_secondary_text', 'button_secondary_bg', 'Teks tombol sekunder vs latarnya'],
+            ['text_header', 'navbar_bg', 'Teks header vs navbar'],
+            ['text_sidebar', 'sidebar_bg', 'Teks sidebar vs latar sidebar'],
+            ['text_title', 'panel', 'Teks judul vs panel'],
+        ];
+
+        $violations = [];
+        foreach ($pairs as [$foreground, $background, $label]) {
+            $ratio = $this->contrastRatio($colors[$foreground] ?? null, $colors[$background] ?? null);
+            if ($ratio !== null && $ratio < 4.5) {
+                $violations[] = $label.' hanya memiliki kontras '.number_format($ratio, 2).' : 1. Minimum yang disarankan adalah 4.5 : 1.';
+            }
+        }
+
+        return $violations;
+    }
+
+    public function contrastRatio(?string $foreground, ?string $background): ?float
+    {
+        if (! $this->isHexColor($foreground) || ! $this->isHexColor($background)) {
+            return null;
+        }
+
+        $relative = static function (string $hex): float {
+            $rgb = array_map(static fn (string $part): float => hexdec($part) / 255, str_split(substr($hex, 1), 2));
+            $linear = array_map(static fn (float $channel): float => $channel <= 0.03928 ? $channel / 12.92 : (($channel + 0.055) / 1.055) ** 2.4, $rgb);
+            return (0.2126 * $linear[0]) + (0.7152 * $linear[1]) + (0.0722 * $linear[2]);
+        };
+
+        $light = max($relative($foreground), $relative($background));
+        $dark = min($relative($foreground), $relative($background));
+
+        return ($light + 0.05) / ($dark + 0.05);
     }
 
     public function isHexColor(mixed $value): bool

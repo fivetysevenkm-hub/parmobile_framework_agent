@@ -44,9 +44,9 @@
 </div>
 
 <style>
-    .notice { color:#cbd5e0; background:rgba(0,229,255,.07); border:1px solid rgba(0,229,255,.2); border-radius:8px; padding:11px 12px; font-size:.78rem; line-height:1.5; margin:0 0 20px; }
-    .hint { color:#9aa9b0; font-size:.68rem; line-height:1.4; margin-top:6px; }
+    .notice { color:var(--legacy_cbd5e0); background:rgba(0,229,255,.07); border:1px solid rgba(0,229,255,.2); border-radius:8px; padding:11px 12px; font-size:.78rem; line-height:1.5; margin:0 0 20px; }
+    .hint { color:var(--legacy_9aa9b0); font-size:.68rem; line-height:1.4; margin-top:6px; }
     .logout-form { text-align:center; margin-top:14px; }
-    .logout-link { border:0; background:transparent; color:#ff9eaa; cursor:pointer; font-size:.74rem; }
-    .logout-link:hover { color:#ffccd0; }
+    .logout-link { border:0; background:transparent; color:var(--legacy_ff9eaa); cursor:pointer; font-size:.74rem; }
+    .logout-link:hover { color:var(--legacy_ffccd0); }
 </style>
