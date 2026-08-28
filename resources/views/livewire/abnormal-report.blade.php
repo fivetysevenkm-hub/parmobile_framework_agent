@@ -13,7 +13,7 @@
         .abnormal-report-page .control { width:100%; background:var(--legacy_0d1418); border:1px solid var(--line); border-radius:7px; color:var(--legacy_f5f7f8); padding:10px 11px; outline:none; }
         .abnormal-report-page .control:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,.1); }
         .abnormal-report-page textarea.control { min-height:82px; resize:vertical; }
-        .abnormal-report-page select.control { color-scheme:dark; }
+        .abnormal-report-page select.control { color-scheme:inherit; }
         .abnormal-report-page .date-tools { display:grid; grid-template-columns:repeat(2,minmax(0,160px)); gap:8px; }
         .abnormal-report-page .table-scroll { max-height:540px; border:1px solid var(--line); border-radius:8px; overflow:auto; -webkit-overflow-scrolling:touch; }
         .abnormal-report-page table { min-width:1050px; }

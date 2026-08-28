@@ -66,6 +66,17 @@ class ThemePreferenceService
 
         $result['preset_key'] = $presetKey;
 
+        // Older custom preferences may have been saved before contrast validation
+        // covered every surface. Do not render an unsafe combination at runtime.
+        if ($this->contrastViolations($result['colors']) !== []) {
+            $safeColors = $this->presets()['par-default']['colors'] ?? $defaults;
+            foreach ($defaults as $key => $default) {
+                $value = $safeColors[$key] ?? $default;
+                $result['colors'][$key] = $this->isHexColor($value) ? strtoupper($value) : $default;
+            }
+            $result['preset_key'] = 'par-default';
+        }
+
         return $result;
     }
 
@@ -96,18 +107,43 @@ class ThemePreferenceService
     public function contrastViolations(array $colors): array
     {
         $pairs = [
+            ['text', 'bg', 'Teks fallback vs latar halaman'],
             ['text_body', 'bg', 'Teks body vs latar halaman'],
             ['text_body', 'panel', 'Teks body vs panel'],
+            ['text_body', 'panel_2', 'Teks body vs panel sekunder'],
+            ['text_body', 'filter_bg', 'Teks body vs area filter'],
             ['text_body', 'input_bg', 'Teks input vs latar input'],
+            ['text_body', 'input_focus_bg', 'Teks body vs input saat fokus'],
+            ['text_title', 'bg', 'Teks judul vs latar halaman'],
+            ['text_title', 'panel', 'Teks judul vs panel'],
+            ['text_title', 'panel_2', 'Teks judul vs panel sekunder'],
+            ['text_title', 'table_row', 'Teks judul vs baris tabel'],
             ['text_table', 'table_row', 'Teks tabel vs baris tabel'],
             ['text_table', 'table_alt', 'Teks tabel vs baris tabel selang-seling'],
             ['text_table', 'table_header', 'Teks tabel vs header tabel'],
             ['text_table', 'table_sticky', 'Teks tabel vs kolom tabel tetap'],
+            ['input_text', 'input_bg', 'Teks input vs latar input'],
+            ['input_text', 'input_focus_bg', 'Teks input vs latar fokus'],
+            ['input_placeholder', 'input_bg', 'Placeholder vs latar input'],
             ['text_button', 'button_primary', 'Teks tombol vs tombol utama'],
             ['button_secondary_text', 'button_secondary_bg', 'Teks tombol sekunder vs latarnya'],
+            ['button_disabled_text', 'button_disabled_bg', 'Teks tombol nonaktif vs latarnya'],
             ['text_header', 'navbar_bg', 'Teks header vs navbar'],
+            ['navbar_icon', 'navbar_bg', 'Ikon navbar vs latar navbar'],
+            ['navbar_icon', 'navbar_icon_hover_bg', 'Ikon navbar vs latar hover'],
+            ['logout', 'navbar_bg', 'Tombol logout vs navbar'],
             ['text_sidebar', 'sidebar_bg', 'Teks sidebar vs latar sidebar'],
-            ['text_title', 'panel', 'Teks judul vs panel'],
+            ['text_header', 'sidebar_active_bg', 'Teks menu aktif vs latarnya'],
+            ['text_footer', 'bg', 'Teks footer vs latar halaman'],
+            ['text_footer', 'panel', 'Teks footer vs panel'],
+            ['modal_text', 'modal_bg', 'Teks modal vs latarnya'],
+            ['modal_heading', 'modal_bg', 'Judul modal vs latarnya'],
+            ['modal_copy', 'modal_bg', 'Keterangan modal vs latarnya'],
+            ['modal_icon_text', 'modal_icon_bg', 'Teks ikon modal vs latarnya'],
+            ['success', 'success_bg', 'Teks status berhasil vs latarnya'],
+            ['warning', 'warning_bg', 'Teks status peringatan vs latarnya'],
+            ['danger', 'danger_bg', 'Teks status bahaya vs latarnya'],
+            ['info', 'info_bg', 'Teks status informasi vs latarnya'],
         ];
 
         $violations = [];

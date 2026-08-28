@@ -13,10 +13,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     @livewireStyles
-    @php($themeColors = app(\App\Services\ThemePreferenceService::class)->currentForUser(auth()->user())['colors'])
+    @php
+        $themeColors = app(\App\Services\ThemePreferenceService::class)->currentForUser(auth()->user())['colors'];
+        $themeBackground = ltrim((string) ($themeColors['bg'] ?? '#10171B'), '#');
+        $themeRed = hexdec(substr($themeBackground, 0, 2));
+        $themeGreen = hexdec(substr($themeBackground, 2, 2));
+        $themeBlue = hexdec(substr($themeBackground, 4, 2));
+        $themeColorScheme = (($themeRed * 0.299) + ($themeGreen * 0.587) + ($themeBlue * 0.114)) > 145 ? 'light' : 'dark';
+    @endphp
     <style>
         :root {
-            color-scheme: dark;
+            color-scheme: {{ $themeColorScheme }};
             @foreach($themeColors as $key => $value)
                 --{{ $key }}: {{ $value }};
                 --{{ str_replace('_', '-', $key) }}: {{ $value }};
@@ -78,6 +85,48 @@
         @media (max-width: 1100px) { .stats { grid-template-columns:repeat(3, minmax(0,1fr)); } }
         @media (max-width: 720px) { .app-shell { width:100%; max-width:100%; min-height:calc(100vh - 58px); } .layout-content { width:100%; max-width:100vw; overflow-x:clip; } .monthly-table-heading { align-items:flex-start; } .monthly-year-select { width:100%; min-width:0; } .monthly-filter > div:first-child { flex:1 1 100%; } .monthly-filter .btn { width:100%; } .chart-wrap-tall { height:220px; } .year-badge { font-size:.62rem; } .site-navbar { height:58px; padding:0 12px; } .site-sidebar { top:58px; width:250px; transform:translateX(-100%); } .layout-content, .sidebar-collapsed .layout-content { width:100%; margin-left:0; padding-top:58px; } .app-shell { padding:14px 12px 24px; } .topbar { display:block; margin-bottom:16px; } .topbar h1 { font-size:1.65rem; } .toolbar { justify-content:flex-start; margin-top:12px; } .filter { gap:8px; padding:11px; } .filter input { min-width:0; width:100%; font-size:.78rem; } .filter > div:first-child { flex:1 1 100%; } .filter .btn, .filter #btnExport { flex:1 1 calc(50% - 4px); text-align:center; } .charts { grid-template-columns:1fr; gap:10px; } .panel { padding:13px; min-height:0; } .chart-wrap { height:220px; } .stats { grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px; } .stat { min-height:96px; padding:11px; } .stat-label { font-size:.6rem; } .stat-value { font-size:1.08rem; margin-top:8px; } .stat-note { font-size:.58rem; } .table-scroll { margin:0 -13px; padding:0 13px 5px; -webkit-overflow-scrolling:touch; } .site-sidebar { top:58px; } .sidebar-collapsed .site-sidebar { width:250px; transform:translateX(-100%); } .sidebar-collapsed .brand-text, .sidebar-collapsed .nav-label, .sidebar-collapsed .sidebar-divider { display:block; } .sidebar-collapsed .sidebar-brand { justify-content:flex-start; padding-left:20px; padding-right:20px; } .sidebar-collapsed .sidebar-link { justify-content:flex-start; padding-left:12px; padding-right:12px; } .sidebar-collapsed .sidebar-group-toggle { justify-content:flex-start; padding-left:12px; padding-right:12px; } .sidebar-collapsed .sidebar-group-items { display:none !important; } .sidebar-collapsed .sidebar-group-items[hidden] { display:none !important; } .sidebar-open .site-sidebar { transform:translateX(0); } .brand-name { display:none; } .navbar-user { max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .navbar-theme-link{padding:7px 8px}.navbar-theme-link span:last-child{display:none}.navbar-logout { font-size:.72rem; } }
         @media (max-width: 430px) { .mobile-table-hint { display:block; } .stats { grid-template-columns:1fr 1fr; } .stat-value { font-size:.98rem; } .timer { font-size:.62rem; } .navbar-user { max-width:80px; } .navbar-theme-link{padding:6px 7px}.panel h2 { font-size:.68rem; } .chart-wrap { height:205px; } }
+        /* Theme guard: page-local styles must inherit the active surface/text pairing. */
+        body .layout-shell .layout-content table:not(.preview-table):not(.home-table) :is(th, td) {
+            border-color: var(--table-border) !important;
+            color: var(--text-table) !important;
+        }
+        body .layout-shell .layout-content table:not(.preview-table):not(.home-table) th {
+            background: var(--table-header) !important;
+        }
+        body .layout-shell .layout-content table:not(.preview-table):not(.home-table) td {
+            background: var(--table-row) !important;
+        }
+        body .layout-shell .layout-content table:not(.preview-table):not(.home-table) tbody tr:nth-child(even) td {
+            background: var(--table-alt) !important;
+        }
+        body .layout-shell .layout-content table:not(.preview-table):not(.home-table) tbody tr:hover td {
+            background: var(--table-hover) !important;
+        }
+        body .layout-shell .layout-content table:not(.preview-table):not(.home-table) :is(th:first-child, td:first-child) {
+            background: var(--table-sticky) !important;
+        }
+        body .layout-shell .layout-content :is(input, select, textarea):not([type='checkbox']):not([type='radio']):not([type='color']) {
+            background: var(--input-bg) !important;
+            border-color: var(--line) !important;
+            color: var(--input-text) !important;
+        }
+        body .layout-shell .layout-content :is(input, select, textarea)::placeholder {
+            color: var(--input-placeholder) !important;
+        }
+        body .layout-shell .layout-content :is(.page-link, .page-disabled) {
+            background: var(--button-secondary-bg) !important;
+            border-color: var(--line) !important;
+            color: var(--button-secondary-text) !important;
+        }
+        body .layout-shell .layout-content .page-current {
+            background: var(--button-primary) !important;
+            border-color: var(--button-primary) !important;
+            color: var(--text-button) !important;
+        }
+        body .layout-shell .layout-content .page-disabled {
+            background: var(--button-disabled-bg) !important;
+            color: var(--button-disabled-text) !important;
+        }
     </style>
 </head>
 <body>
