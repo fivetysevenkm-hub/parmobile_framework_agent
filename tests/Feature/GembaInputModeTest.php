@@ -80,6 +80,24 @@ class GembaInputModeTest extends TestCase
             $table->string('finish', 50)->nullable();
         });
 
+        Schema::create('tbl_seq_02', function (Blueprint $table): void {
+            $table->string('no_lot', 50)->primary();
+            $table->string('start_time', 50)->nullable();
+            $table->string('finish_time', 50)->nullable();
+            $table->string('duration', 50)->nullable();
+            $table->string('tray_no', 50)->nullable();
+            $table->string('tray_nokecil', 50)->nullable();
+            $table->string('no_mesin', 50)->nullable();
+            $table->string('pic_01', 50)->nullable();
+            $table->string('pic_02', 50)->nullable();
+            $table->string('pic_03', 50)->nullable();
+            $table->string('pic_04', 50)->nullable();
+            $table->string('akakami', 50)->nullable();
+            $table->string('ojt', 50)->nullable();
+            $table->string('hold', 50)->nullable();
+            $table->string('finish', 50)->nullable();
+        });
+
         Schema::create('tbl_validator', function (Blueprint $table): void {
             $table->id();
             $table->string('no_lot', 50)->unique();
@@ -388,5 +406,35 @@ class GembaInputModeTest extends TestCase
             ->assertSee('RUNNING');
 
         $this->assertEquals($startTimeIso, $component->instance()->stopwatchStartTime());
+    }
+
+    public function test_tray_numbers_auto_copied_from_initial_process_to_subsequent_processes_and_editable(): void
+    {
+        // 1. Process 1 has tray numbers recorded
+        DB::table('tbl_seq_01')->insert([
+            'no_lot' => 'LOT-12345',
+            'tray_no' => 'TRAY-BESAR-99',
+            'tray_nokecil' => 'TRAY-KECIL-99',
+            'start_time' => '2026-08-29 00:00:00',
+            'finish_time' => '2026-08-29 00:30:00',
+            'finish' => 'yes',
+        ]);
+
+        // 2. Open process 2 (Sequence 2) from LotVerifikator
+        $component = Livewire::test(GembaInput::class, [
+            'noLot' => 'LOT-12345',
+            'sequenceNo' => 2,
+        ]);
+
+        // Should automatically copy tray_no and tray_nokecil from process 1
+        $this->assertEquals('TRAY-BESAR-99', $component->get('trayNo'));
+        $this->assertEquals('TRAY-KECIL-99', $component->get('traySmall'));
+
+        // 3. User can edit the tray numbers
+        $component->set('trayNo', 'TRAY-BESAR-NEW')
+            ->set('traySmall', 'TRAY-KECIL-NEW');
+
+        $this->assertEquals('TRAY-BESAR-NEW', $component->get('trayNo'));
+        $this->assertEquals('TRAY-KECIL-NEW', $component->get('traySmall'));
     }
 }

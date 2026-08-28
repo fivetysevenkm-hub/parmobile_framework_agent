@@ -731,9 +731,19 @@ class GembaInput extends Component
         }
         $this->state = $service->currentState($this->noLot, $this->sequenceNo);
         $this->operators = $service->operators($this->noLot, $this->sequenceNo);
-        $this->trayNo = $this->state['tray_no'] ?? '';
-        $this->traySmall = $this->state['tray_nokecil'] ?? '';
-        $this->machineNo = $this->state['no_mesin'] ?? '';
+        $this->trayNo = trim((string) ($this->state['tray_no'] ?? ''));
+        $this->traySmall = trim((string) ($this->state['tray_nokecil'] ?? ''));
+        $this->machineNo = trim((string) ($this->state['no_mesin'] ?? ''));
+
+        if (($this->trayNo === '' || $this->traySmall === '') && $this->sequenceNo > 1) {
+            $inheritedTrays = $service->resolveInitialTrayNumbers($this->noLot, $this->sequenceNo);
+            if ($this->trayNo === '' && ($inheritedTrays['tray_no'] ?? '') !== '') {
+                $this->trayNo = $inheritedTrays['tray_no'];
+            }
+            if ($this->traySmall === '' && ($inheritedTrays['tray_nokecil'] ?? '') !== '') {
+                $this->traySmall = $inheritedTrays['tray_nokecil'];
+            }
+        }
     }
 
     private function refreshState(GembaInputService $service): void

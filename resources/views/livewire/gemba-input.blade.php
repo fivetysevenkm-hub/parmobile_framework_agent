@@ -40,8 +40,7 @@
             <div class="gemba-header-left">
                 <div class="eyebrow">PAR Mobile / Input Lot / Gemba Input</div>
                 <h1>{{ $process['name'] ?? 'Gemba Input' }} @if($process)<span>{{ $process['label'] }}</span>@endif</h1>
-                <div class="hint">Form dinamis berdasarkan sequence routing aktif. Tidak ada duplikasi form untuk setiap nama proses.</div>
-            </div>
+                            </div>
             <div class="gemba-header-right">
                 @if($context)
                     <div class="stopwatch-box" id="gembaStopwatchContainer"

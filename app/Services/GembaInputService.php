@@ -342,6 +342,72 @@ class GembaInputService
         );
     }
 
+    public function resolveInitialTrayNumbers(string $noLot, int $currentSequenceNo): array
+    {
+        $trayNo = '';
+        $traySmall = '';
+
+        if ($noLot === '') {
+            return [
+                'tray_no' => '',
+                'tray_nokecil' => '',
+            ];
+        }
+
+        // 1. Primary source: check sequence 1 (tbl_seq_01)
+        if (Schema::hasTable('tbl_seq_01')) {
+            $seq1 = DB::table('tbl_seq_01')->where('no_lot', $noLot)->first();
+            if ($seq1) {
+                $trayNo = trim((string) ($this->value($seq1, 'tray_no') ?? ''));
+                $traySmall = trim((string) ($this->value($seq1, 'tray_nokecil') ?? ''));
+            }
+        }
+
+        // 2. Check backwards from (currentSequenceNo - 1) down to 1
+        if ($trayNo === '' || $traySmall === '') {
+            for ($seq = $currentSequenceNo - 1; $seq >= 1; $seq--) {
+                $table = $this->processTable($seq);
+                if (! Schema::hasTable($table)) {
+                    continue;
+                }
+                $row = DB::table($table)->where('no_lot', $noLot)->first();
+                if ($row) {
+                    if ($trayNo === '') {
+                        $trayNo = trim((string) ($this->value($row, 'tray_no') ?? ''));
+                    }
+                    if ($traySmall === '') {
+                        $traySmall = trim((string) ($this->value($row, 'tray_nokecil') ?? ''));
+                    }
+                    if ($trayNo !== '' && $traySmall !== '') {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback: check tbl_seq_all if available
+        if (($trayNo === '' || $traySmall === '') && Schema::hasTable('tbl_seq_all')) {
+            $seqAll = DB::table('tbl_seq_all')
+                ->where('no_lot', $noLot)
+                ->where('seq', '<', $currentSequenceNo)
+                ->orderBy('seq')
+                ->get();
+            foreach ($seqAll as $row) {
+                if ($trayNo === '' && trim((string) ($this->value($row, 'tray_no') ?? '')) !== '') {
+                    $trayNo = trim((string) ($this->value($row, 'tray_no') ?? ''));
+                }
+                if ($traySmall === '' && trim((string) ($this->value($row, 'tray_nokecil') ?? '')) !== '') {
+                    $traySmall = trim((string) ($this->value($row, 'tray_nokecil') ?? ''));
+                }
+            }
+        }
+
+        return [
+            'tray_no' => $trayNo,
+            'tray_nokecil' => $traySmall,
+        ];
+    }
+
     public function machines(): array
     {
         if (! Schema::hasTable('tblmesin')) {
