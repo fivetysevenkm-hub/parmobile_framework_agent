@@ -1,47 +1,704 @@
-<div class="home-page" style="font-family:Tahoma,Arial,sans-serif;color:var(--legacy_f4f7f8);">
+@php
+    $menuCount = count($accessibleMenus);
+    $groupCount = collect($accessibleMenus)->pluck('group')->filter()->unique()->count();
+@endphp
+
+<div class="home-page">
     <style>
-        .home-page{width:100%;max-width:1180px;margin:0 auto;padding:8px 4px 28px;box-sizing:border-box;overflow-x:hidden}
-        .home-hero{background:linear-gradient(135deg,var(--legacy_112c36),var(--legacy_123f4b) 58%,var(--legacy_0b2028);border:1px solid var(--legacy_1d5b68);border-radius:12px;padding:22px 24px;box-shadow:0 10px 24px rgba(0,0,0,.22);margin-bottom:16px}
-        .home-kicker{font-size:12px;letter-spacing:1.5px;color:var(--text-header);font-weight:700;text-transform:uppercase;margin-bottom:9px}
-        .home-title{font-size:25px;line-height:1.2;margin:0 0 8px;color:var(--text-title);font-weight:700}
-        .home-subtitle{font-size:14px;line-height:1.6;color:var(--text-body);margin:0;max-width:780px}
-        .home-panel{background:var(--legacy_101c20);border:1px solid var(--legacy_263b40);border-radius:10px;padding:16px;box-shadow:0 7px 18px rgba(0,0,0,.16)}
-        .home-panel-title{font-size:17px;color:var(--text-title);margin:0 0 4px;font-weight:700}
-        .home-panel-intro{font-size:13px;color:var(--text-body);margin:0 0 13px;line-height:1.5}
-        .home-table-wrap{width:100%;max-width:100%;overflow-x:auto;border:1px solid var(--legacy_30464b);border-radius:8px;box-sizing:border-box}
-        .home-table{width:100%;min-width:0;border-collapse:collapse;font-size:13px;table-layout:fixed}
-        .home-table th{background:var(--legacy_183b48);color:var(--text-table);text-align:left;font-size:12px;letter-spacing:.25px;padding:11px 12px;border-bottom:1px solid var(--legacy_3e6973);white-space:normal;overflow-wrap:anywhere}
-        .home-table td{padding:10px 12px;vertical-align:top;border-bottom:1px solid var(--legacy_26383d);color:var(--text-table);line-height:1.45;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;text-align:left!important}
-        .home-table tr:last-child td{border-bottom:0}
-        .home-table tr:nth-child(even) td{background:var(--legacy_142126)}
-        .home-table tr:hover td{background:var(--legacy_1b3036)}.home-table th:last-child{width:55%}
-        .home-menu-name{font-weight:700;color:var(--text-title);white-space:normal;overflow-wrap:anywhere}
-        .home-group{display:inline-block;font-size:11px;color:var(--text-table);background:var(--legacy_164552);border:1px solid var(--legacy_276a76);border-radius:12px;padding:3px 8px;margin-bottom:5px;white-space:nowrap}
-        .home-function{width:55%;max-width:55%;color:var(--text-table);white-space:normal!important;overflow-wrap:anywhere;word-break:normal;text-align:left!important}
-        .home-open{display:inline-block;color:var(--text-header);text-decoration:none;font-size:12px;margin-top:4px}
-        .home-open:hover{text-decoration:underline}
-        .home-note{margin-top:16px;border-left:4px solid var(--legacy_e0ad55);background:var(--legacy_2a2418);border-radius:7px;padding:12px 14px;color:var(--text-footer);font-size:13px;line-height:1.55}
-        .home-note strong{color:var(--text-title)}
-        @media(max-width:650px){.home-page{width:100%;padding:4px 0 22px}.home-hero{padding:17px 14px;border-radius:9px}.home-kicker{font-size:11px;letter-spacing:1px}.home-title{font-size:20px;line-height:1.25;overflow-wrap:anywhere}.home-subtitle{font-size:13px;line-height:1.5}.home-panel{padding:11px 10px;border-radius:9px}.home-panel-title{font-size:16px}.home-panel-intro{font-size:12px;line-height:1.45}.home-table-wrap{overflow:visible;border:0}.home-table,.home-table tbody{display:block;width:100%;max-width:100%;min-width:0;font-size:13px;box-sizing:border-box}.home-table thead{display:none}.home-table tr{display:block;width:100%;max-width:100%;min-width:0;margin:0 0 10px;padding:8px 10px;background:var(--legacy_142126);border:1px solid var(--legacy_30464b);border-radius:8px;box-sizing:border-box;overflow:hidden}.home-table tr:nth-child(even) td,.home-table tr:hover td{background:transparent}.home-table td,.home-table td.home-function{display:block!important;width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:7px 0;border:0;line-height:1.4;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;overflow:hidden}.home-table td::before{display:block;margin-bottom:3px;color:var(--legacy_83aeb5);font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;white-space:normal}.home-table td[data-label="Menu"]::before{content:'Menu'}.home-table td[data-label="Kelompok"]::before{content:'Kelompok'}.home-table td[data-label="Fungsi Menu"]::before{content:'Fungsi Menu'}.home-table td[data-label="Fungsi Menu"]{padding-top:8px}.home-group{font-size:10px;padding:3px 7px;white-space:normal}.home-open{font-size:12px}.home-note{margin-top:12px;padding:11px 12px;font-size:12px;line-height:1.5}}
+        .home-page {
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: clamp(1rem, 2.2vw, 2rem) clamp(.75rem, 1.7vw, 1.5rem) 3rem;
+            overflow: hidden;
+        }
+
+        .home-page *,
+        .home-page *::before,
+        .home-page *::after {
+            box-sizing: border-box;
+            min-width: 0;
+        }
+
+        .home-hero {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+            gap: clamp(1.5rem, 4vw, 4rem);
+            align-items: center;
+            min-height: 300px;
+            padding: clamp(1.5rem, 3.5vw, 3.5rem);
+            overflow: hidden;
+            border: 1px solid color-mix(in srgb, var(--cyan) 30%, var(--line));
+            border-radius: 24px;
+            background:
+                radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--cyan) 18%, transparent), transparent 34%),
+                radial-gradient(circle at 10% 110%, color-mix(in srgb, var(--orange) 13%, transparent), transparent 32%),
+                linear-gradient(135deg, color-mix(in srgb, var(--navbar-bg) 95%, #06131a), color-mix(in srgb, var(--panel) 80%, #09232d) 58%, #071117);
+            box-shadow: 0 22px 55px color-mix(in srgb, var(--shadow-color) 35%, transparent);
+        }
+
+        .home-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: .24;
+            pointer-events: none;
+            background-image: linear-gradient(color-mix(in srgb, var(--cyan) 10%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--cyan) 10%, transparent) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(120deg, black, transparent 68%);
+        }
+
+        .home-hero::after {
+            content: "";
+            position: absolute;
+            right: -96px;
+            bottom: -132px;
+            width: 300px;
+            height: 300px;
+            border: 1px solid color-mix(in srgb, var(--cyan) 28%, transparent);
+            border-radius: 50%;
+            box-shadow: 0 0 0 24px color-mix(in srgb, var(--cyan) 4%, transparent), 0 0 0 48px color-mix(in srgb, var(--cyan) 3%, transparent);
+            pointer-events: none;
+        }
+
+        .home-hero-main,
+        .home-hero-aside {
+            position: relative;
+            z-index: 1;
+        }
+
+        .home-kicker,
+        .home-section-kicker,
+        .home-aside-label {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            color: var(--text-header);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .16em;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        .home-kicker {
+            margin-bottom: 1.15rem;
+            color: var(--cyan);
+        }
+
+        .home-kicker-dot {
+            width: .55rem;
+            height: .55rem;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 0 5px color-mix(in srgb, var(--cyan) 13%, transparent), 0 0 18px color-mix(in srgb, var(--cyan) 65%, transparent);
+            animation: home-pulse 2.2s ease-in-out infinite;
+        }
+
+        .home-title {
+            max-width: 15ch;
+            margin: 0 0 1rem;
+            color: var(--text-title);
+            font-size: clamp(2.35rem, 5vw, 4.7rem);
+            font-weight: 700;
+            letter-spacing: -.075em;
+            line-height: .98;
+            overflow-wrap: anywhere;
+            text-wrap: balance;
+        }
+
+        .home-title-name {
+            display: block;
+            max-width: 100%;
+            color: var(--cyan);
+            overflow-wrap: anywhere;
+        }
+
+        .home-subtitle {
+            max-width: 58ch;
+            margin: 0;
+            color: color-mix(in srgb, var(--text-body) 92%, white);
+            font-size: clamp(.88rem, 1.3vw, 1.02rem);
+            line-height: 1.7;
+            overflow-wrap: anywhere;
+        }
+
+        .home-hero-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: .85rem 1.1rem;
+            margin-top: 1.65rem;
+        }
+
+        .home-primary,
+        .home-open {
+            transition: transform .16s cubic-bezier(.23, 1, .32, 1), background .16s ease, border-color .16s ease, color .16s ease;
+        }
+
+        .home-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .65rem;
+            min-height: 42px;
+            padding: .7rem 1rem;
+            border: 1px solid color-mix(in srgb, var(--cyan) 72%, transparent);
+            border-radius: 10px;
+            background: var(--button-primary);
+            color: var(--text-button);
+            font-size: .8rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .home-primary:hover {
+            transform: translateY(-2px);
+            background: var(--button-primary-hover);
+        }
+
+        .home-primary:active {
+            transform: scale(.97);
+        }
+
+        .home-primary span {
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .home-status {
+            color: var(--text-body);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .68rem;
+            letter-spacing: .03em;
+        }
+
+        .home-status::first-letter {
+            color: var(--success);
+        }
+
+        .home-hero-aside {
+            justify-self: end;
+            width: min(100%, 360px);
+            padding: 1.15rem;
+            border: 1px solid color-mix(in srgb, var(--line) 85%, var(--cyan));
+            border-radius: 17px;
+            background: color-mix(in srgb, var(--panel) 78%, transparent);
+            box-shadow: inset 0 1px 0 color-mix(in srgb, white 7%, transparent), 0 16px 34px color-mix(in srgb, #000 24%, transparent);
+            backdrop-filter: blur(12px);
+        }
+
+        .home-aside-label {
+            margin-bottom: .95rem;
+            color: var(--muted);
+            font-size: .62rem;
+            letter-spacing: .13em;
+        }
+
+        .home-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+        }
+
+        .home-stat {
+            padding: .9rem;
+            border: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--bg) 46%, transparent);
+        }
+
+        .home-stat-value {
+            display: block;
+            margin-bottom: .25rem;
+            color: var(--text-title);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1.35rem, 3vw, 1.8rem);
+            font-weight: 700;
+            letter-spacing: -.07em;
+        }
+
+        .home-stat-label {
+            display: block;
+            color: var(--muted);
+            font-size: .68rem;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+
+        .home-aside-footnote {
+            margin: .9rem 0 0;
+            padding-top: .85rem;
+            border-top: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+            color: var(--text-body);
+            font-size: .72rem;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .home-panel {
+            margin-top: 1rem;
+            padding: clamp(1rem, 2vw, 1.6rem);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: var(--panel);
+            box-shadow: 0 16px 38px color-mix(in srgb, var(--shadow-color) 20%, transparent);
+        }
+
+        .home-panel-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .home-section-kicker {
+            margin-bottom: .55rem;
+            color: var(--orange);
+            font-size: .61rem;
+        }
+
+        .home-panel-title {
+            margin: 0 0 .45rem;
+            color: var(--text-title);
+            font-size: clamp(1.15rem, 2vw, 1.45rem);
+            font-weight: 700;
+            letter-spacing: -.035em;
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+
+        .home-panel-intro {
+            max-width: 75ch;
+            margin: 0;
+            color: var(--text-body);
+            font-size: .82rem;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .home-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .55rem;
+            flex: 0 0 auto;
+            padding: .55rem .7rem;
+            border: 1px solid color-mix(in srgb, var(--cyan) 45%, var(--line));
+            border-radius: 10px;
+            background: color-mix(in srgb, var(--cyan) 9%, transparent);
+            color: var(--text-body);
+            font-size: .68rem;
+            white-space: nowrap;
+        }
+
+        .home-count-badge strong {
+            color: var(--cyan);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+        }
+
+        .home-table-wrap {
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--bg) 42%, transparent);
+        }
+
+        .home-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: .8rem;
+        }
+
+        .home-table col.home-col-menu { width: 30%; }
+        .home-table col.home-col-group { width: 20%; }
+        .home-table col.home-col-function { width: 50%; }
+
+        .home-table th {
+            padding: .85rem 1rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--cyan) 38%, var(--line));
+            background: color-mix(in srgb, var(--table-header) 88%, var(--cyan));
+            color: var(--text-table);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .63rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            line-height: 1.4;
+            text-align: left;
+            text-transform: uppercase;
+            overflow-wrap: anywhere;
+        }
+
+        .home-table td {
+            padding: 1rem;
+            border-bottom: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+            color: var(--text-table);
+            line-height: 1.55;
+            text-align: left;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+            word-break: normal;
+            hyphens: auto;
+        }
+
+        .home-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .home-table tbody tr {
+            transition: background .16s ease, transform .16s cubic-bezier(.23, 1, .32, 1);
+        }
+
+        .home-table tbody tr:nth-child(even) td {
+            background: color-mix(in srgb, var(--table-alt) 70%, transparent);
+        }
+
+        .home-table tbody tr:hover td {
+            background: color-mix(in srgb, var(--table-hover) 82%, transparent);
+        }
+
+        .home-menu-name {
+            margin-bottom: .35rem;
+            color: var(--text-title);
+            font-weight: 700;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+
+        .home-group {
+            display: inline-flex;
+            max-width: 100%;
+            padding: .28rem .55rem;
+            border: 1px solid color-mix(in srgb, var(--cyan) 45%, var(--line));
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--cyan) 10%, transparent);
+            color: var(--text-header);
+            font-size: .68rem;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+            white-space: normal;
+        }
+
+        .home-function {
+            color: var(--text-table);
+            overflow-wrap: anywhere;
+        }
+
+        .home-open {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            max-width: 100%;
+            color: var(--cyan);
+            font-size: .7rem;
+            font-weight: 700;
+            line-height: 1.4;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .home-open:hover {
+            color: var(--text-header);
+            transform: translateX(2px);
+        }
+
+        .home-open svg {
+            flex: 0 0 auto;
+        }
+
+        .home-empty {
+            padding: 1.5rem !important;
+            color: var(--muted) !important;
+            text-align: center !important;
+        }
+
+        .home-note {
+            display: flex;
+            align-items: flex-start;
+            gap: .8rem;
+            margin-top: 1rem;
+            padding: .95rem 1rem;
+            border: 1px solid color-mix(in srgb, var(--orange) 25%, var(--line));
+            border-left: 3px solid var(--orange);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--orange) 7%, transparent);
+        }
+
+        .home-note-icon {
+            display: grid;
+            width: 1.55rem;
+            height: 1.55rem;
+            flex: 0 0 auto;
+            place-items: center;
+            border: 1px solid color-mix(in srgb, var(--orange) 58%, transparent);
+            border-radius: 50%;
+            color: var(--orange);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .72rem;
+            font-weight: 700;
+        }
+
+        .home-note strong {
+            display: block;
+            margin-bottom: .25rem;
+            color: var(--text-title);
+            font-size: .76rem;
+        }
+
+        .home-note p {
+            margin: 0;
+            color: var(--text-footer);
+            font-size: .74rem;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        @keyframes home-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .65; transform: scale(.82); }
+        }
+
+        @media (max-width: 820px) {
+            .home-hero {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .home-hero-aside {
+                justify-self: stretch;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .home-page {
+                padding: .85rem .1rem 2rem;
+            }
+
+            .home-hero {
+                min-height: 0;
+                padding: 1.35rem;
+                border-radius: 18px;
+            }
+
+            .home-title {
+                max-width: 100%;
+                font-size: clamp(2.25rem, 12vw, 3.6rem);
+            }
+
+            .home-subtitle {
+                font-size: .82rem;
+                line-height: 1.65;
+            }
+
+            .home-hero-actions {
+                align-items: stretch;
+                flex-direction: column;
+                margin-top: 1.3rem;
+            }
+
+            .home-primary {
+                width: 100%;
+            }
+
+            .home-status {
+                text-align: center;
+            }
+
+            .home-panel {
+                padding: .85rem;
+                border-radius: 15px;
+            }
+
+            .home-panel-heading {
+                flex-direction: column;
+                gap: .9rem;
+                margin-bottom: 1rem;
+            }
+
+            .home-count-badge {
+                align-self: flex-start;
+            }
+
+            .home-table-wrap {
+                overflow: visible;
+                border: 0;
+                background: transparent;
+            }
+
+            .home-table,
+            .home-table tbody,
+            .home-table tr,
+            .home-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .home-table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+                clip-path: inset(50%);
+                white-space: nowrap;
+            }
+
+            .home-table tr {
+                margin-bottom: .8rem;
+                padding: .9rem;
+                border: 1px solid var(--line);
+                border-radius: 13px;
+                background: color-mix(in srgb, var(--table-row) 92%, transparent);
+            }
+
+            .home-table tr:nth-child(even) td,
+            .home-table tr:hover td {
+                background: transparent;
+            }
+
+            .home-table td,
+            .home-table td.home-function {
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+                border: 0;
+                line-height: 1.5;
+                overflow-wrap: anywhere;
+            }
+
+            .home-table td:not(:last-child) {
+                margin-bottom: .78rem;
+            }
+
+            .home-table td::before {
+                content: attr(data-label);
+                display: block;
+                margin-bottom: .25rem;
+                color: var(--muted);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: .58rem;
+                font-weight: 700;
+                letter-spacing: .1em;
+                line-height: 1.35;
+                text-transform: uppercase;
+            }
+
+            .home-table td.home-empty {
+                padding: .2rem !important;
+                text-align: left !important;
+            }
+
+            .home-table td.home-empty::before {
+                display: none;
+            }
+
+            .home-menu-name {
+                margin-bottom: .35rem;
+                font-size: .9rem;
+            }
+
+            .home-group {
+                font-size: .64rem;
+            }
+
+            .home-note {
+                padding: .85rem;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .home-hero {
+                padding: 1.15rem;
+            }
+
+            .home-kicker,
+            .home-section-kicker {
+                font-size: .58rem;
+                letter-spacing: .11em;
+            }
+
+            .home-stats {
+                gap: .5rem;
+            }
+
+            .home-stat {
+                padding: .72rem;
+            }
+
+            .home-stat-label,
+            .home-aside-footnote,
+            .home-note p {
+                font-size: .66rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .home-kicker-dot,
+            .home-primary,
+            .home-open,
+            .home-table tbody tr {
+                animation: none;
+                transition: none;
+            }
+        }
     </style>
 
-    <section class="home-hero">
-        <div class="home-kicker">PAR Mobile</div>
-        <h1 class="home-title">Selamat datang, {{ $username }}</h1>
-        <p class="home-subtitle">Anda berhasil login ke aplikasi PAR Mobile. Berikut adalah daftar menu yang dapat Anda akses berdasarkan otorisasi akun Anda.</p>
+    <section class="home-hero" aria-labelledby="home-title">
+        <div class="home-hero-main">
+            <div class="home-kicker"><span class="home-kicker-dot" aria-hidden="true"></span><span>PAR Mobile / Control Center</span></div>
+            <h1 id="home-title" class="home-title">Selamat datang,<span class="home-title-name">{{ $username }}</span></h1>
+            <p class="home-subtitle">Satu ruang kerja untuk membuka informasi operasional yang relevan. Pilih menu sesuai kewenangan Anda dan lanjutkan pekerjaan dengan alur yang lebih terarah.</p>
+            <div class="home-hero-actions">
+                <a class="home-primary" href="#menu-access">Jelajahi menu <span aria-hidden="true">↓</span></a>
+                <span class="home-status">● Akses akun aktif</span>
+            </div>
+        </div>
+
+        <aside class="home-hero-aside" aria-label="Ringkasan akses akun">
+            <div class="home-aside-label">Ringkasan akses / real-time</div>
+            <div class="home-stats">
+                <div class="home-stat">
+                    <span class="home-stat-value">{{ $menuCount }}</span>
+                    <span class="home-stat-label">Menu tersedia</span>
+                </div>
+                <div class="home-stat">
+                    <span class="home-stat-value">{{ $groupCount }}</span>
+                    <span class="home-stat-label">Kelompok akses</span>
+                </div>
+            </div>
+            <p class="home-aside-footnote">Daftar menu ditampilkan otomatis berdasarkan otorisasi akun dan pengaturan Hide Menu.</p>
+        </aside>
     </section>
 
-    <section class="home-panel">
-        <h2 class="home-panel-title">Menu yang dapat diakses</h2>
-        <p class="home-panel-intro">Gunakan tabel berikut sebagai panduan fungsi setiap menu. Daftar menyesuaikan hak akses dan pengaturan Hide Menu user yang sedang login.</p>
+    <section id="menu-access" class="home-panel" aria-labelledby="menu-access-title">
+        <div class="home-panel-heading">
+            <div>
+                <div class="home-section-kicker">Directory / 01</div>
+                <h2 id="menu-access-title" class="home-panel-title">Menu yang dapat diakses</h2>
+                <p class="home-panel-intro">Gunakan daftar ini sebagai panduan singkat fungsi setiap menu. Informasi akan mengikuti hak akses akun yang sedang digunakan.</p>
+            </div>
+            <div class="home-count-badge"><strong>{{ $menuCount }}</strong><span>menu tersedia</span></div>
+        </div>
 
         <div class="home-table-wrap">
             <table class="home-table">
+                <colgroup>
+                    <col class="home-col-menu">
+                    <col class="home-col-group">
+                    <col class="home-col-function">
+                </colgroup>
                 <thead>
                     <tr>
-                        <th style="width:23%;">Menu</th>
-                        <th style="width:22%;">Kelompok</th>
-                        <th>Fungsi Menu</th>
+                        <th scope="col">Menu</th>
+                        <th scope="col">Kelompok</th>
+                        <th scope="col">Fungsi menu</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,15 +707,20 @@
                             <td data-label="Menu">
                                 <div class="home-menu-name">{{ $menu['name'] }}</div>
                                 @if($menu['route'] !== '')
-                                    <a class="home-open" href="{{ route($menu['route']) }}">Buka menu &rarr;</a>
+                                    <a class="home-open" href="{{ route($menu['route']) }}">
+                                        <span>Buka menu</span>
+                                        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                                            <path d="M2.5 10.5 10.5 2.5M5.5 2.5h5v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </a>
                                 @endif
                             </td>
-                            <td data-label="Kelompok"><span class="home-group">{{ $menu['group'] }}</span></td>
-                            <td data-label="Fungsi Menu" class="home-function">{{ $menu['description'] }}</td>
+                            <td data-label="Kelompok"><span class="home-group">{{ $menu['group'] ?: 'Umum' }}</span></td>
+                            <td data-label="Fungsi menu" class="home-function">{{ $menu['description'] ?: 'Deskripsi belum tersedia.' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" style="text-align:center;color:var(--legacy_f0b2b2);padding:18px;">Belum ada menu yang diotorisasi untuk akun ini.</td>
+                            <td class="home-empty" data-label="Informasi" colspan="3">Belum ada menu yang diotorisasi untuk akun ini.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -66,7 +728,11 @@
         </div>
 
         <div class="home-note">
-            <strong>Himbauan penggunaan informasi:</strong> gunakan informasi pada PAR Mobile secara bijak, sesuai kewenangan dan kebutuhan pekerjaan. Data produksi, kualitas, user, dan laporan merupakan informasi operasional yang perlu dijaga kerahasiaannya. Jangan membagikan data kepada pihak yang tidak berwenang dan selalu lakukan logout setelah selesai menggunakan aplikasi.
+            <div class="home-note-icon" aria-hidden="true">!</div>
+            <div>
+                <strong>Himbauan penggunaan informasi</strong>
+                <p>Gunakan informasi pada PAR Mobile secara bijak, sesuai kewenangan dan kebutuhan pekerjaan. Data produksi, kualitas, user, dan laporan merupakan informasi operasional yang perlu dijaga kerahasiaannya. Jangan membagikan data kepada pihak yang tidak berwenang dan selalu lakukan logout setelah selesai menggunakan aplikasi.</p>
+            </div>
         </div>
     </section>
 </div>
