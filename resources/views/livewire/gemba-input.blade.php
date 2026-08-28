@@ -38,7 +38,7 @@
     <div class="gemba-card">
         <div class="gemba-header">
             <div class="gemba-header-left">
-                <div class="eyebrow">PAR Mobile / Input Lot / Gemba Input</div>
+                <div class="eyebrow">PAR Mobile</div>
                 <h1>{{ $process['name'] ?? 'Gemba Input' }} @if($process)<span>{{ $process['label'] }}</span>@endif</h1>
                             </div>
             <div class="gemba-header-right">
