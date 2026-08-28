@@ -250,6 +250,98 @@ class GembaInputService
         return $results;
     }
 
+    public function sequences(): array
+    {
+        if (! Schema::hasTable('tblsequence')) {
+            return [];
+        }
+
+        return DB::table('tblsequence')
+            ->orderBy('id_seq')
+            ->get(['id_seq', 'nm_sequence'])
+            ->map(fn ($row): array => [
+                'id_seq' => (string) ($row->id_seq ?? ''),
+                'nm_sequence' => (string) ($row->nm_sequence ?? ''),
+            ])
+            ->all();
+    }
+
+    public function userGembaMode(?string $username, ?string $idUser = null): array
+    {
+        $default = [
+            'mode' => 'berpindah',
+            'id_seq' => '',
+            'nm_sequence' => '',
+        ];
+
+        if (! Schema::hasTable('tbl_user_gemba_mode')) {
+            return $default;
+        }
+
+        $username = trim((string) $username);
+        $idUser = trim((string) $idUser);
+
+        if ($username === '' && $idUser === '') {
+            return $default;
+        }
+
+        $query = DB::table('tbl_user_gemba_mode');
+        if ($username !== '') {
+            $query->where('username', $username);
+        } elseif ($idUser !== '') {
+            $query->where('id_user', $idUser);
+        }
+
+        $row = $query->first();
+        if (! $row) {
+            return $default;
+        }
+
+        return [
+            'mode' => in_array(strtolower((string) ($row->mode ?? '')), ['tetap', 'berpindah'], true) ? strtolower((string) $row->mode) : 'berpindah',
+            'id_seq' => (string) ($row->id_seq ?? ''),
+            'nm_sequence' => (string) ($row->nm_sequence ?? ''),
+        ];
+    }
+
+    public function saveUserGembaMode(?string $username, ?string $idUser, string $mode, ?string $idSeq = null, ?string $nmSequence = null): void
+    {
+        if (! Schema::hasTable('tbl_user_gemba_mode')) {
+            return;
+        }
+
+        $username = trim((string) $username);
+        $idUser = trim((string) $idUser);
+        if ($username === '' && $idUser === '') {
+            return;
+        }
+
+        $mode = in_array(strtolower(trim($mode)), ['tetap', 'berpindah'], true) ? strtolower(trim($mode)) : 'berpindah';
+        $idSeq = trim((string) $idSeq);
+        $nmSequence = trim((string) $nmSequence);
+
+        if ($idSeq !== '' && $nmSequence === '' && Schema::hasTable('tblsequence')) {
+            $nmSequence = (string) (DB::table('tblsequence')->where('id_seq', $idSeq)->value('nm_sequence') ?? '');
+        } elseif ($nmSequence !== '' && $idSeq === '' && Schema::hasTable('tblsequence')) {
+            $idSeq = (string) (DB::table('tblsequence')->where('nm_sequence', $nmSequence)->value('id_seq') ?? '');
+        }
+
+        $identifier = $username !== '' ? ['username' => $username] : ['id_user' => $idUser];
+
+        DB::table('tbl_user_gemba_mode')->updateOrInsert(
+            $identifier,
+            [
+                'username' => $username ?: ($idUser ?: 'unknown'),
+                'id_user' => $idUser ?: ($username ?: null),
+                'mode' => $mode,
+                'id_seq' => $idSeq ?: null,
+                'nm_sequence' => $nmSequence ?: null,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]
+        );
+    }
+
     public function machines(): array
     {
         if (! Schema::hasTable('tblmesin')) {

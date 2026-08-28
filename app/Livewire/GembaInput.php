@@ -16,6 +16,9 @@ class GembaInput extends Component
     public string $noLot = '';
     public string $scanInput = '';
     public int $sequenceNo = 0;
+    public string $processMode = 'berpindah';
+    public string $selectedSequence = '';
+    public array $sequenceList = [];
     public array $context = [];
     public array $lotContext = [];
     public array $process = [];
@@ -58,14 +61,114 @@ class GembaInput extends Component
     public function mount(?string $noLot = null, ?int $sequenceNo = null): void
     {
         $service = app(GembaInputService::class);
-        $this->noLot = trim((string) ($noLot ?? ''));
-        $this->sequenceNo = (int) ($sequenceNo ?? 0);
+        $this->clearForm();
+
         $this->machines = $service->machines();
         $this->problemCategories = $service->problemCategories();
         $this->problemRanks = $service->problemRanks();
-        if ($this->noLot !== '' && $this->sequenceNo > 0) {
+        $this->sequenceList = $service->sequences();
+
+        $savedMode = $service->userGembaMode($this->currentUsername(), $this->currentIdUser());
+        $this->processMode = $savedMode['mode'] ?? 'berpindah';
+        $this->selectedSequence = (string) ($savedMode['id_seq'] ?: ($savedMode['nm_sequence'] ?? ''));
+
+        $lotToLoad = trim((string) ($noLot ?? ''));
+        $seqToLoad = (int) ($sequenceNo ?? 0);
+
+        if ($lotToLoad !== '' && $seqToLoad > 0) {
+            $mode = $this->processMode;
+            $selectedSeq = $this->selectedSequence;
+            $seqList = $this->sequenceList;
+            $machines = $this->machines;
+
+            // Bersihkan seluruh record form terlebih dahulu
+            $this->clearForm();
+
+            $this->processMode = $mode;
+            $this->selectedSequence = $selectedSeq;
+            $this->sequenceList = $seqList;
+            $this->machines = $machines;
+            $this->noLot = $lotToLoad;
+            $this->sequenceNo = $seqToLoad;
+
+            if ($this->processMode === 'tetap') {
+                if (trim($this->selectedSequence) === '') {
+                    $this->clearForm();
+                    $this->processMode = $mode;
+                    $this->selectedSequence = $selectedSeq;
+                    $this->sequenceList = $seqList;
+                    $this->machines = $machines;
+                    $this->addError('selectedSequence', 'Pilih nama proses terlebih dahulu pada Mode Posisi Tetap.');
+                    $this->flash('Silakan pilih nama proses pada Mode Posisi Tetap terlebih dahulu.', 'warning');
+                    return;
+                }
+
+                $processContext = $service->processContext($this->noLot, $this->sequenceNo);
+                $process = $processContext['process'] ?? [];
+
+                $selectedItem = collect($this->sequenceList)->first(function (array $item): bool {
+                    return (string) ($item['id_seq'] ?? '') === $this->selectedSequence
+                        || strcasecmp((string) ($item['nm_sequence'] ?? ''), $this->selectedSequence) === 0;
+                });
+
+                $expectedSeqId = strtolower(trim((string) ($selectedItem['id_seq'] ?? $this->selectedSequence)));
+                $expectedSeqName = strtolower(trim((string) ($selectedItem['nm_sequence'] ?? $this->selectedSequence)));
+
+                $lotSeqId = strtolower(trim((string) ($process['id_seq'] ?? '')));
+                $lotSeqName = strtolower(trim((string) ($process['name'] ?? '')));
+
+                $isMatch = $process !== [] && (
+                    ($expectedSeqId !== '' && $expectedSeqId === $lotSeqId) ||
+                    ($expectedSeqName !== '' && $expectedSeqName === $lotSeqName)
+                );
+
+                if (! $isMatch) {
+                    $this->clearForm();
+                    $this->processMode = $mode;
+                    $this->selectedSequence = $selectedSeq;
+                    $this->sequenceList = $seqList;
+                    $this->machines = $machines;
+                    $this->flash('Anda Sedang Jumping Process', 'warning');
+                    $this->dispatch('jumping-process-alert', message: 'Anda Sedang Jumping Process');
+                    return;
+                }
+            }
+
             $this->loadContext($service);
+            $this->flash('Konteks lot dan proses aktif berhasil dimuat.', 'success');
+            $this->dispatch('stopwatch-sync');
         }
+    }
+
+    public function updatedProcessMode(string $value): void
+    {
+        $this->processMode = in_array(strtolower(trim($value)), ['tetap', 'berpindah'], true) ? strtolower(trim($value)) : 'berpindah';
+        $this->saveCurrentMode(app(GembaInputService::class));
+    }
+
+    public function updatedSelectedSequence(string $value): void
+    {
+        $this->selectedSequence = trim($value);
+        $this->saveCurrentMode(app(GembaInputService::class));
+    }
+
+    public function saveCurrentMode(GembaInputService $service): void
+    {
+        $username = $this->currentUsername();
+        $idUser = $this->currentIdUser();
+        if ($username === '' && $idUser === '') {
+            return;
+        }
+
+        $selectedItem = collect($this->sequenceList)->first(function (array $item): bool {
+            return (string) ($item['id_seq'] ?? '') === $this->selectedSequence
+                || strcasecmp((string) ($item['nm_sequence'] ?? ''), $this->selectedSequence) === 0;
+        });
+
+        $idSeq = $selectedItem['id_seq'] ?? $this->selectedSequence;
+        $nmSequence = $selectedItem['nm_sequence'] ?? null;
+
+        $service->saveUserGembaMode($username, $idUser, $this->processMode, $idSeq, $nmSequence);
     }
 
     public function processScanInput(LotVerifikatorService $verifikator, GembaInputService $service): void
@@ -89,24 +192,77 @@ class GembaInput extends Component
 
     public function loadLot(LotVerifikatorService $verifikator, GembaInputService $service): void
     {
-        $this->noLot = trim($this->noLot);
-        if ($this->noLot === '') {
+        $lotToLoad = trim($this->noLot);
+
+        // Keep preferences and master lookups
+        $mode = $this->processMode;
+        $selectedSeq = $this->selectedSequence;
+        $seqList = $this->sequenceList;
+        $machines = $this->machines;
+
+        // Bersihkan seluruh record di form gemba input dulu
+        $this->clearForm();
+
+        $this->processMode = $mode;
+        $this->selectedSequence = $selectedSeq;
+        $this->sequenceList = $seqList;
+        $this->machines = $machines;
+        $this->noLot = $lotToLoad;
+
+        if ($lotToLoad === '') {
             $this->addError('noLot', 'No Lot wajib diisi.');
             return;
         }
 
-        $result = $verifikator->verify($this->noLot);
+        if ($this->processMode === 'tetap' && trim($this->selectedSequence) === '') {
+            $this->addError('selectedSequence', 'Pilih nama proses terlebih dahulu pada Mode Posisi Tetap.');
+            $this->flash('Silakan pilih nama proses pada Mode Posisi Tetap terlebih dahulu.', 'warning');
+            return;
+        }
+
+        $result = $verifikator->verify($lotToLoad);
         if (! ($result['ok'] ?? false)) {
             $this->addError('noLot', (string) ($result['message'] ?? 'No Lot tidak ditemukan.'));
             return;
         }
 
         $clickable = collect($result['processes'] ?? [])->first(fn (array $item): bool => (bool) ($item['clickable'] ?? false));
+
+        if ($this->processMode === 'tetap') {
+            $selectedItem = collect($this->sequenceList)->first(function (array $item): bool {
+                return (string) ($item['id_seq'] ?? '') === $this->selectedSequence
+                    || strcasecmp((string) ($item['nm_sequence'] ?? ''), $this->selectedSequence) === 0;
+            });
+
+            $expectedSeqId = strtolower(trim((string) ($selectedItem['id_seq'] ?? $this->selectedSequence)));
+            $expectedSeqName = strtolower(trim((string) ($selectedItem['nm_sequence'] ?? $this->selectedSequence)));
+
+            $lotSeqId = strtolower(trim((string) ($clickable['id_seq'] ?? '')));
+            $lotSeqName = strtolower(trim((string) ($clickable['name'] ?? '')));
+
+            $isMatch = $clickable !== null && (
+                ($expectedSeqId !== '' && $expectedSeqId === $lotSeqId) ||
+                ($expectedSeqName !== '' && $expectedSeqName === $lotSeqName)
+            );
+
+            if (! $isMatch) {
+                $this->clearForm();
+                $this->processMode = $mode;
+                $this->selectedSequence = $selectedSeq;
+                $this->sequenceList = $seqList;
+                $this->machines = $machines;
+                $this->flash('Anda Sedang Jumping Process', 'warning');
+                $this->dispatch('jumping-process-alert', message: 'Anda Sedang Jumping Process');
+                return;
+            }
+        }
+
         if ($clickable) {
             $this->sequenceNo = (int) $clickable['sequence_no'];
         }
         $this->loadContext($service);
         $this->flash('Konteks lot dan proses aktif berhasil dimuat.', 'success');
+        $this->dispatch('stopwatch-sync');
     }
 
     public function openEmployeePicker(GembaInputService $service): void
@@ -371,6 +527,7 @@ class GembaInput extends Component
     public function canReportAbnormal(): bool
     {
         return $this->context !== []
+            && $this->isProcessStarted()
             && ! $this->isProcessFinished();
     }
 
@@ -398,19 +555,73 @@ class GembaInput extends Component
         ]);
     }
 
-    private function isProcessStarted(): bool
+    public function stopwatchStartTime(): string
+    {
+        $startTime = trim((string) ($this->state['start_time'] ?? ''));
+        if ($startTime === '') {
+            return '';
+        }
+        try {
+            return \Illuminate\Support\Carbon::parse($startTime)->toIso8601String();
+        } catch (\Throwable) {
+            return $startTime;
+        }
+    }
+
+    public function stopwatchFinishTime(): string
+    {
+        $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
+        if ($finishTime === '') {
+            return '';
+        }
+        try {
+            return \Illuminate\Support\Carbon::parse($finishTime)->toIso8601String();
+        } catch (\Throwable) {
+            return $finishTime;
+        }
+    }
+
+    public function stopwatchStartMs(): ?int
+    {
+        $startTime = trim((string) ($this->state['start_time'] ?? ''));
+        if ($startTime === '') {
+            return null;
+        }
+        try {
+            return (int) (\Illuminate\Support\Carbon::parse($startTime)->getTimestamp() * 1000);
+        } catch (\Throwable) {
+            $time = strtotime($startTime);
+            return $time ? ($time * 1000) : null;
+        }
+    }
+
+    public function stopwatchFinishMs(): ?int
+    {
+        $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
+        if ($finishTime === '') {
+            return null;
+        }
+        try {
+            return (int) (\Illuminate\Support\Carbon::parse($finishTime)->getTimestamp() * 1000);
+        } catch (\Throwable) {
+            $time = strtotime($finishTime);
+            return $time ? ($time * 1000) : null;
+        }
+    }
+
+    public function isProcessStarted(): bool
     {
         return trim((string) ($this->state['start_time'] ?? '')) !== '';
     }
 
-    private function isProcessFinished(): bool
+    public function isProcessFinished(): bool
     {
         $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
         $finish = strtolower(trim((string) ($this->state['finish'] ?? '')));
         return $finishTime !== '' || in_array($finish, ['yes', '1', 'true', 'finish', 'finished'], true);
     }
 
-    private function isProcessHeld(): bool
+    public function isProcessHeld(): bool
     {
         $hold = strtolower(trim((string) ($this->state['hold'] ?? '')));
         return in_array($hold, ['yes', '1', 'true', 'hold', 'held'], true);
@@ -426,6 +637,7 @@ class GembaInput extends Component
         }
         $this->refreshState($service);
         $this->flash((string) ($result['message'] ?? 'Proses berhasil di-start.'), 'success');
+        $this->dispatch('stopwatch-sync');
     }
 
     public function finishProcess(GembaInputService $service): void
@@ -437,6 +649,7 @@ class GembaInput extends Component
         }
 
         $message = (string) ($result['message'] ?? 'Proses berhasil di-finish.');
+        $this->dispatch('stopwatch-sync');
         $this->clearForm();
         $this->flash($message, 'success');
     }
@@ -535,6 +748,16 @@ class GembaInput extends Component
     private function sessionNik(): string
     {
         return trim((string) (session('nik') ?: session('id_user') ?: auth()->user()?->id_user ?: ''));
+    }
+
+    private function currentUsername(): string
+    {
+        return trim((string) (auth()->user()?->username ?: session('username') ?: ''));
+    }
+
+    private function currentIdUser(): string
+    {
+        return trim((string) (auth()->user()?->id_user ?: session('id_user') ?: session('nik') ?: ''));
     }
 
     private function flash(string $message, string $type): void

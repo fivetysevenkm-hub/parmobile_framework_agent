@@ -2,7 +2,18 @@
     <style>
         .gemba-page{width:100%;max-width:none;margin:0;font-family:Tahoma,Arial,sans-serif;color:var(--text-body)}
         .gemba-page .gemba-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-        .gemba-page .gemba-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.035)}
+        .gemba-page .gemba-header{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.035);flex-wrap:wrap}
+        .gemba-page .gemba-header-left{min-width:0;flex:1}
+        .gemba-page .gemba-header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+        .gemba-page .stopwatch-box{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:5px 14px;border:1px solid color-mix(in srgb,var(--cyan) 35%,var(--line));border-radius:8px;background:var(--input-bg);box-shadow:0 2px 8px rgba(0,0,0,.25);min-width:180px}
+        .gemba-page .stopwatch-header{display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;margin-bottom:2px}
+        .gemba-page .stopwatch-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-footer)}
+        .gemba-page .stopwatch-status{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;letter-spacing:.05em;text-transform:uppercase}
+        .gemba-page .stopwatch-status.running{background:color-mix(in srgb,var(--cyan) 25%,transparent);color:var(--cyan);animation:gemba-pulse 1.5s infinite ease-in-out}
+        .gemba-page .stopwatch-status.finished{background:color-mix(in srgb,var(--success) 25%,transparent);color:var(--success)}
+        .gemba-page .stopwatch-status.standby{background:rgba(255,255,255,.06);color:var(--text-footer)}
+        .gemba-page .stopwatch-time{font-family:'Courier New',Consolas,Menlo,Monaco,'Lucida Console',monospace;font-size:20px;font-weight:800;letter-spacing:.04em;color:var(--cyan);text-shadow:0 0 10px color-mix(in srgb,var(--cyan) 40%,transparent);line-height:1.2}
+        @keyframes gemba-pulse{0%,100%{opacity:1}50%{opacity:.55}}
         .gemba-page .eyebrow{color:var(--text-footer);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
         .gemba-page h1{margin:4px 0 0;color:var(--text-title);font-size:22px;line-height:1.25}.gemba-page h1 span{color:var(--cyan)}
         .gemba-page .body{padding:12px}.gemba-page .scan-line{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:start;padding:10px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--cyan) 9%,var(--panel))}
@@ -12,14 +23,75 @@
         .gemba-page .lot-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.gemba-page .info-item{min-width:0;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}.gemba-page .info-item small{display:block;margin-bottom:4px;color:var(--text-footer);font-size:10px;text-transform:uppercase}.gemba-page .info-item strong{display:block;color:var(--text-title);font-size:13px;overflow-wrap:anywhere}
         .gemba-page .operator-add{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:end}.gemba-page .operator-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.gemba-page .operator-slot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--legacy_116ca5);border-radius:6px;background:var(--legacy_0879c7);color:#fff}.gemba-page .operator-slot.ojt{background:var(--legacy_a83e48);border-color:var(--legacy_ed7d86)}.gemba-page .operator-slot .person{min-width:0}.gemba-page .operator-slot strong{display:block;overflow-wrap:anywhere;font-size:13px}.gemba-page .operator-slot small{display:block;margin-top:3px;opacity:.88;font-size:11px}.gemba-page .operator-slot button{padding:4px 7px;border:1px solid rgba(255,255,255,.7);border-radius:4px;background:transparent;color:#fff;cursor:pointer;font-weight:700}.gemba-page .empty-slot{padding:10px;border:1px dashed var(--line);border-radius:6px;color:var(--text-footer);font-size:12px;text-align:center}
         .gemba-page .tray-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.gemba-page .machine-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}.gemba-page .machine-row .field.machine{grid-column:span 1}.gemba-page .actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:11px}.gemba-page .actions .btn{width:100%}.gemba-page .collapsed-frame{margin-top:11px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2)}.gemba-page .collapsed-frame h2{margin:0;color:var(--text-title);font-size:15px;line-height:1.2}.gemba-page .collapsed-frame .status-item small{font-size:10px}.gemba-page .collapsed-frame .status-item strong{font-size:12px}.gemba-page .status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.gemba-page .status-item{padding:9px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}.gemba-page .status-item small{display:block;color:var(--text-footer);font-size:10px;text-transform:uppercase}.gemba-page .status-item strong{display:block;margin-top:4px;color:var(--text-title);font-size:12px;overflow-wrap:anywhere}.gemba-page .akakami-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.gemba-page .akakami-grid .wide{grid-column:span 2}.gemba-page textarea.control{min-height:110px;resize:vertical}.gemba-page .empty-context{padding:30px 15px;border:1px dashed var(--line);border-radius:8px;color:var(--text-footer);text-align:center;font-size:14px;line-height:1.5}.gemba-page .employee-modal-backdrop{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.72)}.gemba-page .employee-modal{width:min(720px,100%);max-height:min(720px,90vh);overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:0 18px 60px rgba(0,0,0,.45)}.gemba-page .employee-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line);background:var(--panel-2)}.gemba-page .employee-modal-head h3{margin:0;color:var(--text-title);font-size:16px}.gemba-page .employee-modal-close{min-width:34px!important;height:34px;padding:4px!important;font-size:18px!important}.gemba-page .employee-modal-body{padding:13px;overflow:auto;max-height:calc(90vh - 68px)}.gemba-page .employee-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.gemba-page .employee-results{display:flex;flex-direction:column;gap:7px;margin-top:12px}.gemba-page .employee-result{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:7px;background:var(--panel-2);color:var(--text-body);text-align:left;font-family:Tahoma,Arial,sans-serif;cursor:pointer}.gemba-page .employee-result:hover{border-color:var(--cyan);background:color-mix(in srgb,var(--cyan) 10%,var(--panel-2))}.gemba-page .employee-result.rejected{border-color:color-mix(in srgb,var(--danger) 60%,var(--line));opacity:.72;cursor:not-allowed}.gemba-page .employee-result strong{display:block;color:var(--text-title);font-size:13px}.gemba-page .employee-result small{display:block;margin-top:3px;color:var(--text-footer);font-size:11px}.gemba-page .employee-result .eligibility{font-size:11px;font-weight:700;text-align:right;color:var(--success)}.gemba-page .employee-result.rejected .eligibility{color:var(--danger)}.gemba-page .employee-empty{padding:18px;border:1px dashed var(--line);border-radius:7px;color:var(--text-footer);text-align:center;font-size:13px}.gemba-page .category-options{display:flex;flex-wrap:wrap;gap:8px}.gemba-page .category-options label{display:flex;align-items:center;gap:5px;margin:0;padding:7px 9px;border:1px solid var(--line);border-radius:5px;background:var(--panel);color:var(--text-body);font-size:12px;text-transform:none;letter-spacing:0;cursor:pointer}.gemba-page .category-options input{accent-color:var(--cyan)}.gemba-page .abnormal-modal-backdrop{position:fixed;inset:0;z-index:1100;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.75)}.gemba-page .abnormal-modal{width:min(1060px,100%);max-height:94vh;overflow:hidden;border:1px solid var(--legacy_a9a9a9);border-radius:4px;background:#fff;color:var(--legacy_1f2937);box-shadow:0 20px 70px rgba(0,0,0,.55);font-family:Tahoma,Arial,sans-serif}.gemba-page .abnormal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;background:var(--legacy_686868);color:#fff}.gemba-page .abnormal-head h3{margin:0;font-size:18px;font-weight:700}.gemba-page .abnormal-head small{font-size:12px}.gemba-page .abnormal-body{padding:11px;overflow:auto;max-height:calc(94vh - 108px)}.gemba-page .abnormal-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:9px;border-bottom:1px solid var(--legacy_c6c6c6);padding-bottom:9px}.gemba-page .abnormal-field{min-width:0}.gemba-page .abnormal-field label{color:#222;font-size:11px;font-weight:700;text-transform:none;letter-spacing:0}.gemba-page .abnormal-control{width:100%;box-sizing:border-box;padding:8px 9px;border:1px solid var(--legacy_c2c2c2);border-radius:2px;background:#fff;color:var(--legacy_111827);font-family:Tahoma,Arial,sans-serif;font-size:13px}.gemba-page .abnormal-control[readonly]{background:var(--legacy_f1f1f1);color:#333}.gemba-page .abnormal-category{display:flex;flex-wrap:wrap;gap:10px;padding:7px 0}.gemba-page .abnormal-category label{display:flex;align-items:center;gap:4px;margin:0;color:#222;font-size:12px;text-transform:none;letter-spacing:0}.gemba-page .abnormal-category input{accent-color:var(--legacy_274b7a)}.gemba-page .abnormal-detail-label{display:block;margin:9px 0 4px;color:#222;font-size:12px;font-weight:700}.gemba-page .abnormal-detail{width:100%;min-height:260px;box-sizing:border-box;resize:vertical}.gemba-page .abnormal-foot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:9px 11px;background:var(--legacy_adadad)}.gemba-page .abnormal-confirm{display:flex;align-items:center;gap:6px;margin-right:auto;color:#222;font-size:11px}.gemba-page .abnormal-confirm input{width:17px;height:17px;accent-color:var(--legacy_274b7a)}.gemba-page .abnormal-submit{min-width:98px;border:1px solid var(--legacy_24466f)!important;background:var(--legacy_2d4f80)!important;color:#fff!important}.gemba-page .abnormal-cancel{min-width:98px;border:1px solid var(--legacy_8a3c34)!important;background:var(--legacy_d66a5d)!important;color:#fff!important}
+        .gemba-page .mode-card{padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+        .gemba-page .mode-group{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+        .gemba-page .mode-label{color:var(--text-footer);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+        .gemba-page .mode-radio{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-title);text-transform:none;letter-spacing:0;margin:0}
+        .gemba-page .mode-radio input[type="radio"]{accent-color:var(--cyan);width:16px;height:16px;margin:0;cursor:pointer}
+        .gemba-page .mode-select-wrap{display:flex;align-items:center;gap:8px;min-width:260px;flex:1;max-width:400px}
+        .gemba-page .mode-select-wrap label{margin:0;white-space:nowrap}
         @media(max-width:1000px){.gemba-page .layout{grid-template-columns:1fr}.gemba-page .status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-        @media(max-width:650px){.gemba-page .body{padding:8px}.gemba-page .gemba-header{padding:11px 12px}.gemba-page h1{font-size:19px}.gemba-page .scan-line{grid-template-columns:1fr 1fr}.gemba-page .scan-line .field{grid-column:span 2}.gemba-page .scan-line .btn{width:100%}.gemba-page .layout{gap:8px}.gemba-page .section{padding:10px}.gemba-page .operator-add{grid-template-columns:minmax(0,1fr) minmax(78px,auto)}.gemba-page .operator-add .field{grid-column:span 2}.gemba-page .operator-add .btn{width:100%}.gemba-page .operator-list{grid-template-columns:1fr}.gemba-page .machine-row{grid-template-columns:1fr 1fr}.gemba-page .machine-row .field.machine{grid-column:span 2}.gemba-page .actions{grid-template-columns:1fr 1fr}.gemba-page .lot-info{grid-template-columns:1fr 1fr}.gemba-page .akakami-grid{grid-template-columns:1fr}.gemba-page .akakami-grid .wide{grid-column:auto}}
+        @media(max-width:650px){.gemba-page .mode-card{flex-direction:column;align-items:stretch;gap:10px}.gemba-page .mode-select-wrap{max-width:none;width:100%}.gemba-page .body{padding:8px}.gemba-page .gemba-header{padding:11px 12px}.gemba-page h1{font-size:19px}.gemba-page .scan-line{grid-template-columns:1fr 1fr}.gemba-page .scan-line .field{grid-column:span 2}.gemba-page .scan-line .btn{width:100%}.gemba-page .layout{gap:8px}.gemba-page .section{padding:10px}.gemba-page .operator-add{grid-template-columns:minmax(0,1fr) minmax(78px,auto)}.gemba-page .operator-add .field{grid-column:span 2}.gemba-page .operator-add .btn{width:100%}.gemba-page .operator-list{grid-template-columns:1fr}.gemba-page .machine-row{grid-template-columns:1fr 1fr}.gemba-page .machine-row .field.machine{grid-column:span 2}.gemba-page .actions{grid-template-columns:1fr 1fr}.gemba-page .lot-info{grid-template-columns:1fr 1fr}.gemba-page .akakami-grid{grid-template-columns:1fr}.gemba-page .akakami-grid .wide{grid-column:auto}}
         @media(max-width:390px){.gemba-page .lot-info{grid-template-columns:1fr}.gemba-page .scan-line{grid-template-columns:1fr}.gemba-page .scan-line .field{grid-column:auto}.gemba-page .actions{grid-template-columns:1fr}.gemba-page .machine-row{grid-template-columns:1fr}.gemba-page .machine-row .field.machine{grid-column:auto}}
     </style>
 
     <div class="gemba-card">
-        <div class="gemba-header"><div><div class="eyebrow">PAR Mobile / Input Lot / Gemba Input</div><h1>{{ $process['name'] ?? 'Gemba Input' }} @if($process)<span>{{ $process['label'] }}</span>@endif</h1><div class="hint">Form dinamis berdasarkan sequence routing aktif. Tidak ada duplikasi form untuk setiap nama proses.</div></div>@if($process)<span class="badge">PROCESS CODE: {{ $process['id_seq'] }}</span>@endif</div>
+        <div class="gemba-header">
+            <div class="gemba-header-left">
+                <div class="eyebrow">PAR Mobile / Input Lot / Gemba Input</div>
+                <h1>{{ $process['name'] ?? 'Gemba Input' }} @if($process)<span>{{ $process['label'] }}</span>@endif</h1>
+                <div class="hint">Form dinamis berdasarkan sequence routing aktif. Tidak ada duplikasi form untuk setiap nama proses.</div>
+            </div>
+            <div class="gemba-header-right">
+                @if($context)
+                    <div class="stopwatch-box" id="gembaStopwatchContainer"
+                         data-start-ms="{{ $this->stopwatchStartMs() ?? '' }}"
+                         data-finish-ms="{{ $this->stopwatchFinishMs() ?? '' }}"
+                         data-is-finished="{{ $this->isProcessFinished() ? '1' : '0' }}"
+                         data-is-started="{{ $this->isProcessStarted() ? '1' : '0' }}"
+                         data-server-time-ms="{{ (int) (\Illuminate\Support\Carbon::now()->getTimestamp() * 1000) }}">
+                        <div class="stopwatch-header">
+                            <span class="stopwatch-title">STOPWATCH</span>
+                            @if($this->isProcessFinished())
+                                <span class="stopwatch-status finished">FINISH</span>
+                            @elseif($this->isProcessStarted())
+                                <span class="stopwatch-status running">RUNNING</span>
+                            @else
+                                <span class="stopwatch-status standby">STANDBY</span>
+                            @endif
+                        </div>
+                        <div class="stopwatch-time" id="gembaStopwatchDisplay">00:00:00.000</div>
+                    </div>
+                @endif
+                @if($process)<span class="badge">PROCESS CODE: {{ $process['id_seq'] }}</span>@endif
+            </div>
+        </div>
         <div class="body">
+            <div class="mode-card">
+                <div class="mode-group">
+                    <span class="mode-label">Mode Proses:</span>
+                    <label class="mode-radio">
+                        <input type="radio" name="process_mode" value="tetap" wire:model.live="processMode">
+                        <span>Mode Posisi Tetap</span>
+                    </label>
+                    <label class="mode-radio">
+                        <input type="radio" name="process_mode" value="berpindah" wire:model.live="processMode">
+                        <span>Mode Posisi Berpindah (default)</span>
+                    </label>
+                </div>
+                @if($processMode === 'tetap')
+                    <div class="mode-select-wrap">
+                        <label for="gemba-select-seq" class="mode-label">Proses:</label>
+                        <select id="gemba-select-seq" class="control" wire:model.live="selectedSequence">
+                            <option value="">-- Pilih Nama Proses --</option>
+                            @foreach($sequenceList as $seq)
+                                <option value="{{ $seq['id_seq'] }}">{{ $seq['nm_sequence'] }} ({{ $seq['id_seq'] }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+            </div>
+            @error('selectedSequence')<div class="error" style="margin-top:-6px;margin-bottom:10px">{{ $message }}</div>@enderror
             <div class="scan-line">
                 <div class="field"><label for="gemba-scan-input">Scan No Lot / NIK Operator</label><input id="gemba-scan-input" type="text" class="control scan-input" wire:model.live="scanInput" wire:keydown.enter="processScanInput" autocomplete="off" autofocus placeholder="Scan barcode atau ketik lalu Enter"><p class="hint">Barcode No Lot akan membuka konteks proses. Barcode NIK setelah konteks terbuka akan menambah operator.</p>@error('scanInput')<div class="error">{{ $message }}</div>@enderror</div>
                 <button type="button" class="btn" id="gembaStartQr">CAM SCAN</button><button type="button" class="btn btn-cyan" wire:click="processScanInput" wire:loading.attr="disabled" wire:target="processScanInput">MUAT</button>
@@ -128,6 +200,170 @@
                 }
             });
             window.setTimeout(armFlashAutoHide, 0);
+        })();
+
+        (() => {
+            window.addEventListener('jumping-process-alert', event => {
+                const message = (event.detail && typeof event.detail === 'object' && event.detail.message)
+                    ? event.detail.message
+                    : (typeof event.detail === 'string' ? event.detail : 'Anda Sedang Jumping Process');
+                window.alert(message);
+            });
+        })();
+
+        (() => {
+            let stopwatchTimer = null;
+            let lastServerTimeMs = null;
+            let baseServerTime = null;
+            let baseClientTime = null;
+
+            const pad = (n, width = 2) => {
+                const s = String(n);
+                return s.length >= width ? s : new Array(width - s.length + 1).join('0') + s;
+            };
+
+            const formatDuration = (ms) => {
+                if (ms < 0 || isNaN(ms)) ms = 0;
+                const totalSeconds = Math.floor(ms / 1000);
+                const milliseconds = Math.floor(ms % 1000);
+                const seconds = totalSeconds % 60;
+                const totalMinutes = Math.floor(totalSeconds / 60);
+                const minutes = totalMinutes % 60;
+                const hours = Math.floor(totalMinutes / 60);
+                return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds) + '.' + pad(milliseconds, 3);
+            };
+
+            const syncStopwatch = () => {
+                const container = document.getElementById('gembaStopwatchContainer');
+                const display = document.getElementById('gembaStopwatchDisplay');
+                if (!container || !display) {
+                    if (stopwatchTimer) {
+                        clearInterval(stopwatchTimer);
+                        stopwatchTimer = null;
+                    }
+                    return;
+                }
+
+                const startMsAttr = container.getAttribute('data-start-ms');
+                const finishMsAttr = container.getAttribute('data-finish-ms');
+                const isFinished = container.getAttribute('data-is-finished') === '1';
+                const isStarted = container.getAttribute('data-is-started') === '1';
+                const serverTimeMsAttr = container.getAttribute('data-server-time-ms');
+
+                const startMs = startMsAttr ? parseInt(startMsAttr, 10) : null;
+                const finishMs = finishMsAttr ? parseInt(finishMsAttr, 10) : null;
+                const serverTimeMs = serverTimeMsAttr ? parseInt(serverTimeMsAttr, 10) : null;
+
+                if (!isStarted || !startMs || isNaN(startMs)) {
+                    display.textContent = '00:00:00.000';
+                    if (stopwatchTimer) {
+                        clearInterval(stopwatchTimer);
+                        stopwatchTimer = null;
+                    }
+                    return;
+                }
+
+                if (isFinished && finishMs && !isNaN(finishMs)) {
+                    const elapsed = Math.max(0, finishMs - startMs);
+                    display.textContent = formatDuration(elapsed);
+                    if (stopwatchTimer) {
+                        clearInterval(stopwatchTimer);
+                        stopwatchTimer = null;
+                    }
+                    return;
+                }
+
+                if (isFinished) {
+                    if (stopwatchTimer) {
+                        clearInterval(stopwatchTimer);
+                        stopwatchTimer = null;
+                    }
+                    return;
+                }
+
+                // Update base time reference if serverTimeMs changed or base not set
+                if (serverTimeMs && (serverTimeMs !== lastServerTimeMs || baseServerTime === null)) {
+                    lastServerTimeMs = serverTimeMs;
+                    baseServerTime = serverTimeMs;
+                    baseClientTime = performance.now();
+                } else if (baseServerTime === null) {
+                    baseServerTime = Date.now();
+                    baseClientTime = performance.now();
+                }
+
+                const tick = () => {
+                    const elContainer = document.getElementById('gembaStopwatchContainer');
+                    const elDisplay = document.getElementById('gembaStopwatchDisplay');
+                    if (!elContainer || !elDisplay) return;
+
+                    const currentIsFinished = elContainer.getAttribute('data-is-finished') === '1';
+                    const currentIsStarted = elContainer.getAttribute('data-is-started') === '1';
+                    if (currentIsFinished || !currentIsStarted) {
+                        syncStopwatch();
+                        return;
+                    }
+
+                    const elapsedSinceBase = performance.now() - baseClientTime;
+                    const currentServerTime = baseServerTime + elapsedSinceBase;
+                    const elapsed = Math.max(0, currentServerTime - startMs);
+                    elDisplay.textContent = formatDuration(elapsed);
+                };
+
+                // Run immediately
+                tick();
+
+                if (stopwatchTimer) {
+                    clearInterval(stopwatchTimer);
+                    stopwatchTimer = null;
+                }
+                stopwatchTimer = setInterval(tick, 30);
+            };
+
+            window.addEventListener('stopwatch-sync', () => {
+                baseServerTime = null;
+                lastServerTimeMs = null;
+                if (stopwatchTimer) {
+                    clearInterval(stopwatchTimer);
+                    stopwatchTimer = null;
+                }
+                setTimeout(syncStopwatch, 20);
+            });
+            window.addEventListener('stopwatch-started', () => {
+                baseServerTime = null;
+                lastServerTimeMs = null;
+                if (stopwatchTimer) {
+                    clearInterval(stopwatchTimer);
+                    stopwatchTimer = null;
+                }
+                setTimeout(syncStopwatch, 20);
+            });
+            window.addEventListener('stopwatch-stopped', () => {
+                if (stopwatchTimer) {
+                    clearInterval(stopwatchTimer);
+                    stopwatchTimer = null;
+                }
+                setTimeout(syncStopwatch, 20);
+            });
+            document.addEventListener('livewire:navigated', () => {
+                baseServerTime = null;
+                lastServerTimeMs = null;
+                if (stopwatchTimer) {
+                    clearInterval(stopwatchTimer);
+                    stopwatchTimer = null;
+                }
+                syncStopwatch();
+            });
+            document.addEventListener('livewire:updated', () => {
+                baseServerTime = null;
+                lastServerTimeMs = null;
+                if (stopwatchTimer) {
+                    clearInterval(stopwatchTimer);
+                    stopwatchTimer = null;
+                }
+                setTimeout(syncStopwatch, 20);
+            });
+            document.addEventListener('DOMContentLoaded', syncStopwatch);
+            syncStopwatch();
         })();
     </script>
 </div>
