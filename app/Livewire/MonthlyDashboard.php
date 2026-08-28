@@ -141,6 +141,8 @@ class MonthlyDashboard extends Component
 
     public function render()
     {
-        return view('livewire.monthly-dashboard')->layout('layouts.app');
+        return view('livewire.monthly-dashboard', [
+            'chartData' => $this->chartData(),
+        ])->layout('layouts.app');
     }
 }

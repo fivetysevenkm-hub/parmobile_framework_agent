@@ -50,13 +50,21 @@ class ThemePreferenceService
         $savedColors = json_decode((string) ($saved->colors_json ?? ''), true);
         $savedColors = is_array($savedColors) ? $savedColors : [];
 
+        $presetKey = (string) ($saved->preset_key ?? 'par-default');
+        $presetKey = ($presetKey === 'custom' || array_key_exists($presetKey, $this->presets())) ? $presetKey : 'par-default';
+
+        // Presets are the source of truth for every visual token, including table fills.
+        // This also repairs older saved preferences that predate the table color tokens.
+        $presetColors = $presetKey === 'custom'
+            ? array_merge($defaults, $savedColors)
+            : ($this->presets()[$presetKey]['colors'] ?? $defaults);
+
         foreach ($defaults as $key => $default) {
-            $value = $savedColors[$key] ?? $default;
+            $value = $presetColors[$key] ?? $default;
             $result['colors'][$key] = $this->isHexColor($value) ? strtoupper($value) : $default;
         }
 
-        $presetKey = (string) ($saved->preset_key ?? 'par-default');
-        $result['preset_key'] = ($presetKey === 'custom' || array_key_exists($presetKey, $this->presets())) ? $presetKey : 'par-default';
+        $result['preset_key'] = $presetKey;
 
         return $result;
     }
