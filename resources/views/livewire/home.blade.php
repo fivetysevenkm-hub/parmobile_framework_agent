@@ -311,6 +311,8 @@
 
         .home-table {
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
             table-layout: fixed;
             border-collapse: collapse;
             font-size: .8rem;
@@ -333,6 +335,8 @@
             text-align: left;
             text-transform: uppercase;
             overflow-wrap: anywhere;
+            white-space: normal;
+            position: static;
         }
 
         .home-table td {
@@ -345,6 +349,8 @@
             overflow-wrap: anywhere;
             word-break: normal;
             hyphens: auto;
+            white-space: normal;
+            position: static;
         }
 
         .home-table tr:last-child td {
@@ -538,6 +544,8 @@
             .home-table td {
                 display: block;
                 width: 100%;
+                max-width: 100%;
+                min-width: 0;
             }
 
             .home-table thead {
@@ -571,6 +579,8 @@
                 border: 0;
                 line-height: 1.5;
                 overflow-wrap: anywhere;
+                white-space: normal;
+                position: static;
             }
 
             .home-table td:not(:last-child) {
