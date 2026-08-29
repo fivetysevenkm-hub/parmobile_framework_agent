@@ -664,7 +664,7 @@
         <div class="home-hero-main">
             <div class="home-kicker"><span class="home-kicker-dot" aria-hidden="true"></span><span>PAR Mobile / Control Center</span></div>
             <h1 id="home-title" class="home-title">Selamat datang,<span class="home-title-name">{{ $username }}</span></h1>
-            <p class="home-subtitle">Satu ruang kerja untuk membuka informasi operasional yang relevan. Pilih menu sesuai kewenangan Anda dan lanjutkan pekerjaan dengan alur yang lebih terarah.</p>
+            <p class="home-subtitle">Industrial Process 4.0, Transformasi Digital</p>
             <div class="home-hero-actions">
                 <a class="home-primary" href="#menu-access">Jelajahi menu <span aria-hidden="true">↓</span></a>
                 <span class="home-status">● Akses akun aktif</span>
@@ -683,7 +683,7 @@
                     <span class="home-stat-label">Kelompok akses</span>
                 </div>
             </div>
-            <p class="home-aside-footnote">Daftar menu ditampilkan otomatis berdasarkan otorisasi akun dan pengaturan Hide Menu.</p>
+            <p class="home-aside-footnote">Daftar halaman kontrol berdasarkan otorisasi akun dan pengaturan Anda.</p>
         </aside>
     </section>
 
