@@ -355,6 +355,29 @@ class GembaInput extends Component
         $this->operatorNik = '';
     }
 
+    public function addCurrentOperator(GembaInputService $service): void
+    {
+        $sessionNik = $this->sessionNik();
+        if ($sessionNik === '') {
+            $message = 'NIK pengguna login tidak tersedia pada sesi.';
+            $this->addError('operatorNik', $message);
+            $this->flash('Tambahkan Saya ditolak. '.$message, 'warning');
+            return;
+        }
+
+        $operatorCountBefore = count($this->operators);
+        $this->operatorNik = $sessionNik;
+        $this->addOperator($service);
+
+        if (count($this->operators) === $operatorCountBefore) {
+            $reason = (string) ($this->getErrorBag()->first('operatorNik') ?: 'Operator login belum memiliki skill untuk proses ini.');
+            $this->flash('Tambahkan Saya ditolak. '.$reason, 'warning');
+            return;
+        }
+
+        $this->flash('Operator '.$sessionNik.' berhasil ditambahkan.', 'success');
+    }
+
     public function removeOperator(int $index): void
     {
         if (isset($this->operators[$index])) {
