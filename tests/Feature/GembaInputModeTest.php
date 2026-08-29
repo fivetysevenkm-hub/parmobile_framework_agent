@@ -437,4 +437,33 @@ class GembaInputModeTest extends TestCase
         $this->assertEquals('TRAY-BESAR-NEW', $component->get('trayNo'));
         $this->assertEquals('TRAY-KECIL-NEW', $component->get('traySmall'));
     }
+
+    public function test_button_states_when_start_time_not_null_and_finish_time_null(): void
+    {
+        // 1. Lot was started previously, but finish_time is null
+        DB::table('tbl_seq_01')->insert([
+            'no_lot' => 'LOT-12345',
+            'tray_no' => 'TRAY-01',
+            'start_time' => '2026-08-29 18:00:00',
+            'finish_time' => null,
+            'hold' => 'no',
+            'finish' => 'no',
+            'pic_01' => 'KARY99',
+        ]);
+
+        // 2. Load lot in GembaInput
+        $component = Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput');
+
+        // Prosedur:
+        // - Tombol Start: non-aktif (false)
+        // - Tombol Akakami: aktif (true)
+        // - Tombol Finish: aktif (true)
+        // - Tombol Abnormal Rep: aktif (true)
+        $this->assertFalse($component->instance()->canStart());
+        $this->assertTrue($component->instance()->canAkakami());
+        $this->assertTrue($component->instance()->canFinish());
+        $this->assertTrue($component->instance()->canReportAbnormal());
+    }
 }

@@ -634,14 +634,16 @@ class GembaInput extends Component
 
     public function isProcessStarted(): bool
     {
-        return trim((string) ($this->state['start_time'] ?? '')) !== '';
+        $startTime = trim((string) ($this->state['start_time'] ?? ''));
+        return $startTime !== '' && $startTime !== '-';
     }
 
     public function isProcessFinished(): bool
     {
         $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
         $finish = strtolower(trim((string) ($this->state['finish'] ?? '')));
-        return $finishTime !== '' || in_array($finish, ['yes', '1', 'true', 'finish', 'finished'], true);
+        return ($finishTime !== '' && $finishTime !== '-')
+            || in_array($finish, ['yes', '1', 'true', 'finish', 'finished'], true);
     }
 
     public function isProcessHeld(): bool
