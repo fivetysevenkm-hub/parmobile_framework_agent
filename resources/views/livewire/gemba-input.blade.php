@@ -38,10 +38,27 @@
     <div class="gemba-card">
         <div class="gemba-header">
             <div class="gemba-header-left">
-                <div class="eyebrow">PAR Mobile</div>
+                <div class="eyebrow">PAR Mobile / Input Lot / Gemba Input</div>
                 <h1>{{ $process['name'] ?? 'Gemba Input' }} @if($process)<span>{{ $process['label'] }}</span>@endif</h1>
                             </div>
             <div class="gemba-header-right">
+                
+                @if($process)<span class="badge">PROCESS CODE: {{ $process['id_seq'] }}</span>@endif
+            </div>
+        </div>
+        <div class="body">
+            <div class="mode-card">
+                <div class="mode-group">
+                    <span class="mode-label">Mode Proses:</span>
+                    <label class="mode-radio">
+                        <input type="radio" name="process_mode" value="tetap" wire:model.live="processMode">
+                        <span>Mode Posisi Tetap</span>
+                    </label>
+                    <label class="mode-radio">
+                        <input type="radio" name="process_mode" value="berpindah" wire:model.live="processMode">
+                        <span>Mode Posisi Berpindah (default)</span>
+                    </label>
+                </div>
                 @if($context)
                     <div class="stopwatch-box" id="gembaStopwatchContainer"
                          data-start-ms="{{ $this->stopwatchStartMs() ?? '' }}"
@@ -62,22 +79,6 @@
                         <div class="stopwatch-time" id="gembaStopwatchDisplay">00:00:00.000</div>
                     </div>
                 @endif
-                @if($process)<span class="badge">PROCESS CODE: {{ $process['id_seq'] }}</span>@endif
-            </div>
-        </div>
-        <div class="body">
-            <div class="mode-card">
-                <div class="mode-group">
-                    <span class="mode-label">Mode Proses:</span>
-                    <label class="mode-radio">
-                        <input type="radio" name="process_mode" value="tetap" wire:model.live="processMode">
-                        <span>Mode Posisi Tetap</span>
-                    </label>
-                    <label class="mode-radio">
-                        <input type="radio" name="process_mode" value="berpindah" wire:model.live="processMode">
-                        <span>Mode Posisi Berpindah (default)</span>
-                    </label>
-                </div>
                 @if($processMode === 'tetap')
                     <div class="mode-select-wrap">
                         <label for="gemba-select-seq" class="mode-label">Proses:</label>
