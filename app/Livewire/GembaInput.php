@@ -578,10 +578,22 @@ class GembaInput extends Component
         ]);
     }
 
+    private function isFilledTime(?string $time): bool
+    {
+        if ($time === null) {
+            return false;
+        }
+        $t = trim($time);
+        if ($t === '' || $t === '-' || $t === '0' || str_starts_with($t, '0000-00-00')) {
+            return false;
+        }
+        return true;
+    }
+
     public function stopwatchStartTime(): string
     {
         $startTime = trim((string) ($this->state['start_time'] ?? ''));
-        if ($startTime === '') {
+        if (! $this->isFilledTime($startTime)) {
             return '';
         }
         try {
@@ -594,7 +606,7 @@ class GembaInput extends Component
     public function stopwatchFinishTime(): string
     {
         $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
-        if ($finishTime === '') {
+        if (! $this->isFilledTime($finishTime)) {
             return '';
         }
         try {
@@ -607,7 +619,7 @@ class GembaInput extends Component
     public function stopwatchStartMs(): ?int
     {
         $startTime = trim((string) ($this->state['start_time'] ?? ''));
-        if ($startTime === '') {
+        if (! $this->isFilledTime($startTime)) {
             return null;
         }
         try {
@@ -621,7 +633,7 @@ class GembaInput extends Component
     public function stopwatchFinishMs(): ?int
     {
         $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
-        if ($finishTime === '') {
+        if (! $this->isFilledTime($finishTime)) {
             return null;
         }
         try {
@@ -634,15 +646,14 @@ class GembaInput extends Component
 
     public function isProcessStarted(): bool
     {
-        $startTime = trim((string) ($this->state['start_time'] ?? ''));
-        return $startTime !== '' && $startTime !== '-';
+        return $this->isFilledTime($this->state['start_time'] ?? null);
     }
 
     public function isProcessFinished(): bool
     {
-        $finishTime = trim((string) ($this->state['finish_time'] ?? ''));
+        $finishTime = $this->state['finish_time'] ?? null;
         $finish = strtolower(trim((string) ($this->state['finish'] ?? '')));
-        return ($finishTime !== '' && $finishTime !== '-')
+        return $this->isFilledTime($finishTime)
             || in_array($finish, ['yes', '1', 'true', 'finish', 'finished'], true);
     }
 

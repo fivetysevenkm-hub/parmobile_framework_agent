@@ -466,4 +466,37 @@ class GembaInputModeTest extends TestCase
         $this->assertTrue($component->instance()->canFinish());
         $this->assertTrue($component->instance()->canReportAbnormal());
     }
+
+    public function test_legacy_zero_datetime_finish_time_is_not_treated_as_finished(): void
+    {
+        // In legacy MySQL, start_time is set, and finish_time is default '0000-00-00 00:00:00'
+        DB::table('tbl_seq_01')->insert([
+            'no_lot' => 'LOT-12345',
+            'tray_no' => 'TRAY-01',
+            'start_time' => '2026-08-29 18:50:08',
+            'finish_time' => '0000-00-00 00:00:00',
+            'hold' => 'no',
+            'finish' => 'no',
+            'pic_01' => 'KARY99',
+        ]);
+
+        $component = Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput');
+
+        $this->assertTrue($component->instance()->isProcessStarted());
+        $this->assertFalse($component->instance()->isProcessFinished());
+        $this->assertFalse($component->instance()->canStart());
+        $this->assertTrue($component->instance()->canAkakami());
+        $this->assertTrue($component->instance()->canFinish());
+        $this->assertTrue($component->instance()->canReportAbnormal());
+
+        $this->assertNotEmpty($component->instance()->stopwatchStartTime());
+        $this->assertNotNull($component->instance()->stopwatchStartMs());
+        $this->assertEquals('', $component->instance()->stopwatchFinishTime());
+        $this->assertNull($component->instance()->stopwatchFinishMs());
+
+        $component->assertSee('RUNNING')
+            ->assertDontSee('data-is-finished="1"');
+    }
 }
