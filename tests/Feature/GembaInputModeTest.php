@@ -98,6 +98,20 @@ class GembaInputModeTest extends TestCase
             $table->string('finish', 50)->nullable();
         });
 
+        Schema::create('tbl_seq_all', function (Blueprint $table): void {
+            $table->id();
+            $table->string('no_lot', 50)->nullable();
+            $table->string('no_srp', 50)->nullable();
+            $table->integer('seq')->nullable();
+            $table->string('id_seq', 50)->nullable();
+            $table->string('nm_seq', 50)->nullable();
+            $table->string('start_time', 50)->nullable();
+            $table->string('finish_time', 50)->nullable();
+            $table->string('duration', 50)->nullable();
+            $table->string('finish', 50)->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('tbl_validator', function (Blueprint $table): void {
             $table->id();
             $table->string('no_lot', 50)->unique();
@@ -498,5 +512,42 @@ class GembaInputModeTest extends TestCase
 
         $component->assertSee('RUNNING')
             ->assertDontSee('data-is-finished="1"');
+    }
+
+    public function test_lot_not_in_tbllotdaily_shows_warning_notification(): void
+    {
+        $component = Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-TIDAK-ADA')
+            ->call('processScanInput');
+
+        $component->assertSee('Lot tersebut tidak ada')
+            ->assertSet('flashType', 'warning');
+    }
+
+    public function test_delivered_lot_in_tbl_seq_all_shows_warning_notification(): void
+    {
+        // 1. Lot exists in tbllotdaily
+        DB::table('tbllotdaily')->insert([
+            'no_lot' => 'LOT-DELIVERED',
+            'no_srps' => 'SRP-001',
+            'qty' => '100',
+        ]);
+
+        // 2. In tbl_seq_all, lot status is S26 (delivery) with finish = yes
+        DB::table('tbl_seq_all')->insert([
+            'no_lot' => 'LOT-DELIVERED',
+            'no_srp' => 'SRP-001',
+            'seq' => 10,
+            'id_seq' => 'S26',
+            'nm_seq' => 'Delivery',
+            'finish' => 'yes',
+        ]);
+
+        $component = Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-DELIVERED')
+            ->call('processScanInput');
+
+        $component->assertSee('Lot Sudah selesai proses &amp; telah di kirim ke customer', false)
+            ->assertSet('flashType', 'warning');
     }
 }

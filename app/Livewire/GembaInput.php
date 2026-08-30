@@ -91,6 +91,15 @@ class GembaInput extends Component
             $this->noLot = $lotToLoad;
             $this->sequenceNo = $seqToLoad;
 
+            // Cek keberadaan lot di tbllotdaily dan status delivery di tbl_seq_all
+            $lotAvailability = $service->checkLotAvailabilityAndDelivery($lotToLoad);
+            if (! ($lotAvailability['ok'] ?? false)) {
+                $message = (string) ($lotAvailability['message'] ?? 'Lot tersebut tidak ada');
+                $this->addError('noLot', $message);
+                $this->flash($message, 'warning');
+                return;
+            }
+
             if ($this->processMode === 'tetap') {
                 if (trim($this->selectedSequence) === '') {
                     $this->clearForm();
@@ -211,6 +220,15 @@ class GembaInput extends Component
 
         if ($lotToLoad === '') {
             $this->addError('noLot', 'No Lot wajib diisi.');
+            return;
+        }
+
+        // Cek keberadaan lot di tbllotdaily dan status delivery di tbl_seq_all
+        $lotAvailability = $service->checkLotAvailabilityAndDelivery($lotToLoad);
+        if (! ($lotAvailability['ok'] ?? false)) {
+            $message = (string) ($lotAvailability['message'] ?? 'Lot tersebut tidak ada');
+            $this->addError('noLot', $message);
+            $this->flash($message, 'warning');
             return;
         }
 

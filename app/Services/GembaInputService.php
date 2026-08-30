@@ -71,6 +71,69 @@ class GembaInputService
         ];
     }
 
+    public function checkLotAvailabilityAndDelivery(string $noLot): array
+    {
+        $noLot = trim($noLot);
+        if ($noLot === '') {
+            return [
+                'ok' => false,
+                'message' => 'No Lot wajib diisi.',
+            ];
+        }
+
+        // 1. Cek apakah lot tercantum di tbllotdaily (field no_lot)
+        if (Schema::hasTable('tbllotdaily')) {
+            $existsInDaily = DB::table('tbllotdaily')->where('no_lot', $noLot)->exists();
+            if (! $existsInDaily) {
+                return [
+                    'ok' => false,
+                    'message' => 'Lot tersebut tidak ada',
+                ];
+            }
+        }
+
+        // 2. Cek apakah status lot tersebut telah delivery di tbl_seq_all ((id_seq/id_sq) = S26 dan finish = yes)
+        if (Schema::hasTable('tbl_seq_all')) {
+            $query = DB::table('tbl_seq_all')->where('no_lot', $noLot);
+            $hasIdSeq = Schema::hasColumn('tbl_seq_all', 'id_seq');
+            $hasIdSq = Schema::hasColumn('tbl_seq_all', 'id_sq');
+
+            if ($hasIdSeq || $hasIdSq) {
+                $query->where(function ($q) use ($hasIdSeq, $hasIdSq) {
+                    if ($hasIdSeq) {
+                        $q->where('id_seq', 'S26');
+                    }
+                    if ($hasIdSq) {
+                        if ($hasIdSeq) {
+                            $q->orWhere('id_sq', 'S26');
+                        } else {
+                            $q->where('id_sq', 'S26');
+                        }
+                    }
+                });
+
+                if (Schema::hasColumn('tbl_seq_all', 'finish')) {
+                    $query->where(function ($q) {
+                        $q->where('finish', 'yes')
+                            ->orWhere('finish', '1')
+                            ->orWhere('finish', 'true')
+                            ->orWhere('finish', 'finish')
+                            ->orWhere('finish', 'finished');
+                    });
+                }
+
+                if ($query->exists()) {
+                    return [
+                        'ok' => false,
+                        'message' => 'Lot Sudah selesai proses & telah di kirim ke customer',
+                    ];
+                }
+            }
+        }
+
+        return ['ok' => true];
+    }
+
     public function processContext(string $noLot, int $sequenceNo): ?array
     {
         $result = $this->lotVerifikator->verify($noLot);
@@ -706,7 +769,10 @@ class GembaInputService
         DB::table($table)->where('no_lot', $noLot)->update($payload);
 
         if (Schema::hasTable('tbl_seq_all')) {
-            DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update($payload + ['updated_at' => $finishTime->format('Y-m-d H:i:s')]);
+            $seqAllPayload = $this->onlyExistingColumns('tbl_seq_all', $payload + ['updated_at' => $finishTime->format('Y-m-d H:i:s')]);
+            if ($seqAllPayload !== []) {
+                DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update($seqAllPayload);
+            }
         }
 
         if (Schema::hasTable('tbl_validator')) {
