@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\LegacyUser;
 use App\Services\LegacyPasswordService;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
@@ -22,8 +24,8 @@ class Login extends Component
     public function mount(): void
     {
         if ($this->needsLocalRedirect()) {
-            redirect()->to('http://192.168.100.225'.(request()->getRequestUri() ?: '/login'))->send();
-            die();
+            $url = 'http://192.168.100.225'.(request()->getRequestUri() ?: '/login');
+            throw new HttpResponseException(new RedirectResponse($url));
         }
     }
 
