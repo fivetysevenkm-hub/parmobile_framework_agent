@@ -50,7 +50,7 @@
 
     <div class="auto-switch" id="autoSwitchBar" aria-live="polite">
         <span class="pulse" aria-hidden="true"></span>
-        <span id="autoSwitchStatus">Auto-switch aktif: mencari alamat koneksi terdekat...</span>
+        <span id="autoSwitchStatus">Auto-switch aktif: memeriksa ketersediaan alamat lokal...</span>
         <button type="button" class="skip" id="autoSwitchSkip">tetap di alamat ini</button>
     </div>
 
@@ -159,8 +159,14 @@
             if (cancelled) return;
 
             if (host === LOCAL_ADDRESS) {
-                setStatus('Koneksi sudah di alamat lokal (192.168.100.225).');
+                setStatus('Anda sudah di alamat lokal (192.168.100.225).');
                 setTimeout(hide, 2500);
+                return;
+            }
+
+            if (host !== PUBLIC_ADDRESS) {
+                setStatus('Auto-switch hanya berlaku saat akses via ' + PUBLIC_ADDRESS + '. Alamat ini tidak dialihkan.');
+                setTimeout(hide, 3500);
                 return;
             }
 
@@ -168,18 +174,8 @@
                 .then((localOk) => {
                     if (cancelled) return;
                     if (localOk) { go(LOCAL_ADDRESS); return; }
-                    if (host === PUBLIC_ADDRESS) {
-                        setStatus('Alamat lokal tidak tersedia dari jaringan ini. Tetap di alamat public.');
-                        setTimeout(hide, 3000);
-                        return;
-                    }
-                    return probe(PUBLIC_ADDRESS);
-                })
-                .then((publicOk) => {
-                    if (cancelled || publicOk === undefined) return;
-                    if (publicOk) { go(PUBLIC_ADDRESS); return; }
-                    setStatus('Alamat lokal & public tidak dapat dijangkau. Tetap di alamat ini.');
-                    setTimeout(hide, 4000);
+                    setStatus('192.168.100.225 tidak terdeteksi aktif. Tetap di alamat public.');
+                    setTimeout(hide, 3500);
                 });
         };
 
