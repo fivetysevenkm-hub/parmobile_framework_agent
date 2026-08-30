@@ -1,6 +1,19 @@
 @php
     $menuCount = count($accessibleMenus);
     $groupCount = collect($accessibleMenus)->pluck('group')->filter()->unique()->count();
+
+    $connHost = strtolower((string) request()->getHost());
+    $connPort = request()->getPort();
+    $connScheme = request()->isSecure() ? 'https' : 'http';
+    $connNetwork = 'Lainnya';
+    if (in_array($connHost, ['localhost', '127.0.0.1', '::1'], true)) {
+        $connNetwork = 'Localhost / Server Lokal';
+    } elseif ($connHost === '192.168.100.225') {
+        $connNetwork = 'Jaringan Lokal (LAN)';
+    } elseif ($connHost === '180.250.83.205') {
+        $connNetwork = 'IP Public (Internet)';
+    }
+    $connAddress = $connHost . (in_array((int) $connPort, [80, 443], true) ? '' : ':' . $connPort);
 @endphp
 
 <div class="home-page">
@@ -301,6 +314,152 @@
             font-size: 1rem;
         }
 
+        .conn-live-badge {
+            gap: .5rem;
+            border-color: color-mix(in srgb, var(--success) 45%, var(--line));
+        }
+
+        .conn-live-badge.is-warn {
+            border-color: color-mix(in srgb, var(--warning) 55%, var(--line));
+            background: color-mix(in srgb, var(--warning) 9%, transparent);
+        }
+
+        .conn-live-dot {
+            width: .5rem;
+            height: .5rem;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 15%, transparent), 0 0 12px color-mix(in srgb, var(--success) 55%, transparent);
+            animation: home-pulse 2.2s ease-in-out infinite;
+        }
+
+        .conn-live-badge.is-warn .conn-live-dot {
+            background: var(--warning);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 15%, transparent), 0 0 12px color-mix(in srgb, var(--warning) 55%, transparent);
+        }
+
+        .home-conn-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: .65rem;
+        }
+
+        .home-conn-item {
+            position: relative;
+            min-width: 0;
+            padding: .95rem 1rem;
+            border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--bg) 46%, transparent);
+        }
+
+        .home-conn-label {
+            display: block;
+            margin-bottom: .3rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .6rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        .home-conn-value {
+            display: block;
+            color: var(--text-title);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-weight: 700;
+            letter-spacing: -.03em;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+
+        .home-conn-sub {
+            display: block;
+            margin-top: .3rem;
+            color: var(--muted);
+            font-size: .68rem;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+
+        .home-conn-endpoints {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .65rem;
+            margin-top: .65rem;
+        }
+
+        .home-conn-endpoint {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            min-width: 0;
+            padding: .9rem 1rem;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--panel-2) 72%, transparent);
+        }
+
+        .home-conn-endpoint-main {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .home-conn-endpoint-main strong {
+            display: block;
+            color: var(--text-title);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .84rem;
+            overflow-wrap: anywhere;
+        }
+
+        .home-conn-endpoint-main span {
+            display: block;
+            margin-top: .22rem;
+            color: var(--muted);
+            font-size: .66rem;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+        }
+
+        .home-conn-endpoint-status {
+            flex: 0 0 auto;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .64rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .home-conn-dot {
+            width: .7rem;
+            height: .7rem;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: color-mix(in srgb, var(--panel) 20%, var(--muted));
+            transition: background .18s ease, box-shadow .18s ease;
+        }
+
+        .home-conn-dot.is-ok {
+            background: var(--success);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 16%, transparent), 0 0 14px color-mix(in srgb, var(--success) 50%, transparent);
+        }
+
+        .home-conn-dot.is-warn {
+            background: var(--warning);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--warning) 16%, transparent), 0 0 14px color-mix(in srgb, var(--warning) 50%, transparent);
+        }
+
+        .home-conn-dot.is-bad {
+            background: var(--danger);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 16%, transparent), 0 0 14px color-mix(in srgb, var(--danger) 50%, transparent);
+        }
+
         .home-table-wrap {
             width: 100%;
             overflow: hidden;
@@ -532,6 +691,15 @@
                 align-self: flex-start;
             }
 
+            .home-conn-grid,
+            .home-conn-endpoints {
+                grid-template-columns: 1fr;
+            }
+
+            .home-conn-endpoint-status {
+                text-align: left;
+            }
+
             .home-table-wrap {
                 overflow: visible;
                 border: 0;
@@ -687,6 +855,58 @@
         </aside>
     </section>
 
+    <section id="conn-access" class="home-panel" aria-labelledby="conn-access-title">
+        <div class="home-panel-heading">
+            <div>
+                <div class="home-section-kicker">Network / 00</div>
+                <h2 id="conn-access-title" class="home-panel-title">Status Koneksi Server</h2>
+                <p class="home-panel-intro">Informasi jalur akses server saat ini:</p>
+            </div>
+            <!-- <div class="home-count-badge conn-live-badge{{ $connScheme !== 'https' ? ' is-warn' : '' }}" id="connLiveBadge"> -->
+                <!-- <span class="conn-live-dot" aria-hidden="true"></span><span id="connLiveText">MEMERIKSA...</span> -->
+            <!-- </div> -->
+        </div>
+
+        <div class="home-conn-grid">
+            <div class="home-conn-item">
+                <span class="home-conn-label">Alamat aktif</span>
+                <strong class="home-conn-value">{{ $connScheme }}://{{ $connAddress }}</strong>
+                <span class="home-conn-sub" id="connActiveHost">{{ $connHost }}</span>
+            </div>
+            <div class="home-conn-item">
+                <span class="home-conn-label">Jaringan</span>
+                <strong class="home-conn-value">{{ $connNetwork }}</strong>
+                <span class="home-conn-sub">Deteksi otomatis dari alamat yang sedang digunakan.</span>
+            </div>
+            <div class="home-conn-item">
+                <span class="home-conn-label">Protokol</span>
+                <strong class="home-conn-value">{{ strtoupper($connScheme) }}</strong>
+                <span class="home-conn-sub">{{ $connScheme === 'https' ? 'Koneksi terenkripsi (aman).' : 'Koneksi tidak terenkripsi.' }}</span>
+            </div>
+        </div>
+
+        <div class="home-conn-endpoints">
+            <div class="home-conn-endpoint">
+                <span class="home-conn-dot" id="connLocalDot" aria-hidden="true"></span>
+                <div class="home-conn-endpoint-main">
+                    <strong>Local Area Netwok</strong>
+                    <span>Alamat utama · prioritas saat di jaringan lokal (LAN) untuk kecepatan maksimal</span>
+                </div>
+                <span class="home-conn-endpoint-status" id="connLocalStatus">memeriksa...</span>
+            </div>
+            <div class="home-conn-endpoint">
+                <span class="home-conn-dot" id="connPublicDot" aria-hidden="true"></span>
+                <div class="home-conn-endpoint-main">
+                    <strong>Internet Public network</strong>
+                    <span>Alamat cadangan · IP Public (Internet / dari luar)</span>
+                </div>
+                <span class="home-conn-endpoint-status" id="connPublicStatus">memeriksa...</span>
+            </div>
+        </div>
+
+        
+    </section>
+
     <section id="menu-access" class="home-panel" aria-labelledby="menu-access-title">
         <div class="home-panel-heading">
             <div>
@@ -746,3 +966,68 @@
         </div>
     </section>
 </div>
+
+<script>
+    (() => {
+        const LOCAL_ADDRESS = '192.168.100.225';
+        const PUBLIC_ADDRESS = '180.250.83.205';
+        const scheme = window.location.protocol;
+        let host = (window.location.hostname || '').toLowerCase();
+
+        const $ = (id) => document.getElementById(id);
+        const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+        const isLocalHost = () => host === 'localhost' || host === '127.0.0.1' || host === '::1';
+
+        const probe = (address) => fetch(scheme + '//' + address + '/', { mode: 'no-cors', cache: 'no-store' })
+            .then(() => true)
+            .catch(() => false);
+
+        const applyState = (localOk, publicOk) => {
+            const setEndpointState = (dotId, statusId, ok, active) => {
+                const dot = $(dotId);
+                const statusEl = $(statusId);
+                if (!dot || !statusEl) return;
+                dot.classList.remove('is-ok', 'is-warn', 'is-bad');
+                if (active) {
+                    dot.classList.add('is-ok');
+                    statusEl.textContent = 'AKTIF SEKARANG';
+                    statusEl.style.color = 'var(--success)';
+                } else if (ok) {
+                    dot.classList.add('is-ok');
+                    statusEl.textContent = 'TERJANGKAU';
+                    statusEl.style.color = 'var(--success)';
+                } else {
+                    dot.classList.add('is-bad');
+                    statusEl.textContent = 'TIDAK TERJANGKAU';
+                    statusEl.style.color = 'var(--danger)';
+                }
+            };
+
+            setEndpointState('connLocalDot', 'connLocalStatus', localOk, host === LOCAL_ADDRESS || isLocalHost());
+            setEndpointState('connPublicDot', 'connPublicStatus', publicOk, host === PUBLIC_ADDRESS);
+
+            const badge = $('connLiveBadge');
+            const text = $('connLiveText');
+            if (!badge || !text) return;
+            if (scheme === 'http:') {
+                badge.classList.add('is-warn');
+                text.textContent = 'HTTP · TIDAK AMAN';
+            } else {
+                badge.classList.remove('is-warn');
+                text.textContent = 'HTTPS · AMAN';
+            }
+        };
+
+        const detect = () => {
+            host = (window.location.hostname || '').toLowerCase();
+            setText('connActiveHost', host || '-');
+            Promise.all([probe(LOCAL_ADDRESS), probe(PUBLIC_ADDRESS)])
+                .then(([localOk, publicOk]) => applyState(localOk, publicOk));
+        };
+
+        document.addEventListener('livewire:navigated', detect);
+        document.addEventListener('livewire:updated', detect);
+        document.addEventListener('DOMContentLoaded', detect);
+        detect();
+    })();
+</script>
