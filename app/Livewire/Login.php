@@ -4,8 +4,6 @@ namespace App\Livewire;
 
 use App\Models\LegacyUser;
 use App\Services\LegacyPasswordService;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,36 +18,6 @@ class Login extends Component
     public string $password = '';
 
     public string $turnstileToken = '';
-
-    public function mount(): void
-    {
-        if ($this->needsLocalRedirect()) {
-            $url = 'http://192.168.100.225'.(request()->getRequestUri() ?: '/login');
-            throw new HttpResponseException(new RedirectResponse($url));
-        }
-    }
-
-    private function needsLocalRedirect(): bool
-    {
-        $host = strtolower((string) request()->getHost());
-        if (in_array($host, ['192.168.100.225', 'localhost', '127.0.0.1', '::1'], true)) {
-            return false;
-        }
-
-        return $this->isPrivateNetworkClient();
-    }
-
-    private function isPrivateNetworkClient(): bool
-    {
-        $ip = (string) (request()->ip() ?? '');
-        if (str_starts_with($ip, '10.') || str_starts_with($ip, '192.168.') || str_starts_with($ip, '127.')) {
-            return true;
-        }
-        if (preg_match('/^172\.(1[6-9]|2[0-9]|3[01])\./', $ip) === 1) {
-            return true;
-        }
-        return false;
-    }
 
     protected function rules(): array
     {

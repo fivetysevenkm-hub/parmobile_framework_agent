@@ -20,7 +20,7 @@
                 @error('password') <div class="error">{{ $message }}</div> @enderror
             </div>
 
-            <div class="field captcha-field">
+            <div class="field captcha-field" wire:ignore>
                 <div
                     class="cf-turnstile"
                     data-sitekey="{{ config('services.turnstile.site_key') }}"
@@ -45,23 +45,19 @@
 @script
 <script>
     window.parTurnstileCompleted = token => {
-        const input = document.getElementById('turnstileToken');
-        if (!input) return;
-        input.value = token;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        $wire.set('turnstileToken', token);
     };
 
     window.parTurnstileExpired = () => {
-        const input = document.getElementById('turnstileToken');
-        if (!input) return;
-        input.value = '';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        $wire.set('turnstileToken', '');
     };
 
     window.parTurnstileError = window.parTurnstileExpired;
 
     $wire.on('turnstile-reset', () => {
-        window.turnstile?.reset();
+        if (window.turnstile) {
+            window.turnstile.reset();
+        }
     });
 </script>
 @endscript
