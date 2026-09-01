@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\LegacyUser;
+use App\Services\AuditLogger;
 use App\Services\LegacyPasswordService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -28,7 +29,7 @@ class Login extends Component
         ];
     }
 
-    public function authenticate(LegacyPasswordService $passwords): void
+    public function authenticate(LegacyPasswordService $passwords, AuditLogger $audit): void
     {
         $credentials = $this->validate();
         [$userThrottleKey, $ipThrottleKey] = $this->throttleKeys($credentials['pengguna']);
@@ -59,6 +60,12 @@ class Login extends Component
         if (! $user || ! $passwords->matches($credentials['password'], $user->getAuthPassword())) {
             $this->hitThrottle($userThrottleKey, $ipThrottleKey);
             $this->resetTurnstile();
+            $audit->log(
+                AuditLogger::EVENT_LOGIN_FAILED,
+                'Percobaan login gagal untuk pengguna '.$credentials['pengguna'],
+                'authentication',
+                metadata: ['tried_username' => $credentials['pengguna']],
+            );
             throw ValidationException::withMessages([
                 'pengguna' => 'Akses ditolak. Periksa nama pengguna dan kata sandi Anda.',
             ]);
@@ -66,6 +73,13 @@ class Login extends Component
 
         RateLimiter::clear($userThrottleKey);
         RateLimiter::clear($ipThrottleKey);
+        $audit->log(
+            AuditLogger::EVENT_LOGIN,
+            'Pengguna berhasil masuk ke sistem',
+            'authentication',
+            userId: (int) $user->id_user,
+            username: (string) $user->username,
+        );
         Auth::login($user);
         request()->session()->regenerate();
         request()->session()->put([
@@ -79,6 +93,7 @@ class Login extends Component
         if ($passwords->requiresChange($credentials['password'], $user->getAuthPassword())) {
             request()->session()->put('must_change_password', true);
             $this->redirectRoute('password.change', navigate: true);
+
             return;
         }
 
@@ -123,6 +138,7 @@ class Login extends Component
             return $response->successful() && $response->json('success') === true;
         } catch (\Throwable $exception) {
             report($exception);
+
             return false;
         }
     }

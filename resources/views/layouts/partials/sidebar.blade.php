@@ -10,7 +10,7 @@
     $lotVerifikatorOpen = request()->routeIs('lot.verifikator', 'gemba.input');
     $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker', 'pttn.pairing.srp');
     $pttnOperatorOpen = request()->routeIs('pttn.omes.input');
-    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization', 'user-management.hide-menu');
+    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization', 'user-management.hide-menu', 'user-management.audit-trail');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 
     $sessionUser = auth()->user();
@@ -149,6 +149,7 @@
                 {!! $menuLink('user-management-qr', 'user-management.qr-code', 'Buat QR Code User', '▣') !!}
                 {!! $menuLink('user-management-authorization', 'user-management.menu-authorization', 'Otorisasi Menu', '☑') !!}
                 {!! $menuLink('user-management-hide-menu', 'user-management.hide-menu', 'Hide Menu', '◌') !!}
+                {!! $menuLink('user-management-audit', 'user-management.audit-trail', 'Audit Trail', '◔') !!}
             </div>
         </div>
     </nav>

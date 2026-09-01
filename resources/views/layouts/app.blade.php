@@ -30,6 +30,39 @@
             @endforeach
             --shadow: 0 12px 30px color-mix(in srgb, var(--shadow-color) 24%, transparent);
             --focus-ring: 0 0 0 3px color-mix(in srgb, var(--focus-ring) 24%, transparent);
+            @if($themeColorScheme === 'light')
+                /* Light-scheme guard: page sections/controls historically use fixed dark "legacy" fills and light text.
+                   Rebind them to light surfaces + dark text so every custom light theme stays uniform and the
+                   dark-fill-on-dark-text / light-fill-on-light-text mismatch is avoided across all pages. */
+                --legacy_111a1f: #FFFFFF; --legacy-111a1f: #FFFFFF;
+                --legacy_0d1418: #FFFFFF; --legacy-0d1418: #FFFFFF;
+                --legacy_0b1013: #E3EDF2; --legacy-0b1013: #E3EDF2;
+                --legacy_17252c: #E3EDF2; --legacy-17252c: #E3EDF2;
+                --legacy_050708: #EEF3F6; --legacy-050708: #EEF3F6;
+                --legacy_182228: #F6F9FB; --legacy-182228: #F6F9FB;
+                --legacy_121e24: #EEF3F6; --legacy-121e24: #EEF3F6;
+                --legacy_f5f7f8: #17242C; --legacy-f5f7f8: #17242C;
+                --legacy_d9e0e3: #22313A; --legacy-d9e0e3: #22313A;
+                --legacy_e6eef0: #17242C; --legacy-e6eef0: #17242C;
+                --legacy_9aaeb4: #5B6B76; --legacy-9aaeb4: #5B6B76;
+                --legacy_aeb5bb: #5B6B76; --legacy-aeb5bb: #5B6B76;
+                --legacy_f2f5f6: #22313A; --legacy-f2f5f6: #22313A;
+                --legacy_eef3f4: #22313A; --legacy-eef3f4: #22313A;
+                --legacy_eef7f8: #22313A; --legacy-eef7f8: #22313A;
+                --legacy_e8f5f7: #22313A; --legacy-e8f5f7: #22313A;
+                --legacy_8ff5df: #0E7A63; --legacy-8ff5df: #0E7A63;
+                --legacy_8fdcff: #00677F; --legacy-8fdcff: #00677F;
+                --legacy_bfeef3: #075D6E; --legacy-bfeef3: #075D6E;
+                --legacy_9ee8f1: #0B6A79; --legacy-9ee8f1: #0B6A79;
+                --legacy_ff9eaa: #B22B3A; --legacy-ff9eaa: #B22B3A;
+                --legacy_ffb4b8: #A82736; --legacy-ffb4b8: #A82736;
+                --legacy_b9fff2: #0D745F; --legacy-b9fff2: #0D745F;
+                --legacy_d6faff: #0B6A79; --legacy-d6faff: #0B6A79;
+                --legacy_c9f8ff: #0B6A79; --legacy-c9f8ff: #0B6A79;
+                --legacy_e7fbff: #0B6A79; --legacy-e7fbff: #0B6A79;
+                --legacy_e9fcff: #0B6A79; --legacy-e9fcff: #0B6A79;
+                --legacy_fecdd3: #B22B3A; --legacy-fecdd3: #B22B3A;
+            @endif
         }
         * { box-sizing: border-box; }
         html { overflow-x:hidden; } body { margin: 0; background: var(--bg); color: var(--text-body); font-family: 'Space Grotesk', sans-serif; overflow-x:hidden; }

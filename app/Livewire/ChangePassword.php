@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\AuditLogger;
 use App\Services\LegacyPasswordService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -42,13 +43,14 @@ class ChangePassword extends Component
         ];
     }
 
-    public function save(LegacyPasswordService $passwords): void
+    public function save(LegacyPasswordService $passwords, AuditLogger $audit): void
     {
         $this->validate();
 
         $user = Auth::user();
         if (! $user) {
             $this->redirectRoute('login', navigate: true);
+
             return;
         }
 
@@ -67,6 +69,15 @@ class ChangePassword extends Component
         DB::table('tbl_user')
             ->where('id_user', $user->id_user)
             ->update(['pwd' => $passwords->storePlaintext($this->newPassword)]);
+
+        $audit->log(
+            AuditLogger::EVENT_PASSWORD_CHANGE,
+            'Pengguna mengganti password sendiri',
+            'user-management',
+            newData: ['password_changed' => true],
+            userId: (int) $user->id_user,
+            username: (string) ($user->username ?: ''),
+        );
 
         request()->session()->regenerate();
         request()->session()->forget('must_change_password');

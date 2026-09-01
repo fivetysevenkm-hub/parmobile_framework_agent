@@ -1,59 +1,63 @@
 <?php
 
-use App\Livewire\AkakamiApproval;
-use App\Livewire\AkakamiApprovalReview;
-use App\Livewire\AkakamiDashboard;
-use App\Livewire\Dashboard;
+use App\Http\Controllers\AbnormalReportPrintController;
 use App\Http\Controllers\AkakamiExportController;
 use App\Http\Controllers\AkakamiPrintController;
-use App\Http\Controllers\AbnormalReportPrintController;
+use App\Http\Controllers\AuditTrailCertificateController;
+use App\Http\Controllers\DocumentProcessPdfController;
 use App\Http\Controllers\ExportExcelController;
-use App\Http\Controllers\LastSequenceExportController;
 use App\Http\Controllers\IncomingTraceExportController;
-use App\Http\Controllers\RealtimeProductionExportController;
-use App\Http\Controllers\RealtimeProductionCertificateController;
-use App\Http\Controllers\ProductivityProcessExportController;
-use App\Http\Controllers\ProcessProductivityExportController;
+use App\Http\Controllers\LastSequenceExportController;
 use App\Http\Controllers\ManpowerCertificateController;
+use App\Http\Controllers\ProcessProductivityExportController;
+use App\Http\Controllers\ProductivityProcessExportController;
+use App\Http\Controllers\PttnImageController;
 use App\Http\Controllers\RankAImageController;
 use App\Http\Controllers\RankAInstructionImageController;
 use App\Http\Controllers\RankAInstructionPrintController;
-use App\Livewire\MonthlyDashboard;
-use App\Livewire\LastSequence;
-use App\Livewire\IncomingTrace;
-use App\Livewire\RealtimeProduction;
-use App\Livewire\ManpowerProductivity;
-use App\Livewire\ManPowerControl;
-use App\Livewire\SusunRoutingProses;
-use App\Livewire\PairingRoutingSrp;
-use App\Livewire\AdjustCycleTime;
-use App\Livewire\UploadWiProses;
-use App\Livewire\RoleAkses;
-use App\Livewire\UserControl;
-use App\Livewire\UserQrCode;
-use App\Livewire\AddItemSatuan;
-use App\Livewire\PttnMaker;
-use App\Livewire\PairingPttnToSrp;
-use App\Livewire\InputPttnOmes;
-use App\Http\Controllers\DocumentProcessPdfController;
+use App\Http\Controllers\RealtimeProductionCertificateController;
+use App\Http\Controllers\RealtimeProductionExportController;
 use App\Http\Controllers\UserQrCodePrintController;
-use App\Http\Controllers\PttnImageController;
-use App\Livewire\ProcessProductivity;
-use App\Livewire\RankAApproval;
-use App\Livewire\RankAInstructionSheet;
+use App\Http\Middleware\AuditMenuAccess;
+use App\Http\Middleware\EnsureMenuAccess;
+use App\Http\Middleware\EnsurePasswordChanged;
 use App\Livewire\AbnormalMtcApproval;
 use App\Livewire\AbnormalReport;
+use App\Livewire\AddItemSatuan;
+use App\Livewire\AdjustCycleTime;
+use App\Livewire\AkakamiApproval;
+use App\Livewire\AkakamiApprovalReview;
+use App\Livewire\AkakamiDashboard;
+use App\Livewire\AuditTrailLog;
 use App\Livewire\CarbTemperMonitoring;
-use App\Livewire\Login;
-use App\Livewire\Home;
 use App\Livewire\ChangePassword;
-use App\Livewire\MenuAuthorization;
-use App\Livewire\HideMenu;
-use App\Livewire\LotVerifikator;
-use App\Livewire\GembaInput;
 use App\Livewire\CustomTheme;
-use App\Http\Middleware\EnsurePasswordChanged;
-use App\Http\Middleware\EnsureMenuAccess;
+use App\Livewire\Dashboard;
+use App\Livewire\GembaInput;
+use App\Livewire\HideMenu;
+use App\Livewire\Home;
+use App\Livewire\IncomingTrace;
+use App\Livewire\InputPttnOmes;
+use App\Livewire\LastSequence;
+use App\Livewire\Login;
+use App\Livewire\LotVerifikator;
+use App\Livewire\ManPowerControl;
+use App\Livewire\ManpowerProductivity;
+use App\Livewire\MenuAuthorization;
+use App\Livewire\MonthlyDashboard;
+use App\Livewire\PairingPttnToSrp;
+use App\Livewire\PairingRoutingSrp;
+use App\Livewire\ProcessProductivity;
+use App\Livewire\PttnMaker;
+use App\Livewire\RankAApproval;
+use App\Livewire\RankAInstructionSheet;
+use App\Livewire\RealtimeProduction;
+use App\Livewire\RoleAkses;
+use App\Livewire\SusunRoutingProses;
+use App\Livewire\UploadWiProses;
+use App\Livewire\UserControl;
+use App\Livewire\UserQrCode;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -65,7 +69,7 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
 });
 
-Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class])->group(function () {
+Route::middleware(['auth', EnsurePasswordChanged::class, AuditMenuAccess::class, EnsureMenuAccess::class])->group(function () {
     Route::get('/home', Home::class)->name('home');
     Route::get('/custom-theme', CustomTheme::class)->name('theme.custom');
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
@@ -104,6 +108,8 @@ Route::middleware(['auth', EnsurePasswordChanged::class, EnsureMenuAccess::class
     Route::get('/user-management/qr-code', UserQrCode::class)->name('user-management.qr-code');
     Route::get('/user-management/menu-authorization', MenuAuthorization::class)->name('user-management.menu-authorization');
     Route::get('/user-management/hide-menu', HideMenu::class)->name('user-management.hide-menu');
+    Route::get('/user-management/audit-trail', AuditTrailLog::class)->name('user-management.audit-trail');
+    Route::get('/user-management/audit-trail/certificate', AuditTrailCertificateController::class)->name('user-management.audit-trail.certificate');
     Route::get('/user-management/qr-code/print', UserQrCodePrintController::class)->name('user-management.qr-code.print');
     Route::get('/pttn-engineering/add-item-satuan', AddItemSatuan::class)->name('pttn.add-item-satuan');
     Route::get('/pttn-engineering/pttn-maker', PttnMaker::class)->name('pttn.maker');
@@ -123,6 +129,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/change-password', ChangePassword::class)->name('password.change');
 
     Route::post('/logout', function () {
+        app(AuditLogger::class)->log(
+            AuditLogger::EVENT_LOGOUT,
+            'Pengguna keluar dari sistem',
+            'authentication',
+        );
         Auth::logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();

@@ -75,7 +75,7 @@ class UserControlService
         return $row ? (array) $row : null;
     }
 
-    public function create(int $idUser, string $username, string $password, string $idDept, int $idRole, bool $isActive): void
+    public function create(int $idUser, string $username, string $password, string $idDept, int $idRole, bool $isActive, ?AuditLogger $audit = null): void
     {
         $this->assertFields($idUser, $username, $password, $idDept, $idRole);
         if (DB::table('tbl_user')->where('id_user', $idUser)->exists()) {
@@ -90,12 +90,20 @@ class UserControlService
             'is_active' => $isActive ? 1 : 0,
             'pwd' => $password,
         ]);
+
+        ($audit ?? app(AuditLogger::class))->log(
+            AuditLogger::EVENT_CREATE,
+            'Membuat user baru NIK '.$idUser,
+            'user-management',
+            newData: ['username' => trim($username), 'id_dept' => trim($idDept), 'id_role' => $idRole, 'is_active' => $isActive ? 1 : 0],
+        );
     }
 
-    public function update(int $idUser, string $username, string $password, string $idDept, int $idRole, bool $isActive): void
+    public function update(int $idUser, string $username, string $password, string $idDept, int $idRole, bool $isActive, ?AuditLogger $audit = null): void
     {
         $this->assertFields($idUser, $username, $password, $idDept, $idRole);
-        if (! DB::table('tbl_user')->where('id_user', $idUser)->exists()) {
+        $existing = DB::table('tbl_user')->where('id_user', $idUser)->first();
+        if (! $existing) {
             throw new RuntimeException('User yang dipilih tidak ditemukan.');
         }
 
@@ -108,17 +116,37 @@ class UserControlService
                 'id_role' => $idRole,
                 'is_active' => $isActive ? 1 : 0,
             ]);
+
+        $old = ['username' => $existing->username, 'id_dept' => $existing->id_dept, 'id_role' => $existing->id_role, 'is_active' => (int) $existing->is_active];
+        $new = ['username' => trim($username), 'id_dept' => trim($idDept), 'id_role' => $idRole, 'is_active' => $isActive ? 1 : 0];
+        $logger = $audit ?? app(AuditLogger::class);
+        $logger->log(
+            AuditLogger::EVENT_UPDATE,
+            'Memperbarui user NIK '.$idUser,
+            'user-management',
+            oldData: $old,
+            newData: $new,
+            metadata: ['changes' => $logger->diff($old, $new)],
+        );
     }
 
-    public function delete(int $idUser): void
+    public function delete(int $idUser, ?AuditLogger $audit = null): void
     {
-        if (! DB::table('tbl_user')->where('id_user', $idUser)->exists()) {
+        $existing = DB::table('tbl_user')->where('id_user', $idUser)->first();
+        if (! $existing) {
             throw new RuntimeException('User yang dipilih tidak ditemukan.');
         }
 
         DB::transaction(function () use ($idUser): void {
             DB::table('tbl_user')->where('id_user', $idUser)->delete();
         });
+
+        ($audit ?? app(AuditLogger::class))->log(
+            AuditLogger::EVENT_DELETE,
+            'Menghapus user NIK '.$idUser,
+            'user-management',
+            oldData: ['username' => $existing->username, 'id_dept' => $existing->id_dept, 'id_role' => $existing->id_role, 'is_active' => (int) $existing->is_active],
+        );
     }
 
     private function assertFields(int $idUser, string $username, string $password, string $idDept, int $idRole): void
