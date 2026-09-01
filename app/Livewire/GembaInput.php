@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Services\AbnormalReportService;
 use App\Services\AbnormalReportTelegramMessage;
 use App\Services\AkakamiTelegramMessage;
+use App\Services\DocumentProcessService;
 use App\Services\GembaInputService;
 use App\Services\LotVerifikatorService;
 use App\Services\PttnOmesService;
@@ -29,6 +30,8 @@ class GembaInput extends Component
     public array $problemRanks = [];
     public bool $requiresMachine = false;
     public bool $hasPttn = false;
+    public bool $hasWorkInstruction = false;
+    public int $wiDocumentId = 0;
 
     public string $operatorNik = '';
     public string $employeeSearch = '';
@@ -722,6 +725,8 @@ class GembaInput extends Component
         $this->process = [];
         $this->requiresMachine = false;
         $this->hasPttn = false;
+        $this->hasWorkInstruction = false;
+        $this->wiDocumentId = 0;
         $this->scanInput = '';
         $this->operatorNik = '';
         $this->employeeSearch = '';
@@ -765,6 +770,8 @@ class GembaInput extends Component
             $this->process = [];
             $this->requiresMachine = false;
             $this->hasPttn = false;
+            $this->hasWorkInstruction = false;
+            $this->wiDocumentId = 0;
             $this->state = [];
             $this->operators = [];
             return;
@@ -773,16 +780,8 @@ class GembaInput extends Component
         $this->lotContext = $service->lotContext($this->noLot) ?? [];
         $this->process = $this->context['process'] ?? [];
         $this->requiresMachine = $service->requiresMachine($this->process);
-        try {
-            $this->hasPttn = app(PttnOmesService::class)->mappingForLotSequence(
-                $this->noLot,
-                (string) ($this->lotContext['no_srp'] ?? ''),
-                $this->sequenceNo
-            ) !== null;
-        } catch (\Throwable $exception) {
-            report($exception);
-            $this->hasPttn = false;
-        }
+        $this->resolvePttn();
+        $this->resolveWorkInstruction();
         $this->state = $service->currentState($this->noLot, $this->sequenceNo);
         $this->operators = $service->operators($this->noLot, $this->sequenceNo);
         $this->trayNo = trim((string) ($this->state['tray_no'] ?? ''));
@@ -797,6 +796,47 @@ class GembaInput extends Component
             if ($this->traySmall === '' && ($inheritedTrays['tray_nokecil'] ?? '') !== '') {
                 $this->traySmall = $inheritedTrays['tray_nokecil'];
             }
+        }
+    }
+
+    private function resolvePttn(): void
+    {
+        try {
+            $this->hasPttn = app(PttnOmesService::class)->mappingForLotSequence(
+                $this->noLot,
+                (string) ($this->lotContext['no_srp'] ?? ''),
+                $this->sequenceNo
+            ) !== null;
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->hasPttn = false;
+        }
+    }
+
+    private function resolveWorkInstruction(): void
+    {
+        $this->hasWorkInstruction = false;
+        $this->wiDocumentId = 0;
+
+        $noSrp = (string) ($this->lotContext['no_srp'] ?? '');
+        $idRouting = (string) ($this->lotContext['id_routing'] ?? '');
+        $sequence = (string) ($this->process['id_seq'] ?? '');
+        if ($noSrp === '' || $idRouting === '' || $sequence === '') {
+            return;
+        }
+
+        try {
+            $documents = app(DocumentProcessService::class)->documents($noSrp, $idRouting, $sequence);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return;
+        }
+
+        $latest = $documents[0] ?? null;
+        if ($latest !== null) {
+            $this->hasWorkInstruction = true;
+            $this->wiDocumentId = (int) ($latest['id'] ?? 0);
         }
     }
 

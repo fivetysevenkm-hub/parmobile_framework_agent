@@ -136,6 +136,18 @@ class GembaInputModeTest extends TestCase
             $table->string('class_01', 20)->nullable();
         });
 
+        Schema::create('tbl_pdf_document', function (Blueprint $table): void {
+            $table->id();
+            $table->string('doc_no', 100)->nullable();
+            $table->string('doc_name', 200)->nullable();
+            $table->string('no_srp', 50)->nullable();
+            $table->string('id_routing', 50)->nullable();
+            $table->string('sequence', 10)->nullable();
+            $table->string('file_path', 200)->nullable();
+            $table->string('upload_by', 50)->nullable();
+            $table->dateTime('upload_date')->nullable();
+        });
+
         // Insert sample sequence master data
         DB::table('tblsequence')->insert([
             ['id_seq' => '01', 'nm_sequence' => 'CARBURIZING'],
@@ -175,7 +187,7 @@ class GembaInputModeTest extends TestCase
 
     public function test_switching_mode_to_tetap_shows_combo_and_auto_saves(): void
     {
-        $user = new LegacyUser();
+        $user = new LegacyUser;
         $user->id_user = 'USR01';
         $user->username = 'operator1';
         $this->actingAs($user);
@@ -196,7 +208,7 @@ class GembaInputModeTest extends TestCase
 
     public function test_loads_saved_user_preference_on_mount(): void
     {
-        $user = new LegacyUser();
+        $user = new LegacyUser;
         $user->id_user = 'USR02';
         $user->username = 'operator2';
         $this->actingAs($user);
@@ -321,7 +333,7 @@ class GembaInputModeTest extends TestCase
 
     public function test_opening_from_lot_verifikator_triggers_jumping_process_if_mode_tetap_mismatched(): void
     {
-        $user = new LegacyUser();
+        $user = new LegacyUser;
         $user->id_user = 'USR03';
         $user->username = 'operator3';
         $this->actingAs($user);
@@ -549,5 +561,53 @@ class GembaInputModeTest extends TestCase
 
         $component->assertSee('Lot Sudah selesai proses &amp; telah di kirim ke customer', false)
             ->assertSet('flashType', 'warning');
+    }
+
+    public function test_wi_button_appears_when_wi_pdf_exists_for_lot_process(): void
+    {
+        DB::table('tbl_pdf_document')->insert([
+            'doc_no' => 'uuid-1',
+            'doc_name' => 'IK_SRP-001_CARBURIZING.pdf',
+            'no_srp' => 'SRP-001',
+            'id_routing' => 'ROUT-001',
+            'sequence' => '01',
+            'file_path' => 'wi/SRP-001/ROUT-001/01/IK_SRP-001_CARBURIZING.pdf',
+            'upload_by' => 'USR01',
+            'upload_date' => now(),
+        ]);
+
+        Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput')
+            ->assertSet('hasWorkInstruction', true)
+            ->assertSet('wiDocumentId', 1)
+            ->assertSee('INPUT WI');
+    }
+
+    public function test_wi_button_hidden_when_no_wi_pdf_exists_for_lot_process(): void
+    {
+        Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput')
+            ->assertSet('hasWorkInstruction', false)
+            ->assertSet('wiDocumentId', 0)
+            ->assertDontSee('INPUT WI');
+    }
+
+    public function test_wi_button_uses_latest_document_for_the_active_sequence(): void
+    {
+        DB::table('tbl_pdf_document')->insert([
+            ['doc_no' => 'uuid-old', 'doc_name' => 'IK_SRP-001_CARBURIZING_OLD.pdf', 'no_srp' => 'SRP-001', 'id_routing' => 'ROUT-001', 'sequence' => '01', 'file_path' => 'wi/SRP-001/ROUT-001/01/old.pdf', 'upload_by' => 'USR01', 'upload_date' => now()->subDay()],
+            ['doc_no' => 'uuid-new', 'doc_name' => 'IK_SRP-001_CARBURIZING_NEW.pdf', 'no_srp' => 'SRP-001', 'id_routing' => 'ROUT-001', 'sequence' => '01', 'file_path' => 'wi/SRP-001/ROUT-001/01/new.pdf', 'upload_by' => 'USR01', 'upload_date' => now()],
+            ['doc_no' => 'uuid-seq02', 'doc_name' => 'IK_SRP-001_TEMPERING.pdf', 'no_srp' => 'SRP-001', 'id_routing' => 'ROUT-001', 'sequence' => '02', 'file_path' => 'wi/SRP-001/ROUT-001/02/temper.pdf', 'upload_by' => 'USR01', 'upload_date' => now()],
+        ]);
+
+        $component = Livewire::test(GembaInput::class)
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput');
+
+        // Active process is sequence 01 (CARBURIZING); must pick the latest doc for 01, ignore sequence 02.
+        $this->assertTrue($component->instance()->hasWorkInstruction);
+        $this->assertSame(2, $component->get('wiDocumentId'));
     }
 }
