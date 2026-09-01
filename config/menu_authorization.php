@@ -62,5 +62,6 @@ return [
         ['key' => 'user-management-authorization', 'name' => 'Otorisasi Menu', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.menu-authorization', 'description' => 'Mengatur akses menu dan submenu per user melalui checklist otorisasi.'],
         ['key' => 'user-management-hide-menu', 'name' => 'Hide Menu', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.hide-menu', 'description' => 'Mengatur visibilitas menu dan submenu per user agar sidebar dan tabel Home tetap sederhana.'],
         ['key' => 'user-management-audit', 'name' => 'Audit Trail', 'group' => 'USER MANAGEMENT', 'route' => 'user-management.audit-trail', 'aliases' => ['user-management.audit-trail.certificate'], 'description' => 'Mencatat seluruh aktivitas login, akses menu, dan perubahan data user sebagai jejak audit (IATF 16949:2016).'],
+        ['key' => 'health-check', 'name' => 'Health Check', 'group' => 'USER MANAGEMENT', 'route' => 'health-check', 'aliases' => ['health-check.certificate'], 'description' => 'Laporan pemantauan berkala database & program PAR/SMS beserta sertifikat lampiran berita acara biaya maintenance bulanan (khusus Didik).'],
     ],
 ];

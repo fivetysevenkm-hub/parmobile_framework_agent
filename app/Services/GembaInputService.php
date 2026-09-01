@@ -2,20 +2,17 @@
 
 namespace App\Services;
 
+use App\Support\SchemaCache;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\ValidationException;
 
 class GembaInputService
 {
-    public function __construct(private readonly LotVerifikatorService $lotVerifikator)
-    {
-    }
+    public function __construct(private readonly LotVerifikatorService $lotVerifikator) {}
 
     public function lotContext(string $noLot): ?array
     {
-        if (! Schema::hasTable('tbllotdaily') || ! Schema::hasTable('tblsrp')) {
+        if (! SchemaCache::hasTable('tbllotdaily') || ! SchemaCache::hasTable('tblsrp')) {
             return null;
         }
 
@@ -23,13 +20,13 @@ class GembaInputService
             ->leftJoin('tblsrp as srp', 'lot.no_srps', '=', 'srp.no_srp')
             ->where('lot.no_lot', trim($noLot));
 
-        if (Schema::hasTable('tblpart')) {
+        if (SchemaCache::hasTable('tblpart')) {
             $query->leftJoin('tblpart as part', 'srp.no_parts', '=', 'part.no_part');
         }
-        if (Schema::hasTable('tblcustomer')) {
+        if (SchemaCache::hasTable('tblcustomer')) {
             $query->leftJoin('tblcustomer as customer', 'srp.no_customers', '=', 'customer.no_customer');
         }
-        if (Schema::hasTable('tblproses')) {
+        if (SchemaCache::hasTable('tblproses')) {
             $query->leftJoin('tblproses as proses', 'srp.no_process', '=', 'proses.no_proses');
         }
 
@@ -41,14 +38,14 @@ class GembaInputService
             'lot.qty',
             'srp.id_routing',
         ];
-        if (Schema::hasTable('tblpart')) {
+        if (SchemaCache::hasTable('tblpart')) {
             $columns[] = 'part.no_brg_asli as no_part';
             $columns[] = 'part.nm_part';
         }
-        if (Schema::hasTable('tblcustomer')) {
+        if (SchemaCache::hasTable('tblcustomer')) {
             $columns[] = 'customer.nm_customer as customer';
         }
-        if (Schema::hasTable('tblproses')) {
+        if (SchemaCache::hasTable('tblproses')) {
             $columns[] = 'proses.proses as proses';
         }
 
@@ -82,7 +79,7 @@ class GembaInputService
         }
 
         // 1. Cek apakah lot tercantum di tbllotdaily (field no_lot)
-        if (Schema::hasTable('tbllotdaily')) {
+        if (SchemaCache::hasTable('tbllotdaily')) {
             $existsInDaily = DB::table('tbllotdaily')->where('no_lot', $noLot)->exists();
             if (! $existsInDaily) {
                 return [
@@ -93,10 +90,10 @@ class GembaInputService
         }
 
         // 2. Cek apakah status lot tersebut telah delivery di tbl_seq_all ((id_seq/id_sq) = S26 dan finish = yes)
-        if (Schema::hasTable('tbl_seq_all')) {
+        if (SchemaCache::hasTable('tbl_seq_all')) {
             $query = DB::table('tbl_seq_all')->where('no_lot', $noLot);
-            $hasIdSeq = Schema::hasColumn('tbl_seq_all', 'id_seq');
-            $hasIdSq = Schema::hasColumn('tbl_seq_all', 'id_sq');
+            $hasIdSeq = SchemaCache::hasColumn('tbl_seq_all', 'id_seq');
+            $hasIdSq = SchemaCache::hasColumn('tbl_seq_all', 'id_sq');
 
             if ($hasIdSeq || $hasIdSq) {
                 $query->where(function ($q) use ($hasIdSeq, $hasIdSq) {
@@ -112,7 +109,7 @@ class GembaInputService
                     }
                 });
 
-                if (Schema::hasColumn('tbl_seq_all', 'finish')) {
+                if (SchemaCache::hasColumn('tbl_seq_all', 'finish')) {
                     $query->where(function ($q) {
                         $q->where('finish', 'yes')
                             ->orWhere('finish', '1')
@@ -134,9 +131,9 @@ class GembaInputService
         return ['ok' => true];
     }
 
-    public function processContext(string $noLot, int $sequenceNo): ?array
+    public function processContext(string $noLot, int $sequenceNo, ?array $verifyResult = null): ?array
     {
-        $result = $this->lotVerifikator->verify($noLot);
+        $result = $verifyResult ?? $this->lotVerifikator->verify($noLot);
         if (! ($result['ok'] ?? false)) {
             return null;
         }
@@ -160,7 +157,7 @@ class GembaInputService
     public function currentState(string $noLot, int $sequenceNo): array
     {
         $table = $this->processTable($sequenceNo);
-        if (! Schema::hasTable($table)) {
+        if (! SchemaCache::hasTable($table)) {
             return $this->emptyState();
         }
 
@@ -198,7 +195,7 @@ class GembaInputService
             }
         }
 
-        if ($niks === [] || ! Schema::hasTable('tblkaryawan')) {
+        if ($niks === [] || ! SchemaCache::hasTable('tblkaryawan')) {
             return [];
         }
 
@@ -223,14 +220,14 @@ class GembaInputService
     public function findOperator(string $nik, array $process): ?array
     {
         $nik = trim($nik);
-        if ($nik === '' || ! Schema::hasTable('tblkaryawan')) {
+        if ($nik === '' || ! SchemaCache::hasTable('tblkaryawan')) {
             return null;
         }
 
         $columns = ['nik', 'nama_kary', 'ojt_a'];
         for ($index = 1; $index <= 39; $index++) {
             $column = 'class_'.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
-            if (Schema::hasColumn('tblkaryawan', $column)) {
+            if (SchemaCache::hasColumn('tblkaryawan', $column)) {
                 $columns[] = $column;
             }
         }
@@ -267,14 +264,14 @@ class GembaInputService
 
     public function searchOperators(string $keyword, array $process): array
     {
-        if (! Schema::hasTable('tblkaryawan')) {
+        if (! SchemaCache::hasTable('tblkaryawan')) {
             return [];
         }
 
         $columns = ['nik', 'nama_kary', 'ojt_a'];
         for ($index = 1; $index <= 39; $index++) {
             $column = 'class_'.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
-            if (Schema::hasColumn('tblkaryawan', $column)) {
+            if (SchemaCache::hasColumn('tblkaryawan', $column)) {
                 $columns[] = $column;
             }
         }
@@ -315,7 +312,7 @@ class GembaInputService
 
     public function sequences(): array
     {
-        if (! Schema::hasTable('tblsequence')) {
+        if (! SchemaCache::hasTable('tblsequence')) {
             return [];
         }
 
@@ -337,7 +334,7 @@ class GembaInputService
             'nm_sequence' => '',
         ];
 
-        if (! Schema::hasTable('tbl_user_gemba_mode')) {
+        if (! SchemaCache::hasTable('tbl_user_gemba_mode')) {
             return $default;
         }
 
@@ -371,7 +368,7 @@ class GembaInputService
 
     public function saveUserGembaMode(?string $username, ?string $idUser, string $mode, ?string $idSeq = null, ?string $nmSequence = null): void
     {
-        if (! Schema::hasTable('tbl_user_gemba_mode')) {
+        if (! SchemaCache::hasTable('tbl_user_gemba_mode')) {
             return;
         }
 
@@ -386,9 +383,9 @@ class GembaInputService
         $idSeq = trim((string) $idSeq);
         $nmSequence = trim((string) $nmSequence);
 
-        if ($idSeq !== '' && $nmSequence === '' && Schema::hasTable('tblsequence')) {
+        if ($idSeq !== '' && $nmSequence === '' && SchemaCache::hasTable('tblsequence')) {
             $nmSequence = (string) (DB::table('tblsequence')->where('id_seq', $idSeq)->value('nm_sequence') ?? '');
-        } elseif ($nmSequence !== '' && $idSeq === '' && Schema::hasTable('tblsequence')) {
+        } elseif ($nmSequence !== '' && $idSeq === '' && SchemaCache::hasTable('tblsequence')) {
             $idSeq = (string) (DB::table('tblsequence')->where('nm_sequence', $nmSequence)->value('id_seq') ?? '');
         }
 
@@ -421,7 +418,7 @@ class GembaInputService
         }
 
         // 1. Primary source: check sequence 1 (tbl_seq_01)
-        if (Schema::hasTable('tbl_seq_01')) {
+        if (SchemaCache::hasTable('tbl_seq_01')) {
             $seq1 = DB::table('tbl_seq_01')->where('no_lot', $noLot)->first();
             if ($seq1) {
                 $trayNo = trim((string) ($this->value($seq1, 'tray_no') ?? ''));
@@ -433,7 +430,7 @@ class GembaInputService
         if ($trayNo === '' || $traySmall === '') {
             for ($seq = $currentSequenceNo - 1; $seq >= 1; $seq--) {
                 $table = $this->processTable($seq);
-                if (! Schema::hasTable($table)) {
+                if (! SchemaCache::hasTable($table)) {
                     continue;
                 }
                 $row = DB::table($table)->where('no_lot', $noLot)->first();
@@ -452,7 +449,7 @@ class GembaInputService
         }
 
         // 3. Fallback: check tbl_seq_all if available
-        if (($trayNo === '' || $traySmall === '') && Schema::hasTable('tbl_seq_all')) {
+        if (($trayNo === '' || $traySmall === '') && SchemaCache::hasTable('tbl_seq_all')) {
             $seqAll = DB::table('tbl_seq_all')
                 ->where('no_lot', $noLot)
                 ->where('seq', '<', $currentSequenceNo)
@@ -473,9 +470,10 @@ class GembaInputService
             'tray_nokecil' => $traySmall,
         ];
     }
+
     public function machines(): array
     {
-        if (! Schema::hasTable('tblmesin')) {
+        if (! SchemaCache::hasTable('tblmesin')) {
             return [];
         }
 
@@ -503,7 +501,7 @@ class GembaInputService
 
     public function problemCategories(): array
     {
-        if (! Schema::hasTable('tblproblem')) {
+        if (! SchemaCache::hasTable('tblproblem')) {
             return [];
         }
 
@@ -519,7 +517,7 @@ class GembaInputService
 
     public function problemRanks(): array
     {
-        if (! Schema::hasTable('tblrankproblem')) {
+        if (! SchemaCache::hasTable('tblrankproblem')) {
             return [];
         }
 
@@ -547,10 +545,10 @@ class GembaInputService
         if ($noLot === '' || $noReg === '' || $category === '' || $description === '' || $reporterNik === '') {
             return ['ok' => false, 'message' => 'No Reg, kategori, pelapor, dan isi masalah wajib diisi.'];
         }
-        if (! Schema::hasTable('tblakakami')) {
+        if (! SchemaCache::hasTable('tblakakami')) {
             return ['ok' => false, 'message' => 'Tabel Akakami belum tersedia.'];
         }
-        if (! Schema::hasTable('tblproblem')) {
+        if (! SchemaCache::hasTable('tblproblem')) {
             return ['ok' => false, 'message' => 'Master kategori masalah tblproblem belum tersedia.'];
         }
         if (! DB::table('tblproblem')->where('idproblem', $category)->exists()) {
@@ -560,10 +558,10 @@ class GembaInputService
         if ($rank === '') {
             return ['ok' => false, 'message' => 'Rank masalah wajib dipilih.'];
         }
-        if (! Schema::hasTable('tblrankproblem') || ! DB::table('tblrankproblem')->where('idrankproblem', $rank)->exists()) {
+        if (! SchemaCache::hasTable('tblrankproblem') || ! DB::table('tblrankproblem')->where('idrankproblem', $rank)->exists()) {
             return ['ok' => false, 'message' => 'Rank masalah yang dipilih tidak valid.'];
         }
-        if (! Schema::hasTable($table)) {
+        if (! SchemaCache::hasTable($table)) {
             return ['ok' => false, 'message' => "Tabel proses {$table} tidak tersedia."];
         }
         if (DB::table('tblakakami')->where('noflpp', $noReg)->exists()) {
@@ -596,11 +594,11 @@ class GembaInputService
         ];
         $payload = $this->onlyExistingColumns('tblakakami', $payload);
 
-        DB::transaction(function () use ($payload, $noReg, $table, $noLot, $sequenceNo, $now): void {
+        DB::transaction(function () use ($payload, $table, $noLot, $sequenceNo, $now): void {
             DB::table('tblakakami')->insert($payload);
             $statusPayload = $this->onlyExistingColumns($table, ['hold' => 'yes', 'akakami' => 'yes']);
             DB::table($table)->where('no_lot', $noLot)->update($statusPayload);
-            if (Schema::hasTable('tbl_seq_all')) {
+            if (SchemaCache::hasTable('tbl_seq_all')) {
                 DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update([
                     'hold' => 'yes',
                     'akakami' => 'yes',
@@ -653,7 +651,7 @@ class GembaInputService
         }
 
         $processTable = $this->processTable($sequenceNo);
-        if (! Schema::hasTable($processTable)) {
+        if (! SchemaCache::hasTable($processTable)) {
             return ['ok' => false, 'message' => "Tabel proses {$processTable} tidak tersedia."];
         }
 
@@ -672,7 +670,7 @@ class GembaInputService
             $operatorNames[$slot] = (string) ($operators[$slot]['name'] ?? '');
         }
 
-        DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $sequenceCode, $now, $trayNo, $traySmall, $machineNo, $ojt, $operatorNiks, $context, $sequenceNo): void {
+        DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $now, $trayNo, $traySmall, $machineNo, $ojt, $operatorNiks, $context, $sequenceNo): void {
             $processPayload = $this->onlyExistingColumns($processTable, [
                 'no_lot' => $noLot,
                 'no_srp' => $noSrp,
@@ -694,7 +692,7 @@ class GembaInputService
             ]);
             DB::table($processTable)->updateOrInsert(['no_lot' => $noLot], $processPayload);
 
-            if (Schema::hasTable('tbl_seq_all')) {
+            if (SchemaCache::hasTable('tbl_seq_all')) {
                 $lot = $this->lotContext($noLot) ?? [];
                 $allPayload = $this->onlyExistingColumns('tbl_seq_all', [
                     'no_lot' => $noLot,
@@ -743,7 +741,7 @@ class GembaInputService
         $context = $canonical;
         $process = $context['process'] ?? [];
         $table = $this->processTable($sequenceNo);
-        if ($noLot === '' || ! Schema::hasTable($table)) {
+        if ($noLot === '' || ! SchemaCache::hasTable($table)) {
             return ['ok' => false, 'message' => 'Data proses belum tersedia.'];
         }
 
@@ -768,17 +766,17 @@ class GembaInputService
         ]);
         DB::table($table)->where('no_lot', $noLot)->update($payload);
 
-        if (Schema::hasTable('tbl_seq_all')) {
+        if (SchemaCache::hasTable('tbl_seq_all')) {
             $seqAllPayload = $this->onlyExistingColumns('tbl_seq_all', $payload + ['updated_at' => $finishTime->format('Y-m-d H:i:s')]);
             if ($seqAllPayload !== []) {
                 DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update($seqAllPayload);
             }
         }
 
-        if (Schema::hasTable('tbl_validator')) {
+        if (SchemaCache::hasTable('tbl_validator')) {
             DB::table('tbl_validator')->where('no_lot', $noLot)->update(['finish' => 'yes']);
             $nextProcess = strtolower(trim((string) ($this->validatorValue(DB::table('tbl_validator')->where('no_lot', $noLot)->first(), 'next_process') ?? '')));
-            if ($nextProcess === 'fin' && Schema::hasTable('tbllotdaily') && Schema::hasColumn('tbllotdaily', 'delv')) {
+            if ($nextProcess === 'fin' && SchemaCache::hasTable('tbllotdaily') && SchemaCache::hasColumn('tbllotdaily', 'delv')) {
                 DB::table('tbllotdaily')->where('no_lot', $noLot)->update(['delv' => 1]);
             }
         }
@@ -796,7 +794,7 @@ class GembaInputService
         }
         $context = $canonical;
         $table = $this->processTable($sequenceNo);
-        if ($noLot === '' || ! Schema::hasTable($table)) {
+        if ($noLot === '' || ! SchemaCache::hasTable($table)) {
             return ['ok' => false, 'message' => 'Data proses belum tersedia.'];
         }
 
@@ -805,7 +803,7 @@ class GembaInputService
             return ['ok' => false, 'message' => 'Proses belum di-start.'];
         }
         DB::table($table)->where('no_lot', $noLot)->update($this->onlyExistingColumns($table, ['hold' => 'yes']));
-        if (Schema::hasTable('tbl_seq_all')) {
+        if (SchemaCache::hasTable('tbl_seq_all')) {
             DB::table('tbl_seq_all')->where('no_lot', $noLot)->where('seq', $sequenceNo)->update(['hold' => 'yes', 'updated_at' => now()->format('Y-m-d H:i:s')]);
         }
 
@@ -814,7 +812,7 @@ class GembaInputService
 
     private function validateAndAdvanceValidator(string $noLot, string $noSrp, string $idRouting, string $sequenceCode): array
     {
-        if (! Schema::hasTable('tbl_validator')) {
+        if (! SchemaCache::hasTable('tbl_validator')) {
             return ['ok' => false, 'message' => 'Tabel validator tidak tersedia.'];
         }
 
@@ -839,6 +837,7 @@ class GembaInputService
                 'total_seq_remain' => max(0, $this->routingCount($idRouting) - 1),
                 'finish' => 'no',
             ]);
+
             return ['ok' => true];
         }
 
@@ -871,12 +870,12 @@ class GembaInputService
 
     private function routingProcessAt(string $idRouting, int $sequenceNo): ?string
     {
-        if (! Schema::hasTable('tblrouting') || $sequenceNo < 1 || $sequenceNo > LotVerifikatorService::MAX_SEQUENCE) {
+        if (! SchemaCache::hasTable('tblrouting') || $sequenceNo < 1 || $sequenceNo > LotVerifikatorService::MAX_SEQUENCE) {
             return null;
         }
 
         $column = 'Seq_'.str_pad((string) $sequenceNo, 2, '0', STR_PAD_LEFT);
-        if (! Schema::hasColumn('tblrouting', $column)) {
+        if (! SchemaCache::hasColumn('tblrouting', $column)) {
             return null;
         }
 
@@ -891,6 +890,7 @@ class GembaInputService
                 $count++;
             }
         }
+
         return $count;
     }
 
@@ -903,10 +903,11 @@ class GembaInputService
     {
         $result = [];
         foreach ($values as $column => $value) {
-            if (Schema::hasColumn($table, $column)) {
+            if (SchemaCache::hasColumn($table, $column)) {
                 $result[$column] = $value;
             }
         }
+
         return $result;
     }
 
@@ -920,6 +921,7 @@ class GembaInputService
                 return trim((string) ($value ?? ''));
             }
         }
+
         return '';
     }
 
@@ -933,6 +935,7 @@ class GembaInputService
                 return $value;
             }
         }
+
         return null;
     }
 

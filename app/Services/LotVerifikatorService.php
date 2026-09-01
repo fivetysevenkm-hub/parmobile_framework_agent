@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Support\SchemaCache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class LotVerifikatorService
 {
@@ -16,7 +16,7 @@ class LotVerifikatorService
             return $this->failure('Masukan No Lot terlebih dahulu.');
         }
 
-        if (! Schema::hasTable('tbllotdaily') || ! Schema::hasTable('tblsrp') || ! Schema::hasTable('tblrouting')) {
+        if (! SchemaCache::hasTable('tbllotdaily') || ! SchemaCache::hasTable('tblsrp') || ! SchemaCache::hasTable('tblrouting')) {
             return $this->failure('Struktur data lot/routing belum tersedia pada database.');
         }
 
@@ -41,7 +41,7 @@ class LotVerifikatorService
         $routingColumns = ['id_routing'];
         for ($index = 1; $index <= self::MAX_SEQUENCE; $index++) {
             $column = $this->sequenceColumn($index);
-            if (Schema::hasColumn('tblrouting', $column)) {
+            if (SchemaCache::hasColumn('tblrouting', $column)) {
                 $routingColumns[] = $column;
             }
         }
@@ -131,7 +131,7 @@ class LotVerifikatorService
         }
 
         $names = [];
-        if ($idValues !== [] && Schema::hasTable('tblsequence')) {
+        if ($idValues !== [] && SchemaCache::hasTable('tblsequence')) {
             $names = DB::table('tblsequence')
                 ->whereIn('id_seq', array_values($idValues))
                 ->pluck('nm_sequence', 'id_seq')
@@ -162,7 +162,7 @@ class LotVerifikatorService
     private function resolveNextProcess(string $lotNo, object $routing, array $processes, string $routingId): array
     {
         $first = $processes[0] ?? [];
-        if (! Schema::hasTable('tbl_validator')) {
+        if (! SchemaCache::hasTable('tbl_validator')) {
             return $first;
         }
 
@@ -183,6 +183,7 @@ class LotVerifikatorService
         if (strtoupper($nextProcess) === 'FIN') {
             $column = $this->sequenceColumnFromCode($currentSequence);
             $idSeq = $column ? trim((string) ($routing->{$column} ?? '')) : '';
+
             return $this->findProcess($processes, $idSeq) ?? $first;
         }
 
@@ -235,11 +236,11 @@ class LotVerifikatorService
         $routingCount = max(1, min(self::MAX_SEQUENCE, $routingCount));
         $table = 'tbl_seq_'.str_pad((string) $routingCount, 2, '0', STR_PAD_LEFT);
 
-        if (Schema::hasTable($table) && Schema::hasColumn($table, 'no_lot') && Schema::hasColumn($table, 'finish')) {
+        if (SchemaCache::hasTable($table) && SchemaCache::hasColumn($table, 'no_lot') && SchemaCache::hasColumn($table, 'finish')) {
             return trim((string) (DB::table($table)->where('no_lot', $lotNo)->value('finish') ?? ''));
         }
 
-        if (Schema::hasTable('tbl_seq_all') && Schema::hasColumn('tbl_seq_all', 'seq') && Schema::hasColumn('tbl_seq_all', 'finish')) {
+        if (SchemaCache::hasTable('tbl_seq_all') && SchemaCache::hasColumn('tbl_seq_all', 'seq') && SchemaCache::hasColumn('tbl_seq_all', 'finish')) {
             return trim((string) (DB::table('tbl_seq_all')
                 ->where('no_lot', $lotNo)
                 ->where('seq', $routingCount)

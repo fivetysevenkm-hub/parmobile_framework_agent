@@ -278,7 +278,7 @@ class GembaInput extends Component
         if ($clickable) {
             $this->sequenceNo = (int) $clickable['sequence_no'];
         }
-        $this->loadContext($service);
+        $this->loadContext($service, $result);
         $this->flash('Konteks lot dan proses aktif berhasil dimuat.', 'success');
         $this->dispatch('stopwatch-sync');
     }
@@ -755,11 +755,11 @@ class GembaInput extends Component
         $this->resetValidation();
     }
 
-    private function loadContext(GembaInputService $service): void
+    private function loadContext(GembaInputService $service, ?array $verifyResult = null): void
     {
         $this->problemCategories = $service->problemCategories();
         $this->problemRanks = $service->problemRanks();
-        $this->context = $service->processContext($this->noLot, $this->sequenceNo) ?? [];
+        $this->context = $service->processContext($this->noLot, $this->sequenceNo, $verifyResult) ?? [];
         if ($this->context === []) {
             $this->lotContext = [];
             $this->process = [];
