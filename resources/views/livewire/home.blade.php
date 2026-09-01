@@ -14,6 +14,7 @@
         $connNetwork = 'IP Public (Internet)';
     }
     $connAddress = $connHost . (in_array((int) $connPort, [80, 443], true) ? '' : ':' . $connPort);
+    $connSecure = $connScheme === 'https';
 @endphp
 
 <div class="home-page">
@@ -193,6 +194,57 @@
             color: var(--success);
         }
 
+        .home-conn-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .42rem .7rem;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--panel-2) 70%, var(--line));
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .66rem;
+            letter-spacing: .05em;
+            white-space: nowrap;
+        }
+
+        .home-conn-lock {
+            flex: none;
+        }
+
+        .home-conn-badge.is-secure {
+            border-color: color-mix(in srgb, var(--success) 55%, var(--line));
+            background: color-mix(in srgb, var(--success) 12%, var(--panel-2));
+        }
+
+        .home-conn-badge.is-plain {
+            border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
+            background: color-mix(in srgb, var(--danger) 10%, var(--panel-2));
+        }
+
+        .home-conn-scheme {
+            font-weight: 700;
+            color: var(--text-title);
+        }
+
+        .home-conn-secure {
+            padding: .12rem .4rem;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--success) 22%, transparent);
+            color: var(--success);
+            font-size: .58rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .home-conn-badge.is-plain .home-conn-lock {
+            color: var(--danger);
+        }
+
+        .home-conn-badge.is-secure .home-conn-lock {
+            color: var(--success);
+        }
+
         .home-hero-aside {
             justify-self: end;
             width: min(100%, 360px);
@@ -312,44 +364,6 @@
             color: var(--cyan);
             font-family: 'JetBrains Mono', monospace;
             font-size: 1rem;
-        }
-
-        .home-conn-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: .65rem;
-        }
-
-        .home-conn-item {
-            position: relative;
-            min-width: 0;
-            padding: .95rem 1rem;
-            border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
-            border-radius: 12px;
-            background: color-mix(in srgb, var(--bg) 46%, transparent);
-        }
-
-        .home-conn-label {
-            display: block;
-            margin-bottom: .3rem;
-            color: var(--muted);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: .6rem;
-            font-weight: 700;
-            letter-spacing: .1em;
-            line-height: 1.4;
-            text-transform: uppercase;
-        }
-
-        .home-conn-value {
-            display: block;
-            color: var(--text-title);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            font-weight: 700;
-            letter-spacing: -.03em;
-            line-height: 1.3;
-            overflow-wrap: anywhere;
         }
 
         .home-table-wrap {
@@ -568,6 +582,13 @@
                 text-align: center;
             }
 
+            .home-conn-badge {
+                justify-content: center;
+                align-self: stretch;
+                white-space: normal;
+                text-align: center;
+            }
+
             .home-panel {
                 padding: .85rem;
                 border-radius: 15px;
@@ -581,10 +602,6 @@
 
             .home-count-badge {
                 align-self: flex-start;
-            }
-
-            .home-conn-grid {
-                grid-template-columns: 1fr;
             }
 
             .home-table-wrap {
@@ -723,6 +740,11 @@
             <div class="home-hero-actions">
                 <a class="home-primary" href="#menu-access">Jelajahi menu <span aria-hidden="true">↓</span></a>
                 <span class="home-status">● Akses akun aktif</span>
+                <span class="home-conn-badge {{ $connSecure ? 'is-secure' : 'is-plain' }}" title="Koneksi server: {{ strtoupper($connScheme) }}://{{ $connAddress }} · {{ $connNetwork }}">
+                    <svg class="home-conn-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="home-conn-scheme">{{ strtoupper($connScheme) }}</span>
+                    @if($connSecure)<span class="home-conn-secure">SECURED</span>@endif
+                </span>
             </div>
         </div>
 
@@ -740,33 +762,6 @@
             </div>
             <p class="home-aside-footnote">Daftar halaman kontrol berdasarkan otorisasi akun dan pengaturan Anda.</p>
         </aside>
-    </section>
-
-    <section id="conn-access" class="home-panel" aria-labelledby="conn-access-title">
-        <div class="home-panel-heading">
-            <div>
-                <div class="home-section-kicker">Network</div>
-                <h2 id="conn-access-title" class="home-panel-title">Status Koneksi Server</h2>
-                <p class="home-panel-intro">Jalur akses server yang sedang digunakan saat ini.</p>
-            </div>
-        </div>
-
-        <div class="home-conn-grid">
-            <div class="home-conn-item">
-                <span class="home-conn-label">Jaringan</span>
-                <strong class="home-conn-value">{{ $connNetwork }}</strong>
-            </div>
-            <div class="home-conn-item">
-                <span class="home-conn-label">Alamat aktif</span>
-                <strong class="home-conn-value">{{ $connScheme }}://{{ $connAddress }}</strong>
-            </div>
-            <div class="home-conn-item">
-                <span class="home-conn-label">Protokol</span>
-                <strong class="home-conn-value">{{ strtoupper($connScheme) }}</strong>
-            </div>
-        </div>
-
-        
     </section>
 
     <section id="menu-access" class="home-panel" aria-labelledby="menu-access-title">
