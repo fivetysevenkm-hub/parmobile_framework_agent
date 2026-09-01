@@ -53,7 +53,7 @@ class HealthCheck extends Component
         $this->sms = $service->evaluate(HealthCheckService::TYPE_SMS, $this->year, $this->month);
     }
 
-    public function updatedActiveType(string $value): void
+    public function setActiveType(string $value): void
     {
         $this->activeType = in_array($value, [HealthCheckService::TYPE_PAR, HealthCheckService::TYPE_SMS], true)
             ? $value

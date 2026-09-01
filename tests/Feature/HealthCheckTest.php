@@ -79,6 +79,23 @@ class HealthCheckTest extends TestCase
             ->assertOk();
     }
 
+    public function test_active_type_tab_switch_via_livewire_call(): void
+    {
+        $didik = new LegacyUser;
+        $didik->id_user = 'USR-DIDIK';
+        $didik->username = 'Didik';
+        $this->actingAs($didik);
+
+        Livewire::test(HealthCheck::class)
+            ->assertSet('activeType', 'PAR')
+            ->call('setActiveType', 'SMS')
+            ->assertSet('activeType', 'SMS')
+            ->assertOk()
+            ->call('setActiveType', 'PAR')
+            ->assertSet('activeType', 'PAR')
+            ->assertOk();
+    }
+
     public function test_health_check_menu_is_granted_only_to_didik(): void
     {
         $svc = app(MenuAuthorizationService::class);

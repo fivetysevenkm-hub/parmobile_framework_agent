@@ -69,8 +69,8 @@
             <div class="hc-headline">Laporan pemantauan berkala database &amp; program — sertifikat lampiran berita acara biaya maintenance bulanan.</div>
         </div>
         <div class="hc-type-tabs">
-            <button type="button" class="hc-tab @if($activeType === 'PAR') active @endif" wire:click="updatedActiveType('PAR')">PAR Health Check<small>Semua tabel non-SMS</small></button>
-            <button type="button" class="hc-tab @if($activeType === 'SMS') active @endif" wire:click="updatedActiveType('SMS')">SMS Health Check<small>tblsrp &amp; tbllotdaily</small></button>
+            <button type="button" class="hc-tab @if($activeType === 'PAR') active @endif" wire:click="setActiveType('PAR')">PAR Health Check<small>Semua tabel non-SMS</small></button>
+            <button type="button" class="hc-tab @if($activeType === 'SMS') active @endif" wire:click="setActiveType('SMS')">SMS Health Check<small>tblsrp &amp; tbllotdaily</small></button>
         </div>
     </div>
 
