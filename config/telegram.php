@@ -52,6 +52,9 @@ return [
         'performance_manpower' => env('TELEGRAM_CHAT_ID_PERFORMANCE_MANPOWER'),
         'productivity_process' => env('TELEGRAM_CHAT_ID_PRODUCTIVITY_PROCESS'),
         'carb_temper' => env('TELEGRAM_CHAT_ID_CARB_TEMPER'),
+
+        // Customer Portal — notifikasi pendaftaran customer baru.
+        'customer_portal' => env('TELEGRAM_CHAT_ID_CUSTOMER_PORTAL'),
     ],
 
     'parse_mode' => 'HTML',

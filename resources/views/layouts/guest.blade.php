@@ -35,6 +35,9 @@
         .captcha-field { min-height:66px; }
         .captcha-field .cf-turnstile { min-height:65px; }
         .footer { border-top:1px solid var(--line); margin-top:25px; padding-top:18px; color:var(--footer-text); text-align:center; font-size:.7rem; }
+        .customer-switch { text-align:center; margin-top:18px; }
+        .customer-switch a { color:var(--accent); text-decoration:none; font-size:.82rem; font-weight:600; }
+        .customer-switch a:hover { text-decoration:underline; }
         @media (max-width:480px) { body { padding:16px; } .login-box { width:100%; } .brand-logo { width:min(184px,68vw); } .card { padding:25px 20px; } .card h2 { font-size:.92rem; margin-bottom:22px; } }
     </style>
 </head>

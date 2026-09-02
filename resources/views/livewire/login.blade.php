@@ -38,6 +38,10 @@
             </button>
         </form>
 
+        <div class="customer-switch">
+            <a href="{{ route('customer.login') }}">Login Customer Portal ↗</a>
+        </div>
+
         <div class="footer">Version_02 | {{ now()->year }} PT Dowa Thermotech Indonesia</div>
     </div>
 </div>

@@ -59,6 +59,12 @@ use App\Livewire\SusunRoutingProses;
 use App\Livewire\UploadWiProses;
 use App\Livewire\UserControl;
 use App\Livewire\UserQrCode;
+use App\Livewire\CustomerDashboard;
+use App\Livewire\CustomerForgotPassword;
+use App\Livewire\CustomerLogin;
+use App\Livewire\CustomerPortalUserManagement;
+use App\Livewire\CustomerRegister;
+use App\Livewire\LotTracking;
 use App\Services\AuditLogger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -127,6 +133,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class, AuditMenuAccess::class,
     Route::get('/carb-temper', CarbTemperMonitoring::class)->name('carb.temper');
     Route::get('/akakami-dashboard', AkakamiDashboard::class)->name('akakami.dashboard');
     Route::get('/export-excel', ExportExcelController::class)->name('export.excel');
+    Route::get('/user-management/customer-portal-users', CustomerPortalUserManagement::class)->name('user-management.customer-portal-users');
 });
 
 Route::middleware('auth')->group(function () {
@@ -144,4 +151,25 @@ Route::middleware('auth')->group(function () {
 
         return redirect()->route('login');
     })->name('logout');
+});
+
+Route::middleware('guest:customer')->group(function () {
+    Route::get('/customer/login', CustomerLogin::class)->name('customer.login');
+    Route::get('/customer/register', CustomerRegister::class)->name('customer.register');
+    Route::get('/customer/forgot-password', CustomerForgotPassword::class)->name('customer.forgot-password');
+});
+
+Route::middleware(['auth:customer', \App\Http\Middleware\EnsureCustomerApproved::class])->group(function () {
+    Route::get('/customer', CustomerDashboard::class)->name('customer.dashboard');
+    Route::get('/customer/lot-tracking', LotTracking::class)->name('customer.lot-tracking');
+});
+
+Route::middleware('auth:customer')->group(function () {
+    Route::post('/customer/logout', function () {
+        auth()->guard('customer')->logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+
+        return redirect()->route('customer.login');
+    })->name('customer.logout');
 });
