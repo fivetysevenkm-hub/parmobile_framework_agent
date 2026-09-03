@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use App\Services\CustomerLotTrackingService;
-use Carbon\Carbon;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,13 +16,13 @@ class LotTracking extends Component
 
     public string $statusFilter = '';
 
-    public string $fromDate = '';
+    public bool $showModal = false;
 
-    public string $toDate = '';
+    public array $lotDetail = [];
 
-    public int $periodDays = 30;
+    public string $selectedLot = '';
 
-    public int $selectedLotIndex = -1;
+    public string $nextProcess = '';
 
     public array $searchColumns = [
         'no_lot' => 'No. Lot (PAR)',
@@ -33,26 +32,12 @@ class LotTracking extends Component
         'nm_part' => 'Nama Part',
     ];
 
-    public function mount(): void
-    {
-        $this->fromDate = now()->subDays($this->periodDays)->format('Y-m-d');
-        $this->toDate = now()->format('Y-m-d');
-    }
-
     public function getPeriodLabelProperty(): string
     {
-        $from = $this->fromDate ? Carbon::parse($this->fromDate)->format('d M Y') : '-';
-        $to = $this->toDate ? Carbon::parse($this->toDate)->format('d M Y') : '-';
+        $from = now()->subDays(30)->format('d M Y');
+        $to = now()->format('d M Y');
 
-        return "H-{$this->periodDays}  ({$from} – {$to})";
-    }
-
-    public function resetPeriod(): void
-    {
-        $this->fromDate = now()->subDays($this->periodDays)->format('Y-m-d');
-        $this->toDate = now()->format('Y-m-d');
-        $this->resetPage();
-        $this->selectedLotIndex = -1;
+        return "H-30  ({$from} – {$to})";
     }
 
     public function getCustomerNameProperty(): string
@@ -81,50 +66,40 @@ class LotTracking extends Component
             $this->searchCol,
             $this->search ?: null,
             $this->statusFilter ?: null,
-            $this->fromDate ?: null,
-            $this->toDate ?: null,
             perPage: 10,
         );
     }
 
     public function selectLot(string $noLot): void
     {
-        $this->selectedLotIndex = $noLot;
+        $service = app(CustomerLotTrackingService::class);
+        $this->lotDetail = $service->getLotDetail($noLot);
+        $this->nextProcess = $service->getNextProcess($noLot) ?? '';
+        $this->selectedLot = $noLot;
+        $this->showModal = true;
     }
 
-    public function clearSelection(): void
+    public function closeModal(): void
     {
-        $this->selectedLotIndex = -1;
+        $this->showModal = false;
+        $this->lotDetail = [];
+        $this->selectedLot = '';
+        $this->nextProcess = '';
     }
 
     public function updatingSearch(): void
     {
         $this->resetPage();
-        $this->selectedLotIndex = -1;
     }
 
     public function updatingSearchCol(): void
     {
         $this->resetPage();
-        $this->selectedLotIndex = -1;
     }
 
     public function updatingStatusFilter(): void
     {
         $this->resetPage();
-        $this->selectedLotIndex = -1;
-    }
-
-    public function updatingFromDate(): void
-    {
-        $this->resetPage();
-        $this->selectedLotIndex = -1;
-    }
-
-    public function updatingToDate(): void
-    {
-        $this->resetPage();
-        $this->selectedLotIndex = -1;
     }
 
     public function render()

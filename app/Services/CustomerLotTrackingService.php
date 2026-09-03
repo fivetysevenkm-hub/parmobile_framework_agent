@@ -26,10 +26,11 @@ class CustomerLotTrackingService
         ?string $searchCol = null,
         ?string $search = null,
         ?string $status = null,
-        ?string $fromDate = null,
-        ?string $toDate = null,
         int $perPage = 10,
     ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
+        $fromDate = now()->subDays(30)->startOfDay();
+        $toDate = now()->endOfDay();
+
         $query = DB::table('tbl_seq_all')
             ->select(
                 'no_lot',
@@ -40,7 +41,7 @@ class CustomerLotTrackingService
                 'no_sj_cust',
                 'customer',
                 'qty',
-                DB::raw("MAX(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) as all_finished"),
+                DB::raw("MIN(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) as all_finished"),
                 DB::raw("MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) as has_hold"),
                 DB::raw("COUNT(DISTINCT seq) as total_seq"),
                 DB::raw("SUM(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) as finished_seq"),
@@ -49,6 +50,7 @@ class CustomerLotTrackingService
                 DB::raw("MAX(finish_time) as last_finish")
             )
             ->where('customer', $customerName)
+            ->whereBetween('created_at', [$fromDate, $toDate])
             ->groupBy('no_lot', 'no_srp', 'no_part', 'nm_part', 'no_lot_cust', 'no_sj_cust', 'customer', 'qty');
 
         $searchCol = $searchCol ?: 'no_lot';
@@ -56,20 +58,11 @@ class CustomerLotTrackingService
             $query->where($searchCol, 'LIKE', "%{$search}%");
         }
 
-        if ($fromDate && $toDate) {
-            $query->whereBetween('created_at', [$fromDate.' 00:00:00', $toDate.' 23:59:59']);
-        } elseif ($fromDate) {
-            $query->where('created_at', '>=', $fromDate.' 00:00:00');
-        } elseif ($toDate) {
-            $query->where('created_at', '<=', $toDate.' 23:59:59');
-        }
-
         if ($status) {
             $query->havingRaw(match ($status) {
-                'selesai' => "MAX(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 1",
-                'hold' => "MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) = 1 AND MAX(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 0",
-                'diproses' => "MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) = 1 AND MAX(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 0 AND MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) = 0",
-                'belum' => "MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) = 0",
+                'selesai' => "MIN(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 1",
+                'diproses' => "(MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) = 1 OR MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) = 1) AND MIN(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 0",
+                'belum' => "MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) = 0 AND MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) = 0",
             });
         }
 
@@ -103,8 +96,7 @@ class CustomerLotTrackingService
     }
 
     public function getLotDetail(string $noLot): array
-    {
-        $rows = DB::table('tbl_seq_all')
+    {        $rows = DB::table('tbl_seq_all')
             ->where('no_lot', $noLot)
             ->orderBy('seq')
             ->orderBy('id')
@@ -165,15 +157,68 @@ class CustomerLotTrackingService
         ];
     }
 
+    public function getNextProcess(string $noLot): ?string
+    {
+        $lot = DB::table('tbl_seq_all')
+            ->where('no_lot', $noLot)
+            ->select('no_srp')
+            ->first();
+
+        if (! $lot) {
+            return null;
+        }
+
+        $srp = DB::table('tblsrp')
+            ->where('no_srp', $lot->no_srp)
+            ->first();
+
+        if (! $srp || ! $srp->id_routing) {
+            return null;
+        }
+
+        $routing = DB::table('tblrouting')
+            ->where('id_routing', $srp->id_routing)
+            ->first();
+
+        if (! $routing) {
+            return null;
+        }
+
+        $stepIds = [];
+        for ($i = 1; $i <= 26; $i++) {
+            $col = 'Seq_'.str_pad((string) $i, 2, '0', STR_PAD_LEFT);
+            $value = $routing->{$col} ?? null;
+            if (! $value || $value === '') {
+                break;
+            }
+            $stepIds[] = $value;
+        }
+
+        if (empty($stepIds)) {
+            return null;
+        }
+
+        $processCount = DB::table('tbl_seq_all')
+            ->where('no_lot', $noLot)
+            ->count('seq');
+
+        if ($processCount >= count($stepIds)) {
+            return null;
+        }
+
+        $nextIdSeq = $stepIds[$processCount];
+
+        return DB::table('tblsequence')
+            ->where('id_seq', $nextIdSeq)
+            ->value('nm_sequence');
+    }
+
     private function resolveStatus(object $lot): string
     {
         if ($lot->all_finished) {
             return 'selesai';
         }
-        if ($lot->has_hold) {
-            return 'hold';
-        }
-        if ($lot->has_started) {
+        if ($lot->has_started || $lot->has_hold) {
             return 'diproses';
         }
 
@@ -184,7 +229,6 @@ class CustomerLotTrackingService
     {
         return match ($status) {
             'selesai' => 'Selesai',
-            'hold' => 'Hold',
             'diproses' => 'Diproses',
             'belum' => 'Belum Diproses',
         };
@@ -194,7 +238,6 @@ class CustomerLotTrackingService
     {
         return match ($status) {
             'selesai' => 'teal',
-            'hold' => 'red',
             'diproses' => 'blue',
             'belum' => 'gray',
         };
