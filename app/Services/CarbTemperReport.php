@@ -157,23 +157,12 @@ class CarbTemperReport
             $lines[] = '----------------------------';
         }
         $lines[] = '<i>Waktu Update: '.now('Asia/Jakarta')->format('H:i:s').' WIB</i>';
-        $lines[] = '';
-        $lines[] = $this->accessBanner();
         return implode("\n", $lines);
     }
 
     public function clearMessage(): string
     {
-        return "✅ <b>Monitoring Clear</b>\nSemua lot sudah dalam kondisi SAFE atau DONE.\n\n".$this->accessBanner();
-    }
-
-    private function accessBanner(): string
-    {
-        return "──────✦✦──────\n"
-            .'🌐 <b>PARMOBILE</b> kini dapat diakses secara online'."\n"
-            .'📲 Yuk pantau progress lot langsung via:'."\n"
-            .'🔗 <b>https://dowa-par.com</b>'
-            ."\n──────✦✦──────";
+        return "✅ <b>Monitoring Clear</b>\nSemua lot sudah dalam kondisi SAFE atau DONE.";
     }
 
     private function parseDate($value): ?Carbon

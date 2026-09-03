@@ -21,6 +21,9 @@ class TelegramService
         }
 
         try {
+            $footer = app(TelegramAdService::class)->nextFooter();
+            $message = rtrim($message).$footer;
+
             $response = Http::asForm()
                 ->timeout((int) config('telegram.timeout', 8))
                 ->post("https://api.telegram.org/bot{$token}/sendMessage", [
