@@ -109,7 +109,7 @@
                         ->filter(fn($p) => $p['status'] === 'finished' || $p['status'] === 'in_progress' || $p['status'] === 'hold')
                         ->sortByDesc('seq')
                         ->first();
-                    $allDone = !empty($procs) && collect($procs)->every(fn($p) => $p['status'] === 'finished');
+                    $allDone = $lotDetail['total_seq'] > 0 && $lotDetail['finished_seq'] >= $lotDetail['total_seq'];
                 @endphp
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
                     <div>
@@ -131,9 +131,12 @@
                 </div>
 
                 <div style="margin-bottom:24px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
                         <span style="font-size:.78rem;color:var(--footer-text);">Progress</span>
-                        <span style="font-size:.78rem;font-weight:600;color:var(--ink);">{{ $lotDetail['finished_seq'] }}/{{ $lotDetail['total_seq'] }} proses ({{ $lotDetail['progress'] }}%)</span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:.72rem;font-weight:600;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--{{ $lotDetail['status_color'] }}) 15%,transparent);color:var(--{{ $lotDetail['status_color'] }});">{{ $lotDetail['status_label'] }}</span>
+                            <span style="font-size:.78rem;font-weight:600;color:var(--ink);">{{ $lotDetail['finished_seq'] }}/{{ $lotDetail['total_seq'] }} proses ({{ $lotDetail['progress'] }}%)</span>
+                        </div>
                     </div>
                     <div style="width:100%;height:8px;background:var(--line);border-radius:4px;overflow:hidden;">
                         <div style="width:{{ $lotDetail['progress'] }}%;height:100%;background:{{ $allDone ? 'var(--success)' : 'var(--cyan)' }};border-radius:4px;transition:width .5s;"></div>

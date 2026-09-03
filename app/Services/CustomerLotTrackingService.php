@@ -29,7 +29,8 @@ class CustomerLotTrackingService
         int $perPage = 10,
     ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
         $fromDate = now()->subDays(30)->startOfDay();
-        $toDate = now()->endOfDay();
+
+        $searchCol = $searchCol ?: 'no_lot';
 
         $query = DB::table('tbl_seq_all')
             ->select(
@@ -43,36 +44,40 @@ class CustomerLotTrackingService
                 'qty',
                 DB::raw("MIN(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) as all_finished"),
                 DB::raw("MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) as has_hold"),
-                DB::raw("COUNT(DISTINCT seq) as total_seq"),
                 DB::raw("SUM(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) as finished_seq"),
                 DB::raw("MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) as has_started"),
-                DB::raw("MAX(start_time) as last_start"),
-                DB::raw("MAX(finish_time) as last_finish")
+                DB::raw("MAX(created_at) as last_created")
             )
             ->where('customer', $customerName)
-            ->whereBetween('created_at', [$fromDate, $toDate])
-            ->groupBy('no_lot', 'no_srp', 'no_part', 'nm_part', 'no_lot_cust', 'no_sj_cust', 'customer', 'qty');
+            ->groupBy('no_lot', 'no_srp', 'no_part', 'nm_part', 'no_lot_cust', 'no_sj_cust', 'customer', 'qty')
+            ->having('last_created', '>=', $fromDate);
 
-        $searchCol = $searchCol ?: 'no_lot';
         if ($search && in_array($searchCol, ['no_lot', 'no_part', 'nm_part', 'no_lot_cust', 'no_sj_cust'], true)) {
             $query->where($searchCol, 'LIKE', "%{$search}%");
         }
 
-        if ($status) {
-            $query->havingRaw(match ($status) {
-                'selesai' => "MIN(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 1",
-                'diproses' => "(MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) = 1 OR MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) = 1) AND MIN(CASE WHEN finish = 'yes' THEN 1 ELSE 0 END) = 0",
-                'belum' => "MAX(CASE WHEN start_time IS NOT NULL AND start_time != '' THEN 1 ELSE 0 END) = 0 AND MAX(CASE WHEN hold = 'yes' THEN 1 ELSE 0 END) = 0",
-            });
-        }
+        $allRows = $query->get();
 
-        $lots = $query->orderBy('no_lot', 'desc')->paginate($perPage);
+        $noSrpValues = $allRows->pluck('no_srp')->unique()->filter()->toArray();
+        $routingStepCounts = $this->getRoutingStepCounts($noSrpValues);
 
-        $mapped = $lots->getCollection()->map(function ($lot) {
-            $status = $this->resolveStatus($lot);
-            $progress = $lot->total_seq > 0
-                ? round(($lot->finished_seq / $lot->total_seq) * 100)
+        $mapped = $allRows->map(function ($lot) use ($routingStepCounts) {
+            $finishedSeq = (int) $lot->finished_seq;
+            $hasStarted = (bool) $lot->has_started;
+            $hasHold = (bool) $lot->has_hold;
+
+            $totalSeq = $routingStepCounts[$lot->no_srp] ?? 0;
+            if ($totalSeq <= 0) {
+                $totalSeq = $finishedSeq;
+            }
+
+            $progress = $totalSeq > 0
+                ? round(($finishedSeq / $totalSeq) * 100)
                 : 0;
+
+            $lotStatus = $totalSeq > 0 && $finishedSeq >= $totalSeq
+                ? 'selesai'
+                : ($hasStarted || $hasHold ? 'diproses' : 'belum');
 
             return [
                 'no_lot' => $lot->no_lot,
@@ -83,22 +88,51 @@ class CustomerLotTrackingService
                 'no_sj_cust' => $lot->no_sj_cust,
                 'customer' => $lot->customer,
                 'qty' => $lot->qty,
-                'status' => $status,
-                'status_label' => $this->statusLabel($status),
-                'status_color' => $this->statusColor($status),
+                'status' => $lotStatus,
+                'status_label' => $this->statusLabel($lotStatus),
+                'status_color' => $this->statusColor($lotStatus),
                 'progress' => $progress,
-                'finished_seq' => $lot->finished_seq,
-                'total_seq' => $lot->total_seq,
+                'finished_seq' => $finishedSeq,
+                'total_seq' => $totalSeq,
             ];
         });
 
-        return $lots->setCollection($mapped);
+        $collection = $mapped
+            ->sortByDesc('no_lot')
+            ->values();
+
+        if ($status) {
+            $collection = $collection->filter(fn ($lot) => $lot['status'] === $status)->values();
+        }
+
+        $total = $collection->count();
+        $page = (int) \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        $items = $collection->slice(($page - 1) * $perPage, $perPage)->values();
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+                'query' => request()->query(),
+            ]
+        );
     }
 
-    public function getLotDetail(string $noLot): array
-    {        $rows = DB::table('tbl_seq_all')
-            ->where('no_lot', $noLot)
-            ->orderBy('seq')
+    public function getLotDetail(string $noLot, ?string $customerName = null): array
+    {
+        $query = DB::table('tbl_seq_all')
+            ->where('no_lot', $noLot);
+        if ($customerName) {
+            $query->where('customer', $customerName);
+        }
+        $rows = $query->orderBy('seq')
             ->orderBy('id')
             ->get();
 
@@ -136,7 +170,15 @@ class CustomerLotTrackingService
         })->toArray();
 
         $total = count($processes);
+        $routingSteps = $this->countRoutingSteps($master->no_srp);
+        $total = $routingSteps > 0 ? $routingSteps : $total;
         $finished = collect($processes)->where('status', 'finished')->count();
+        $hasStarted = collect($processes)->contains(fn ($p) => $p['status'] === 'in_progress' || $p['status'] === 'hold' || $p['finish_time']);
+
+        $status = $total > 0 && $finished >= $total
+            ? 'selesai'
+            : ($hasStarted ? 'diproses' : 'belum');
+
         $progress = $total > 0 ? round(($finished / $total) * 100) : 0;
 
         return [
@@ -154,6 +196,9 @@ class CustomerLotTrackingService
             'total_seq' => $total,
             'finished_seq' => $finished,
             'progress' => $progress,
+            'status' => $status,
+            'status_label' => $this->statusLabel($status),
+            'status_color' => $this->statusColor($status),
         ];
     }
 
@@ -213,16 +258,57 @@ class CustomerLotTrackingService
             ->value('nm_sequence');
     }
 
-    private function resolveStatus(object $lot): string
+    private function getRoutingStepCounts(array $noSrp): array
     {
-        if ($lot->all_finished) {
-            return 'selesai';
-        }
-        if ($lot->has_started || $lot->has_hold) {
-            return 'diproses';
+        if (empty($noSrp)) {
+            return [];
         }
 
-        return 'belum';
+        $srps = DB::table('tblsrp')
+            ->whereIn('no_srp', $noSrp)
+            ->get()
+            ->keyBy('no_srp');
+
+        $routingIds = $srps->map(function ($srp) {
+            return $srp->id_routing ?? null;
+        })->filter()->unique()->toArray();
+
+        if (empty($routingIds)) {
+            return [];
+        }
+
+        $routings = DB::table('tblrouting')
+            ->whereIn('id_routing', $routingIds)
+            ->get()
+            ->keyBy('id_routing');
+
+        $counts = [];
+        foreach ($srps as $srp) {
+            $routing = $routings->get($srp->id_routing);
+            if (! $routing) {
+                $counts[$srp->no_srp] = 0;
+                continue;
+            }
+
+            $count = 0;
+            for ($i = 1; $i <= 26; $i++) {
+                $col = 'Seq_' . str_pad((string) $i, 2, '0', STR_PAD_LEFT);
+                $value = $routing->{$col} ?? null;
+                if (! $value || $value === '') {
+                    break;
+                }
+                $count++;
+            }
+            $counts[$srp->no_srp] = $count;
+        }
+
+        return $counts;
+    }
+
+    private function countRoutingSteps(?string $noSrp): int
+    {
+        $counts = $this->getRoutingStepCounts([$noSrp]);
+        return $counts[$noSrp] ?? 0;
     }
 
     private function statusLabel(string $status): string

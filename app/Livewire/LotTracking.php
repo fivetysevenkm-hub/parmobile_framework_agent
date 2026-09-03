@@ -43,8 +43,13 @@ class LotTracking extends Component
     public function getCustomerNameProperty(): string
     {
         $user = auth()->guard('customer')->user();
+        if (! $user) {
+            return '';
+        }
 
-        return $user ? $user->company : '';
+        $service = app(CustomerLotTrackingService::class);
+
+        return $service->getCustomerName($user->id) ?? '';
     }
 
     public function getLotsProperty()
@@ -73,7 +78,7 @@ class LotTracking extends Component
     public function selectLot(string $noLot): void
     {
         $service = app(CustomerLotTrackingService::class);
-        $this->lotDetail = $service->getLotDetail($noLot);
+        $this->lotDetail = $service->getLotDetail($noLot, $this->customerName);
         $this->nextProcess = $service->getNextProcess($noLot) ?? '';
         $this->selectedLot = $noLot;
         $this->showModal = true;
