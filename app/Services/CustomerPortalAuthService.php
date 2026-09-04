@@ -14,7 +14,6 @@ class CustomerPortalAuthService
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'company' => $data['company'],
             'no_customer' => $data['no_customer'],
             'phone' => $data['phone'] ?? null,
             'status' => 'pending',

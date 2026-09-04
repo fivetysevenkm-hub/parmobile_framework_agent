@@ -1,8 +1,8 @@
 <div>
     <div style="max-width:960px;margin:0 auto;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-            <h1 style="color:var(--ink);font-size:1.3rem;margin:0;font-weight:700;">Customer Portal Users</h1>
-            <input type="text" wire:model.live="userSearch" class="control" placeholder="Cari nama, email, perusahaan..." style="width:280px;height:40px;border:1px solid var(--line);border-radius:8px;padding:0 12px;background:var(--panel-deep);color:var(--body-text);font-size:.82rem;">
+            <h1 style="color:var(--ink);font-size:1.3rem;margin:0;font-weight:700;">Daftar Customer Yang Telah Melakukan Registrasi</h1><br>
+                        <input type="text" wire:model.live="userSearch" class="control" placeholder="Cari nama, email, customer..." style="width:280px;height:40px;border:1px solid var(--line);border-radius:8px;padding:0 12px;background:var(--panel-deep);color:var(--body-text);font-size:.82rem;">
         </div>
 
         @if (session('success'))
@@ -22,7 +22,7 @@
                         <tr style="border-bottom:2px solid var(--line);">
                             <th style="text-align:left;padding:10px 12px;color:var(--ink);font-weight:600;">Nama</th>
                             <th style="text-align:left;padding:10px 12px;color:var(--ink);font-weight:600;">Email</th>
-                            <th style="text-align:left;padding:10px 12px;color:var(--ink);font-weight:600;">Perusahaan</th>
+                            <th style="text-align:left;padding:10px 12px;color:var(--ink);font-weight:600;">Customer</th>
                             <th style="text-align:center;padding:10px 12px;color:var(--ink);font-weight:600;">Status</th>
                             <th style="text-align:center;padding:10px 12px;color:var(--ink);font-weight:600;">Aksi</th>
                         </tr>
@@ -32,7 +32,7 @@
                             <tr style="border-bottom:1px solid var(--line);">
                                 <td style="padding:10px 12px;color:var(--body-text);font-weight:500;">{{ $user['name'] }}</td>
                                 <td style="padding:10px 12px;color:var(--body-text);">{{ $user['email'] }}</td>
-                                <td style="padding:10px 12px;color:var(--body-text);">{{ $user['company'] }}</td>
+                                <td style="padding:10px 12px;color:var(--body-text);font-weight:500;">{{ $user['customer_name'] }}</td>
                                 <td style="padding:10px 12px;text-align:center;">
                                     @php
                                         $statusColors = [

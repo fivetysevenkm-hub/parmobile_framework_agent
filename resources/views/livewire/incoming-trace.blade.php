@@ -114,5 +114,5 @@
         @endif
     </section>
 
-    <div class="status-bar"><span>Menampilkan {{ $totalRows }} data hasil query.</span><span>Refresh otomatis setiap 30 detik · Terakhir diperbarui {{ $lastUpdated->format('d-m-Y H:i:s') }}</span></div>
+    <div class="status-bar"><span>Menampilkan {{ $totalRows }} data hasil query.</span><span>Terakhir diperbarui {{ $lastUpdated->format('d-m-Y H:i:s') }}</span></div>
 </div>

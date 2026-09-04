@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Services\AuditLogger;
 use App\Services\CustomerPortalAuthService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CustomerPortalUserManagement extends Component
@@ -32,11 +33,25 @@ class CustomerPortalUserManagement extends Component
             $query->where(function ($q) {
                 $q->where('name', 'LIKE', "%{$this->userSearch}%")
                     ->orWhere('email', 'LIKE', "%{$this->userSearch}%")
-                    ->orWhere('company', 'LIKE', "%{$this->userSearch}%");
+                    ->orWhere('no_customer', 'LIKE', "%{$this->userSearch}%")
+                    ->orWhereIn('no_customer', DB::table('tblcustomer')->where('nm_customer', 'LIKE', "%{$this->userSearch}%")->pluck('no_customer'));
             });
         }
 
-        $this->users = $query->latest()->get()->toArray();
+        $rows = $query->latest()->get();
+
+        $noCustomers = $rows->pluck('no_customer')->filter()->unique()->toArray();
+        $customerNames = DB::table('tblcustomer')
+            ->whereIn('no_customer', $noCustomers)
+            ->pluck('nm_customer', 'no_customer')
+            ->toArray();
+
+        $this->users = $rows->map(function ($user) use ($customerNames) {
+            $data = $user->toArray();
+            $data['customer_name'] = $customerNames[$user->no_customer] ?? $user->no_customer;
+
+            return $data;
+        })->toArray();
     }
 
     public function approve(int $userId, CustomerPortalAuthService $service, AuditLogger $audit): void

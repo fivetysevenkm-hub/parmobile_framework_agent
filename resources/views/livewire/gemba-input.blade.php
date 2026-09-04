@@ -111,7 +111,7 @@
                     </div>
                 </div>
             @else
-                <div class="empty-context" style="margin-top:11px">Scan atau masukkan No Lot terlebih dahulu. Setelah proses aktif ditemukan, form Gemba akan menampilkan judul sesuai sequence dan nama proses.</div>
+                <div class="empty-context" style="margin-top:11px">Scan atau masukkan No Lot terlebih dahulu. Setelah proses aktif ditemukan, form Gemba akan menampilkan judul sesuai urutan dan nama proses.</div>
             @endif
             <div class="hint" style="margin-top:12px"><strong>Catatan:</strong> PASTIKAN UNTUK SELALU MELAKUKAN SAN TEN SOU.</div>
         </div>

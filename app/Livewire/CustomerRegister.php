@@ -19,11 +19,13 @@ class CustomerRegister extends Component
 
     public string $password_confirmation = '';
 
-    public string $company = '';
-
     public string $no_customer = '';
 
     public string $phone = '';
+
+    public string $customerSearch = '';
+
+    public bool $showCustomerPicker = false;
 
     public array $customers = [];
 
@@ -33,7 +35,7 @@ class CustomerRegister extends Component
             ->select('no_customer', 'nm_customer')
             ->orderBy('nm_customer')
             ->get()
-            ->pluck('nm_customer', 'no_customer')
+            ->map(fn ($row) => ['no_customer' => $row->no_customer, 'nm_customer' => $row->nm_customer])
             ->toArray();
     }
 
@@ -43,10 +45,52 @@ class CustomerRegister extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:tbl_customer_portal_users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'company' => ['required', 'string', 'max:255'],
             'no_customer' => ['required', 'string', 'exists:tblcustomer,no_customer'],
             'phone' => ['nullable', 'string', 'max:30'],
         ];
+    }
+
+    public function getCustomerNameProperty(): string
+    {
+        foreach ($this->customers as $customer) {
+            if ($customer['no_customer'] === $this->no_customer) {
+                return $customer['nm_customer'];
+            }
+        }
+
+        return $this->no_customer;
+    }
+
+    public function getFilteredCustomersProperty(): array
+    {
+        $search = mb_strtolower(trim($this->customerSearch));
+        if ($search === '') {
+            return $this->customers;
+        }
+
+        return array_values(array_filter(
+            $this->customers,
+            fn ($customer) => str_contains(mb_strtolower($customer['nm_customer']), $search)
+                || str_contains(mb_strtolower($customer['no_customer']), $search)
+        ));
+    }
+
+    public function openCustomerPicker(): void
+    {
+        $this->customerSearch = '';
+        $this->showCustomerPicker = true;
+    }
+
+    public function closeCustomerPicker(): void
+    {
+        $this->showCustomerPicker = false;
+        $this->customerSearch = '';
+    }
+
+    public function selectCustomer(string $noCustomer): void
+    {
+        $this->no_customer = $noCustomer;
+        $this->closeCustomerPicker();
     }
 
     public function register(CustomerPortalAuthService $auth, AuditLogger $audit, TelegramService $telegram): void
@@ -57,25 +101,22 @@ class CustomerRegister extends Component
             'name' => $this->name,
             'email' => $this->email,
             'password' => $this->password,
-            'company' => $this->company,
             'no_customer' => $this->no_customer,
             'phone' => $this->phone,
         ]);
 
         $audit->log(
             AuditLogger::EVENT_CREATE,
-            'Customer baru mendaftar: '.$this->email.' ('.$this->company.')',
+            'Customer baru mendaftar: '.$this->email.' ('.$this->customerName.')',
             'customer_portal',
-            newData: ['email' => $this->email, 'company' => $this->company, 'no_customer' => $this->no_customer],
+            newData: ['email' => $this->email, 'no_customer' => $this->no_customer],
         );
 
-        $customerName = $this->customers[$this->no_customer] ?? $this->no_customer;
         $telegram->send(
             "🔔 <b>Customer Portal — Pendaftaran Baru</b>\n\n".
             "Nama: {$this->name}\n".
             "Email: {$this->email}\n".
-            "Perusahaan: {$this->company}\n".
-            "Customer: {$customerName}\n".
+            "Customer: {$this->customerName}\n".
             "Telepon: ".($this->phone ?: '-')."\n\n".
             "Silakan setujui atau tolak melalui menu <b>User Management → Customer Portal Users</b>.",
             'customer_portal',

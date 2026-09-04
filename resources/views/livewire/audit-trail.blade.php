@@ -47,7 +47,7 @@
         <div>
             <div class="eyebrow">PAR Mobile / User Management</div>
             <h1>Audit <span class="cyan">Trail</span></h1>
-            <div class="muted">Jejak audit seluruh aktivitas: login, akses menu, dan perubahan data per user (IATF 16949:2016).</div>
+            <div class="muted">Jejak audit seluruh aktivitas: login, akses menu, dan perubahan data per user.</div>
         </div>
         <div class="toolbar">
             @php($hasFilter = $search !== '' || $event !== '' || $module !== '' || $usernameFilter !== '' || $dateFrom !== '' || $dateTo !== '')

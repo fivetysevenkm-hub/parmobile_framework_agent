@@ -15,7 +15,6 @@ class CustomerPortalUser extends Authenticatable
         'name',
         'email',
         'password',
-        'company',
         'no_customer',
         'phone',
         'status',
