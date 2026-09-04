@@ -28,6 +28,49 @@ class CustomerLotTrackingService
         ?string $status = null,
         int $perPage = 10,
     ): \Illuminate\Contracts\Pagination\LengthAwarePaginator {
+        $collection = $this->lotRows($customerName, $searchCol, $search)
+            ->sortByDesc('no_lot')
+            ->values();
+
+        if ($status) {
+            $collection = $collection->filter(fn ($lot) => $lot['status'] === $status)->values();
+        }
+
+        $total = $collection->count();
+        $page = (int) \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        $items = $collection->slice(($page - 1) * $perPage, $perPage)->values();
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $page,
+            [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+                'query' => request()->query(),
+            ]
+        );
+    }
+
+    public function getStatusSummary(string $customerName): array
+    {
+        $summary = ['belum' => 0, 'diproses' => 0, 'selesai' => 0];
+
+        $this->lotRows($customerName)->each(function (array $lot) use (&$summary) {
+            $summary[$lot['status']]++;
+        });
+
+        $summary['total'] = $summary['belum'] + $summary['diproses'] + $summary['selesai'];
+
+        return $summary;
+    }
+
+    private function lotRows(string $customerName, ?string $searchCol = null, ?string $search = null): \Illuminate\Support\Collection
+    {
         $fromDate = now()->subDays(30)->startOfDay();
 
         $searchCol = $searchCol ?: 'no_lot';
@@ -61,7 +104,7 @@ class CustomerLotTrackingService
         $noSrpValues = $allRows->pluck('no_srp')->unique()->filter()->toArray();
         $routingStepCounts = $this->getRoutingStepCounts($noSrpValues);
 
-        $mapped = $allRows->map(function ($lot) use ($routingStepCounts) {
+        return $allRows->map(function ($lot) use ($routingStepCounts) {
             $finishedSeq = (int) $lot->finished_seq;
             $hasStarted = (bool) $lot->has_started;
             $hasHold = (bool) $lot->has_hold;
@@ -96,33 +139,6 @@ class CustomerLotTrackingService
                 'total_seq' => $totalSeq,
             ];
         });
-
-        $collection = $mapped
-            ->sortByDesc('no_lot')
-            ->values();
-
-        if ($status) {
-            $collection = $collection->filter(fn ($lot) => $lot['status'] === $status)->values();
-        }
-
-        $total = $collection->count();
-        $page = (int) \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
-        if ($page < 1) {
-            $page = 1;
-        }
-
-        $items = $collection->slice(($page - 1) * $perPage, $perPage)->values();
-
-        return new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $page,
-            [
-                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
-                'query' => request()->query(),
-            ]
-        );
     }
 
     public function getLotDetail(string $noLot, ?string $customerName = null): array

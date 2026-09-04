@@ -10,6 +10,13 @@
         </div>
     </div>
 
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+        <span style="display:inline-block;padding:3px 12px;border-radius:12px;font-size:.72rem;font-weight:600;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);">
+            Customer Portal Summary H-30
+        </span>
+        <span style="color:var(--footer-text);font-size:.72rem;">{{ now()->subDays(30)->format('d M Y') }} – {{ now()->format('d M Y') }}</span>
+    </div>
+
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;">
         <div style="background:color-mix(in srgb,var(--panel) 96%,transparent);border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center;">
             <div style="font-size:1.8rem;font-weight:700;color:var(--ink);">{{ $totalLots }}</div>
@@ -22,10 +29,6 @@
         <div style="background:color-mix(in srgb,var(--panel) 96%,transparent);border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center;">
             <div style="font-size:1.8rem;font-weight:700;color:var(--success);">{{ $completedLots }}</div>
             <div style="font-size:.78rem;color:var(--footer-text);margin-top:4px;">Selesai</div>
-        </div>
-        <div style="background:color-mix(in srgb,var(--panel) 96%,transparent);border:1px solid var(--line);border-radius:12px;padding:20px;text-align:center;">
-            <div style="font-size:1.8rem;font-weight:700;color:var(--danger);">{{ $holdLots }}</div>
-            <div style="font-size:.78rem;color:var(--footer-text);margin-top:4px;">Hold</div>
         </div>
     </div>
 
