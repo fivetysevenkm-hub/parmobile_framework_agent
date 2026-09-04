@@ -49,7 +49,7 @@
             </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-            <a href="{{ route('customer.dashboard') }}" wire:navigate style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--line);border-radius:20px;color:var(--body-text);font-size:.78rem;font-weight:500;text-decoration:none;transition:border-color .15s,color .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--body-text)'">‹ Sebelumnya</a>
+            <a href="{{ route('customer.dashboard') }}" wire:navigate style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border:1px solid var(--line);border-radius:20px;color:var(--body-text);font-size:.78rem;font-weight:500;text-decoration:none;transition:border-color .15s,color .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--body-text)'">Summary</a>
             <a href="{{ route('customer.logout') }}" onclick="event.preventDefault();document.getElementById('customer-logout-form').submit();" style="color:var(--danger);font-size:.78rem;text-decoration:none;font-weight:500;">Keluar</a>
             <form id="customer-logout-form" action="{{ route('customer.logout') }}" method="POST" style="display:none;">@csrf</form>
         </div>
@@ -123,7 +123,7 @@
                         Menampilkan {{ $this->lots->firstItem() ?? 0 }}–{{ $this->lots->lastItem() ?? 0 }} dari {{ $this->lots->total() }} lot
                     </span>
                     <div class="lt-pager-actions" style="display:flex;gap:8px;align-items:center;">
-                        <button type="button" wire:click="previousPage" @disabled(!$this->lots->onFirstPage()) style="padding:6px 14px;border:none;border-radius:6px;font-size:.76rem;font-weight:600;cursor:pointer;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);{{ $this->lots->onFirstPage() ? 'opacity:.4;cursor:not-allowed;' : '' }}">‹ Sebelumnya</button>
+                        <button type="button" wire:click="previousPage" @disabled($this->lots->onFirstPage()) style="padding:6px 14px;border:none;border-radius:6px;font-size:.76rem;font-weight:600;cursor:pointer;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);{{ $this->lots->onFirstPage() ? 'opacity:.4;cursor:not-allowed;' : '' }}">‹ Sebelumnya</button>
                         <span style="color:var(--footer-text);font-size:.76rem;">Hal {{ $this->lots->currentPage() }} / {{ $this->lots->lastPage() }}</span>
                         <button type="button" wire:click="nextPage" @disabled(!$this->lots->hasMorePages()) style="padding:6px 14px;border:none;border-radius:6px;font-size:.76rem;font-weight:600;cursor:pointer;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);{{ $this->lots->hasMorePages() ? '' : 'opacity:.4;cursor:not-allowed;' }}">Berikutnya ›</button>
                     </div>
