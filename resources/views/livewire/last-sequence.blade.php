@@ -22,7 +22,7 @@
         .last-sequence-page th:first-child { z-index:3; }
         .last-sequence-page tbody tr:hover td { background:var(--legacy_1c3540); }
         .last-sequence-page .sort-button { display:inline-flex; align-items:center; gap:5px; border:0; background:transparent; color:inherit; font:inherit; cursor:pointer; }
-        .last-sequence-page .sort-button:hover { color:#fff; }
+        .last-sequence-page .sort-button:hover { color:var(--cyan); }
         .last-sequence-page .sort-icon { color:var(--orange); font-size:.72rem; }
         .last-sequence-page .lot-link { color:var(--legacy_bfeef3); font-weight:700; }
         .last-sequence-page .process-cell { color:var(--orange); font-weight:700; }

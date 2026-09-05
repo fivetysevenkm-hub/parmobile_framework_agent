@@ -159,17 +159,6 @@ class CustomTheme extends Component
             'chart_10' => 'Palet chart 10',
         ];
 
-        $coreKeys = array_keys($labels);
-        $legacyKeys = collect($themes->defaults())
-            ->keys()
-            ->filter(fn (string $key): bool => str_starts_with($key, 'legacy_'))
-            ->values()
-            ->all();
-
-        $labels = array_merge($labels, collect($legacyKeys)->mapWithKeys(fn (string $key): array => [
-            $key => 'Warna kompatibilitas halaman ('.strtoupper(substr($key, 7)).')',
-        ])->all());
-
         return view('livewire.custom-theme', [
             'colorLabels' => $labels,
             'colorGroups' => [
@@ -180,7 +169,6 @@ class CustomTheme extends Component
                 ['name' => 'Tombol, Fokus & Navigasi', 'keys' => ['button_primary', 'button_primary_hover', 'button_secondary_bg', 'button_secondary_text', 'button_disabled_bg', 'button_disabled_text', 'focus_ring', 'navbar_icon', 'navbar_icon_hover_bg', 'logout']],
                 ['name' => 'Modal, Logo & Efek', 'keys' => ['modal_backdrop', 'modal_bg', 'modal_border', 'modal_text', 'modal_heading', 'modal_copy', 'modal_icon_bg', 'modal_icon_text', 'logo_bg', 'shadow_color']],
                 ['name' => 'Chart & Visualisasi', 'keys' => ['chart_grid', 'chart_label', 'chart_border', 'chart_1', 'chart_2', 'chart_3', 'chart_4', 'chart_5', 'chart_6', 'chart_7', 'chart_8', 'chart_9', 'chart_10']],
-                ['name' => 'Elemen Halaman Tambahan', 'keys' => $legacyKeys],
             ],
             'presetNames' => $this->presetNames ?: collect($themes->presets())->mapWithKeys(fn (array $preset, string $key): array => [$key => $preset['name']])->all(),
             'presets' => $themes->presets(),

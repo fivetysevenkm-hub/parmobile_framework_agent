@@ -449,7 +449,7 @@
             border: 1px solid color-mix(in srgb, var(--cyan) 45%, var(--line));
             border-radius: 999px;
             background: color-mix(in srgb, var(--cyan) 10%, transparent);
-            color: var(--text-header);
+            color: var(--text-title);
             font-size: .68rem;
             line-height: 1.35;
             overflow-wrap: anywhere;
@@ -475,7 +475,7 @@
         }
 
         .home-open:hover {
-            color: var(--text-header);
+            color: var(--text-title);
             transform: translateX(2px);
         }
 

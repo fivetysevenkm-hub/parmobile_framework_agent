@@ -25,7 +25,7 @@
         .akakami-page .action-cell { width:104px; min-width:104px; text-align:center; vertical-align:middle; }
         .akakami-page .action-cell .btn { display:inline-flex; width:82px; min-height:32px; align-items:center; justify-content:center; padding:7px 8px; white-space:nowrap; font-size:.7rem; line-height:1; }
         .akakami-page .action-cell .akakami-print-btn { width:108px; }
-        .akakami-page .print-link { color:var(--legacy_8ff5df); text-decoration:none; } .akakami-page .print-link:hover { color:#fff; }
+        .akakami-page .print-link { color:var(--legacy_8ff5df); text-decoration:none; } .akakami-page .print-link:hover { color:var(--cyan); }
         .akakami-page .export-backdrop { position:fixed; inset:0; z-index:100; display:grid; place-items:center; padding:18px; background:rgba(0,0,0,.72); }
         .akakami-page .export-modal { width:min(100%,430px); padding:20px; border:1px solid var(--line); border-radius:12px; background:var(--legacy_111a1f); box-shadow:0 20px 70px rgba(0,0,0,.5); }
         .akakami-page .export-modal h3 { margin:0 0 6px; color:var(--cyan); font-size:1rem; } .akakami-page .export-modal p { margin:0 0 16px; color:var(--muted); font-size:.76rem; } .akakami-page .export-period-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .akakami-page .export-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }

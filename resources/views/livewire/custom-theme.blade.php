@@ -3,7 +3,7 @@
         .custom-theme-page{padding:24px;color:var(--text-body)}
         .custom-theme-page .theme-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
         .custom-theme-page .theme-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--panel) 92%,var(--text-title))}
-        .custom-theme-page h1{margin:0;font-size:1.1rem;color:var(--text-title)}.custom-theme-page h2{color:var(--text-header)}
+        .custom-theme-page h1{margin:0;font-size:1.1rem;color:var(--text-title)}.custom-theme-page h2{color:var(--text-title)}
         .custom-theme-page .subtitle{margin-top:6px;color:var(--text-body);font-size:.76rem;line-height:1.5}.custom-theme-page .theme-body{padding:20px}
         .custom-theme-page .theme-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:18px}
         .custom-theme-page .section{padding:16px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}
