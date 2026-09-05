@@ -11,6 +11,15 @@ class ProcessProductivityReport
 {
     public const COLUMNS = ['no_lot','nm_seq','no_mesin','customer','nm_part','qty','pic_01','start_time','finish_time','std_cycle_time','duration','achievement_pct'];
 
+    public const REFINE_FIELDS = [
+        'no_lot' => 'No Lot',
+        'no_part' => 'No Part',
+        'nm_part' => 'Nama Part',
+        'customer' => 'Customer',
+        'pic_01' => 'PIC',
+        'no_mesin' => 'Mesin',
+    ];
+
     public function processOptions(): array
     {
         return DB::table('tbl_seq_all')->whereNotNull('nm_seq')->where('nm_seq','<>','')->distinct()->orderBy('nm_seq')->pluck('nm_seq')->map(fn($v)=>(string)$v)->all();
@@ -21,12 +30,15 @@ class ProcessProductivityReport
         return DB::table('tbl_seq_all')->when($process, fn(Builder $q)=>$q->where('nm_seq',$process))->whereNotNull('no_mesin')->where('no_mesin','<>','')->distinct()->orderBy('no_mesin')->pluck('no_mesin')->map(fn($v)=>(string)$v)->all();
     }
 
-    public function rowsQuery(string $process='', string $machine='', ?string $dateFrom=null, ?string $dateTo=null): Builder
+    public function rowsQuery(string $process='', string $machine='', ?string $dateFrom=null, ?string $dateTo=null, string $refineBy='', string $refineKeyword=''): Builder
     {
         [$from,$to]=$this->dateRange($dateFrom,$dateTo);
+        $refineBy=array_key_exists($refineBy,self::REFINE_FIELDS)?$refineBy:'';
+        $refineKeyword=trim($refineKeyword);
         return DB::table('tbl_seq_all AS a')->leftJoin('tblsrp_detail AS d',function($join):void{$join->on('a.no_srp','=','d.no_srp')->on('a.id_seq','=','d.id_sequence');})
             ->where('a.nm_seq',$process)->when($machine!=='',fn(Builder $q)=>$q->where('a.no_mesin',$machine))
             ->when($from&&$to,fn(Builder $q)=>$q->where('a.start_time','>=',$from)->where('a.start_time','<',$to))
+            ->when($refineBy!==''&&$refineKeyword!=='',fn(Builder $q)=>$q->where('a.'.$refineBy,'like','%'.$refineKeyword.'%'))
             ->select(['a.no_lot','a.nm_seq','a.no_mesin','a.customer','a.nm_part','a.qty','a.pic_01','a.start_time','a.finish_time','a.duration'])
             ->selectRaw('IFNULL(d.cycle_time,0) AS std_cycle_time')
             ->selectRaw('ROUND(IFNULL(d.cycle_time,0) / NULLIF(a.duration,0) * 100,2) AS achievement_pct')

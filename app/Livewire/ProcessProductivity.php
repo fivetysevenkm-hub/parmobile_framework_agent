@@ -15,6 +15,8 @@ class ProcessProductivity extends Component
     public string $machine = '';
     public string $dateFrom = '';
     public string $dateTo = '';
+    public string $refineBy = '';
+    public string $refineKeyword = '';
     public bool $loaded = false;
     public int $perPage = 20;
 
@@ -37,7 +39,18 @@ class ProcessProductivity extends Component
     public function resetFilters(): void
     {
         $this->process=''; $this->machine=''; $this->dateFrom=''; $this->dateTo=''; $this->loaded=false;
+        $this->refineBy=''; $this->refineKeyword='';
         $this->resetErrorBag(); $this->resetPage();
+    }
+
+    public function clearRefine(): void
+    {
+        $this->refineBy=''; $this->refineKeyword=''; $this->resetPage();
+    }
+
+    public function applyRefine(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedProcess(ProcessProductivityReport $report): void
@@ -49,16 +62,22 @@ class ProcessProductivity extends Component
     public function updatedMachine(): void { $this->resetPage(); }
     public function updatedDateFrom(): void { $this->resetPage(); }
     public function updatedDateTo(): void { $this->resetPage(); }
+    public function updatedRefineBy(): void { $this->resetPage(); }
+    public function updatedRefineKeyword(): void { $this->resetPage(); }
 
     public function render(ProcessProductivityReport $report)
     {
         $rows = new LengthAwarePaginator([],0,$this->perPage,LengthAwarePaginator::resolveCurrentPage());
         $summary=['total_qty'=>0,'avg_eff'=>0,'total_lot'=>0,'total_delay'=>0]; $chartRows=collect();
         if ($this->loaded && $this->process !== '') {
-            $all=$report->rowsQuery($this->process,$this->machine,$this->dateFrom,$this->dateTo)->get();
+            $all=$report->rowsQuery($this->process,$this->machine,$this->dateFrom,$this->dateTo,$this->refineBy,$this->refineKeyword)->get();
             $summary=$report->summary($all); $chartRows=$all->filter(fn($row)=>$report->isEligible($row))->take(30);
-            $rows=$report->rowsQuery($this->process,$this->machine,$this->dateFrom,$this->dateTo)->paginate($this->perPage)->through(fn($row)=>(array)$row);
+            $rows=$report->rowsQuery($this->process,$this->machine,$this->dateFrom,$this->dateTo,$this->refineBy,$this->refineKeyword)->paginate($this->perPage)->through(fn($row)=>(array)$row);
         }
-        return view('livewire.process-productivity', compact('rows', 'summary', 'chartRows'))->with(['processOptions' => $report->processOptions(), 'machineOptions' => $report->machineOptions($this->process)])->layout('layouts.app');
+        return view('livewire.process-productivity', compact('rows', 'summary', 'chartRows'))->with([
+            'processOptions' => $report->processOptions(),
+            'machineOptions' => $report->machineOptions($this->process),
+            'refineFields' => ProcessProductivityReport::REFINE_FIELDS,
+        ])->layout('layouts.app');
     }
 }

@@ -14,9 +14,11 @@ class ProcessProductivityExportController
             'mesin' => ['nullable', 'string', 'max:30'],
             'tgl_awal' => ['nullable', 'date_format:Y-m-d'],
             'tgl_akhir' => ['nullable', 'date_format:Y-m-d'],
+            'refine_by' => ['nullable', 'string', 'max:30'],
+            'refine_keyword' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $rows = $report->rowsQuery($validated['proses'], (string) ($validated['mesin'] ?? ''), $validated['tgl_awal'] ?? null, $validated['tgl_akhir'] ?? null)->get();
+        $rows = $report->rowsQuery($validated['proses'], (string) ($validated['mesin'] ?? ''), $validated['tgl_awal'] ?? null, $validated['tgl_akhir'] ?? null, (string) ($validated['refine_by'] ?? ''), (string) ($validated['refine_keyword'] ?? ''))->get();
         $columns = ProcessProductivityReport::COLUMNS;
         $headers = ['NO LOT','PROSES','MESIN','CUSTOMER','PART NAME','QTY','PIC','START','FINISH','STD CT','DURATION','EFF%'];
         $xmlCell = static function ($value, string $type = 'String'): string {
