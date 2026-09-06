@@ -487,6 +487,37 @@ class GembaInputService
             ->all();
     }
 
+    public function machinesForProcess(array $process): array
+    {
+        $idSeq = trim((string) ($process['id_seq'] ?? ''));
+
+        if (! SchemaCache::hasTable('tbl_machine_mapping')) {
+            return $this->machines();
+        }
+
+        $hasMapping = DB::table('tbl_machine_mapping')->where('id_seq', $idSeq)->exists();
+        if (! $hasMapping) {
+            return $this->machines();
+        }
+
+        $mapped = DB::table('tbl_machine_mapping')
+            ->where('id_seq', $idSeq)
+            ->pluck('no_mesin')
+            ->map(fn ($value): string => (string) $value)
+            ->all();
+
+        if ($mapped === []) {
+            return [];
+        }
+
+        $mappedSet = array_fill_keys($mapped, true);
+
+        return collect($this->machines())
+            ->filter(fn (array $machine): bool => isset($mappedSet[$machine['no_mesin']]))
+            ->values()
+            ->all();
+    }
+
     public function requiresMachine(array $process): bool
     {
         $haystack = strtolower(trim((string) ($process['name'] ?? '').' '.($process['id_seq'] ?? '')));

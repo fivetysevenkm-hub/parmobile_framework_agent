@@ -4,7 +4,7 @@
     $abnormalOpen = request()->routeIs('abnormal.report');
     $instructionOpen = request()->routeIs('instruction.rank.a');
     $manpowerOpen = request()->routeIs('manpower.control');
-    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp');
+    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp', 'routing.machine.mapping');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
     $lotVerifikatorOpen = request()->routeIs('lot.verifikator', 'gemba.input');
@@ -92,6 +92,7 @@
             <div class="sidebar-group-items" {{ $routingOpen || ! $parentVisible('ROUTING') ? '' : 'hidden' }}>
                 {!! $menuLink('routing-process', 'routing.process', 'Susun Routing Proses', '⇄') !!}
                 {!! $menuLink('routing-pairing-srp', 'routing.pairing.srp', 'Pairing Routing & SRP', '⇆') !!}
+                {!! $menuLink('routing-machine-mapping', 'routing.machine.mapping', 'Machine Mapping', '⚙') !!}
             </div>
         </div>
 

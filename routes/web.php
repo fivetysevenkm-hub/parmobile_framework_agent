@@ -43,6 +43,7 @@ use App\Livewire\InputPttnOmes;
 use App\Livewire\LastSequence;
 use App\Livewire\Login;
 use App\Livewire\LotVerifikator;
+use App\Livewire\MachineMapping;
 use App\Livewire\ManPowerControl;
 use App\Livewire\ManpowerProductivity;
 use App\Livewire\MenuAuthorization;
@@ -106,6 +107,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class, AuditMenuAccess::class,
     Route::get('/man-power/control', ManPowerControl::class)->name('manpower.control');
     Route::get('/routing/susun-routing-proses', SusunRoutingProses::class)->name('routing.process');
     Route::get('/routing/pairing-routing-srp', PairingRoutingSrp::class)->name('routing.pairing.srp');
+    Route::get('/routing/machine-mapping', MachineMapping::class)->name('routing.machine.mapping');
     Route::get('/cycle-time/adjust', AdjustCycleTime::class)->name('cycle-time.adjust');
     Route::get('/document-process/upload-wi', UploadWiProses::class)->name('document.process.upload');
     Route::get('/input-lot/lot-verifikator', LotVerifikator::class)->name('lot.verifikator');

@@ -780,6 +780,7 @@ class GembaInput extends Component
         $this->lotContext = $service->lotContext($this->noLot) ?? [];
         $this->process = $this->context['process'] ?? [];
         $this->requiresMachine = $service->requiresMachine($this->process);
+        $this->machines = $service->machinesForProcess($this->process);
         $this->resolvePttn();
         $this->resolveWorkInstruction();
         $this->state = $service->currentState($this->noLot, $this->sequenceNo);
