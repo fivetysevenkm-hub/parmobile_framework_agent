@@ -487,6 +487,18 @@ class GembaInputService
             ->all();
     }
 
+    public function machineName(?string $machineNo): string
+    {
+        $machineNo = trim((string) $machineNo);
+        if ($machineNo === '' || ! SchemaCache::hasTable('tblmesin')) {
+            return $machineNo;
+        }
+
+        return trim((string) (DB::table('tblmesin')
+            ->where('no_mesin', $machineNo)
+            ->value('mesin') ?? ''));
+    }
+
     public function machinesForProcess(array $process): array
     {
         $idSeq = trim((string) ($process['id_seq'] ?? ''));
@@ -700,8 +712,9 @@ class GembaInputService
             $operatorNiks[$slot] = (string) ($operators[$slot]['nik'] ?? '');
             $operatorNames[$slot] = (string) ($operators[$slot]['name'] ?? '');
         }
+        $machineName = $this->machineName($machineNo);
 
-        DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $now, $trayNo, $traySmall, $machineNo, $ojt, $operatorNiks, $context, $sequenceNo): void {
+        DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $now, $trayNo, $traySmall, $machineNo, $machineName, $ojt, $operatorNiks, $operatorNames, $context, $sequenceNo): void {
             $processPayload = $this->onlyExistingColumns($processTable, [
                 'no_lot' => $noLot,
                 'no_srp' => $noSrp,
@@ -737,15 +750,15 @@ class GembaInputService
                     'duration' => 0,
                     'tray_no' => $trayNo,
                     'tray_nokecil' => $traySmall !== '' ? $traySmall : null,
-                    'pic_01' => $operatorNiks[0] !== '' ? $operatorNiks[0] : null,
-                    'pic_02' => $operatorNiks[1] !== '' ? $operatorNiks[1] : null,
-                    'pic_03' => $operatorNiks[2] !== '' ? $operatorNiks[2] : null,
-                    'pic_04' => $operatorNiks[3] !== '' ? $operatorNiks[3] : null,
+                    'pic_01' => $operatorNames[0] !== '' ? $operatorNames[0] : ($operatorNiks[0] !== '' ? $operatorNiks[0] : null),
+                    'pic_02' => $operatorNames[1] !== '' ? $operatorNames[1] : ($operatorNiks[1] !== '' ? $operatorNiks[1] : null),
+                    'pic_03' => $operatorNames[2] !== '' ? $operatorNames[2] : ($operatorNiks[2] !== '' ? $operatorNiks[2] : null),
+                    'pic_04' => $operatorNames[3] !== '' ? $operatorNames[3] : ($operatorNiks[3] !== '' ? $operatorNiks[3] : null),
                     'akakami' => 'no',
                     'ojt' => $ojt,
                     'hold' => 'no',
                     'finish' => 'no',
-                    'no_mesin' => $machineNo !== '' ? $machineNo : null,
+                    'no_mesin' => $machineName !== '' ? $machineName : null,
                     'no_part' => $lot['no_part'] ?? null,
                     'nm_part' => $lot['nm_part'] ?? null,
                     'customer' => $lot['customer'] ?? null,

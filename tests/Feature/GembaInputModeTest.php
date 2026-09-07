@@ -108,6 +108,14 @@ class GembaInputModeTest extends TestCase
             $table->string('start_time', 50)->nullable();
             $table->string('finish_time', 50)->nullable();
             $table->string('duration', 50)->nullable();
+            $table->string('tray_no', 50)->nullable();
+            $table->string('tray_nokecil', 50)->nullable();
+            $table->string('no_mesin', 50)->nullable();
+            $table->string('pic_01', 50)->nullable();
+            $table->string('pic_02', 50)->nullable();
+            $table->string('pic_03', 50)->nullable();
+            $table->string('pic_04', 50)->nullable();
+            $table->string('hold', 50)->nullable();
             $table->string('finish', 50)->nullable();
             $table->timestamps();
         });
@@ -134,7 +142,19 @@ class GembaInputModeTest extends TestCase
             $table->string('nama_kary', 100)->nullable();
             $table->string('ojt_a', 20)->nullable();
             $table->string('class_01', 20)->nullable();
+            $table->string('class_02', 20)->nullable();
         });
+
+        Schema::create('tblmesin', function (Blueprint $table): void {
+            $table->id();
+            $table->string('no_mesin', 50)->unique();
+            $table->string('mesin', 100)->nullable();
+        });
+
+        DB::table('tblmesin')->insert([
+            ['no_mesin' => 'MC001', 'mesin' => 'GSN 01'],
+            ['no_mesin' => 'MC002', 'mesin' => 'GSN 02'],
+        ]);
 
         Schema::create('tbl_pdf_document', function (Blueprint $table): void {
             $table->id();
@@ -432,6 +452,58 @@ class GembaInputModeTest extends TestCase
             ->assertSee('RUNNING');
 
         $this->assertEquals($startTimeIso, $component->instance()->stopwatchStartTime());
+    }
+
+    public function test_start_saves_employee_names_and_machine_names_to_tbl_seq_all_only(): void
+    {
+        DB::table('tblkaryawan')->insert([
+            'nik' => 'KARY99',
+            'nama_kary' => 'Operator Stopwatch',
+            'ojt_a' => 'no',
+            'class_01' => '01',
+            'class_02' => '02',
+        ]);
+
+        // Let the validator point to sequence 2 (TEMPERING) as the active process
+        DB::table('tbl_validator')->insert([
+            'no_lot' => 'LOT-12345',
+            'no_srp' => 'SRP-001',
+            'id_routing' => 'ROUT-001',
+            'Current_seq_code' => 'seq_01',
+            'next_seq_code' => 'seq_02',
+            'Curr_process' => '01',
+            'next_process' => '02',
+            'current_seq_count' => 1,
+            'next_seq_count' => 2,
+            'total_seq_count' => 3,
+            'total_seq_remain' => 2,
+            'finish' => 'yes',
+        ]);
+
+        $component = Livewire::test(GembaInput::class, [
+            'noLot' => 'LOT-12345',
+            'sequenceNo' => 2,
+        ]);
+
+        $this->assertTrue($component->instance()->requiresMachine);
+
+        $component->set('operatorNik', 'KARY99')
+            ->call('addOperator')
+            ->set('trayNo', 'TRAY-02')
+            ->set('machineNo', 'MC002')
+            ->call('startProcess');
+
+        // Proses table keeps the NIK and the machine registration number
+        $this->assertDatabaseHas('tbl_seq_02', [
+            'no_lot' => 'LOT-12345',
+            'pic_01' => 'KARY99',
+            'no_mesin' => 'MC002',
+        ]);
+
+        // tbl_seq_all stores the employee name and the machine name
+        $row = DB::table('tbl_seq_all')->where('no_lot', 'LOT-12345')->where('seq', 2)->first();
+        $this->assertSame('Operator Stopwatch', $row->pic_01);
+        $this->assertSame('GSN 02', $row->no_mesin);
     }
 
     public function test_tray_numbers_auto_copied_from_initial_process_to_subsequent_processes_and_editable(): void
