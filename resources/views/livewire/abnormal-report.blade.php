@@ -29,21 +29,27 @@
         .abnormal-report-page .page-current { background:var(--cyan); color:var(--legacy_041014); border-color:var(--cyan); font-weight:700; }
         .abnormal-report-page .page-disabled { opacity:.4; }
         .abnormal-report-page .empty { padding:36px 20px; color:var(--muted); text-align:center; }
-        .abnormal-report-page .banner { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:14px; margin-bottom:18px; border-radius:8px; background:linear-gradient(100deg,var(--legacy_0754bd),var(--legacy_00a6bf); }
+        .abnormal-report-page .banner { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:14px 16px; margin-bottom:18px; border-radius:8px; border-left:3px solid var(--cyan); background:linear-gradient(120deg,var(--legacy_0754bd),var(--legacy_00a6bf)); box-shadow:inset 0 14px 30px rgba(0,0,0,.14); }
         .abnormal-report-page .banner span { display:block; font-size:.62rem; opacity:.8; text-transform:uppercase; }
         .abnormal-report-page .banner strong { display:block; margin-top:4px; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .abnormal-report-page .columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+        .abnormal-report-page .columns { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:16px; align-items:start; }
+        .abnormal-report-page .columns > .section:last-child { position:sticky; top:84px; }
+        @media (min-width:721px) and (max-width:1060px){ .abnormal-report-page .columns{ grid-template-columns:1fr; } .abnormal-report-page .columns > .section:last-child{ position:static; } }
         .abnormal-report-page .section { padding:15px; border:1px solid var(--line); border-radius:8px; background:var(--legacy_111a1f); }
         .abnormal-report-page .section h3 { margin:0 0 14px; color:var(--cyan); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
         .abnormal-report-page .field { margin-bottom:13px; }
+        .abnormal-report-page .form-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px 16px; }
+        .abnormal-report-page .form-fields .field { margin-bottom:0; }
+        .abnormal-report-page .form-fields .span-2 { grid-column:1 / -1; }
         .abnormal-report-page .sequence { padding:13px; border:1px solid var(--line); border-radius:8px; }
         .abnormal-report-page .sequence-grid { display:grid; grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr); align-items:center; gap:9px; }
-        .abnormal-report-page .sequence-grid select { min-height:170px; }
+        .abnormal-report-page .sequence-grid select { min-height:214px; }
         .abnormal-report-page .move-buttons { display:grid; gap:8px; }
         .abnormal-report-page .progress { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:.74rem; }
         .abnormal-report-page .progress-step { color:var(--legacy_f5f7f8); }
         .abnormal-report-page .progress-step.approved { color:var(--legacy_2dd4bf); }
-        .abnormal-report-page .footer-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+        .abnormal-report-page .footer-actions { display:flex; align-items:center; justify-content:flex-end; gap:9px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+        .abnormal-report-page .footer-note { margin-right:auto; color:var(--muted); font-size:.7rem; }
         .abnormal-report-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid var(--legacy_1e8f6d); border-radius:7px; background:rgba(45,212,191,.12); color:var(--legacy_8ff5df); font-size:.78rem; }
         .abnormal-report-page .error { color:var(--legacy_ff9eaa); font-size:.74rem; margin-top:6px; }
         .abnormal-report-page .muted { color:var(--muted); }
@@ -57,7 +63,9 @@
             .abnormal-report-page .tools > div:first-child { margin-bottom:10px; }
             .abnormal-report-page .date-tools { grid-template-columns:1fr 1fr; }
             .abnormal-report-page .columns { grid-template-columns:1fr; }
+            .abnormal-report-page .form-fields { grid-template-columns:1fr; }
             .abnormal-report-page .banner { grid-template-columns:repeat(2,minmax(0,1fr)); }
+            .abnormal-report-page .banner-more { display:none; }
             .abnormal-report-page .sequence-grid { grid-template-columns:1fr; }
             .abnormal-report-page .move-buttons { grid-template-columns:1fr 1fr; }
             .abnormal-report-page .footer-actions { display:grid; grid-template-columns:1fr 1fr; }
@@ -106,18 +114,24 @@
                         <div><span>Tanggal</span><strong>{{ $activeDetail['tgl_problem'] ?? '-' }}</strong></div>
                         <div><span>Ref Lot</span><strong>{{ $activeDetail['ref_lot'] ?? '-' }}</strong></div>
                         <div><span>Object</span><strong>{{ $activeDetail['nm_object'] ?? '-' }}</strong></div>
+                        <div class="banner-more"><span>Kategori</span><strong>{{ $activeDetail['category'] ?? '-' }}</strong></div>
+                        <div class="banner-more"><span>Part</span><strong>{{ $activeDetail['nm_part'] ?? $activeDetail['no_part'] ?? '-' }}</strong></div>
+                        <div class="banner-more"><span>Customer</span><strong>{{ $activeDetail['nm_customer'] ?? 'INTERNAL' }}</strong></div>
+                        <div class="banner-more"><span>Ditemukan Oleh</span><strong>{{ $activeDetail['nama_kary'] ?? $activeDetail['found_by'] ?? '-' }}</strong></div>
                     </div>
                     <div class="columns">
                         <div class="section">
                             <h3>Detail Abnormal Report</h3>
-                            <div class="field"><label>Area / Proses</label><input class="control" value="{{ $activeDetail['nm_sequence'] ?? $activeDetail['area'] ?? '-' }}" readonly></div>
-                            <div class="field"><label>Kategori</label><input class="control" value="{{ $activeDetail['category'] ?? '-' }}" readonly></div>
-                            <div class="field"><label>Ditemukan Oleh</label><input class="control" value="{{ $activeDetail['nama_kary'] ?? $activeDetail['found_by'] ?? '-' }}" readonly></div>
-                            <div class="field"><label>Part</label><input class="control" value="{{ $activeDetail['nm_part'] ?? $activeDetail['no_part'] ?? '-' }}" readonly></div>
-                            <div class="field"><label>Customer</label><input class="control" value="{{ $activeDetail['nm_customer'] ?? 'INTERNAL' }}" readonly></div>
-                            <div class="field"><label>PIC Dept <span class="warning">*</span></label><select class="control" wire:model="picDept"><option value="">-- Pilih Dept --</option>@foreach ($departments as $department)<option value="{{ $department['Id_Dept'] }}">{{ $department['Dept'] }}</option>@endforeach</select>@error('picDept')<div class="error">{{ $message }}</div>@enderror</div>
-                            <div class="field"><label>Detail Problem <span class="warning">*</span></label><textarea class="control" wire:model="detailProblem" maxlength="500"></textarea>@error('detailProblem')<div class="error">{{ $message }}</div>@enderror</div>
-                            <div class="field"><label>Analisa Masalah <span class="warning">*</span></label><textarea class="control" wire:model="analisa" maxlength="500"></textarea>@error('analisa')<div class="error">{{ $message }}</div>@enderror</div>
+                            <div class="form-fields">
+                                <div class="field"><label>Area / Proses</label><input class="control" value="{{ $activeDetail['nm_sequence'] ?? $activeDetail['area'] ?? '-' }}" readonly></div>
+                                <div class="field"><label>Kategori</label><input class="control" value="{{ $activeDetail['category'] ?? '-' }}" readonly></div>
+                                <div class="field"><label>Ditemukan Oleh</label><input class="control" value="{{ $activeDetail['nama_kary'] ?? $activeDetail['found_by'] ?? '-' }}" readonly></div>
+                                <div class="field"><label>Part</label><input class="control" value="{{ $activeDetail['nm_part'] ?? $activeDetail['no_part'] ?? '-' }}" readonly></div>
+                                <div class="field"><label>Customer</label><input class="control" value="{{ $activeDetail['nm_customer'] ?? 'INTERNAL' }}" readonly></div>
+                                <div class="field"><label>PIC Dept <span class="warning">*</span></label><select class="control" wire:model="picDept"><option value="">-- Pilih Dept --</option>@foreach ($departments as $department)<option value="{{ $department['Id_Dept'] }}">{{ $department['Dept'] }}</option>@endforeach</select>@error('picDept')<div class="error">{{ $message }}</div>@enderror</div>
+                                <div class="field span-2"><label>Detail Problem <span class="warning">*</span></label><textarea class="control" wire:model="detailProblem" maxlength="500"></textarea>@error('detailProblem')<div class="error">{{ $message }}</div>@enderror</div>
+                                <div class="field span-2"><label>Analisa Masalah <span class="warning">*</span></label><textarea class="control" wire:model="analisa" maxlength="500"></textarea>@error('analisa')<div class="error">{{ $message }}</div>@enderror</div>
+                            </div>
                         </div>
                         <div class="section">
                             <h3>Tindakan & Approval</h3>
@@ -130,7 +144,7 @@
                             </div>@error('judgmentApprovers')<div class="error">{{ $message }}</div>@enderror</div>
                         </div>
                     </div>
-                    <div class="footer-actions"><button type="button" class="btn btn-ghost" wire:click="selectTab('open')">Batal</button><button type="button" class="btn btn-cyan" wire:click="commit" wire:confirm="Apakah Anda yakin ingin mengeskalasikan Abnormal Report ini?" wire:loading.attr="disabled" wire:target="commit">COMMIT ESKALASI</button></div>
+                    <div class="footer-actions"><span class="footer-note">Pastikan detail problem, analisa, dan urutan approval sudah benar sebelum COMMIT.</span><button type="button" class="btn btn-ghost" wire:click="selectTab('open')">Batal</button><button type="button" class="btn btn-cyan" wire:click="commit" wire:confirm="Apakah Anda yakin ingin mengeskalasikan Abnormal Report ini?" wire:loading.attr="disabled" wire:target="commit">COMMIT ESKALASI</button></div>
                 @else
                     <div class="empty">Pilih data dari tab Open atau Rejected untuk membuka form action.</div>
                 @endif

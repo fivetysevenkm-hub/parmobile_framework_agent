@@ -103,6 +103,35 @@ class GembaInput extends Component
                 return;
             }
 
+            $result = app(LotVerifikatorService::class)->verify($lotToLoad);
+            if (! ($result['ok'] ?? false)) {
+                $message = (string) ($result['message'] ?? 'No Lot tidak dapat diproses.');
+                $this->clearForm();
+                $this->processMode = $mode;
+                $this->selectedSequence = $selectedSeq;
+                $this->sequenceList = $seqList;
+                $this->machines = $machines;
+                $this->noLot = $lotToLoad;
+                $this->addError('noLot', $message);
+                $this->flash($message, 'warning');
+                return;
+            }
+
+            $clickable = collect($result['processes'] ?? [])->first(fn (array $item): bool => (bool) ($item['clickable'] ?? false));
+            if ($clickable === null) {
+                $message = 'Lot sudah selesai diproses. Tidak ada proses aktif yang dapat diinput.';
+                $this->clearForm();
+                $this->processMode = $mode;
+                $this->selectedSequence = $selectedSeq;
+                $this->sequenceList = $seqList;
+                $this->machines = $machines;
+                $this->noLot = $lotToLoad;
+                $this->flash($message, 'warning');
+                return;
+            }
+
+            $this->sequenceNo = (int) $clickable['sequence_no'];
+
             if ($this->processMode === 'tetap') {
                 if (trim($this->selectedSequence) === '') {
                     $this->clearForm();
@@ -115,13 +144,12 @@ class GembaInput extends Component
                     return;
                 }
 
-                $processContext = $service->processContext($this->noLot, $this->sequenceNo);
-                $process = $processContext['process'] ?? [];
-
                 $selectedItem = collect($this->sequenceList)->first(function (array $item): bool {
                     return (string) ($item['id_seq'] ?? '') === $this->selectedSequence
                         || strcasecmp((string) ($item['nm_sequence'] ?? ''), $this->selectedSequence) === 0;
                 });
+
+                $process = $clickable;
 
                 $expectedSeqId = strtolower(trim((string) ($selectedItem['id_seq'] ?? $this->selectedSequence)));
                 $expectedSeqName = strtolower(trim((string) ($selectedItem['nm_sequence'] ?? $this->selectedSequence)));
@@ -249,6 +277,18 @@ class GembaInput extends Component
 
         $clickable = collect($result['processes'] ?? [])->first(fn (array $item): bool => (bool) ($item['clickable'] ?? false));
 
+        if ($clickable === null) {
+            $message = 'Lot sudah selesai diproses. Tidak ada proses aktif yang dapat diinput.';
+            $this->clearForm();
+            $this->processMode = $mode;
+            $this->selectedSequence = $selectedSeq;
+            $this->sequenceList = $seqList;
+            $this->machines = $machines;
+            $this->noLot = $lotToLoad;
+            $this->flash($message, 'warning');
+            return;
+        }
+
         if ($this->processMode === 'tetap') {
             $selectedItem = collect($this->sequenceList)->first(function (array $item): bool {
                 return (string) ($item['id_seq'] ?? '') === $this->selectedSequence
@@ -261,7 +301,7 @@ class GembaInput extends Component
             $lotSeqId = strtolower(trim((string) ($clickable['id_seq'] ?? '')));
             $lotSeqName = strtolower(trim((string) ($clickable['name'] ?? '')));
 
-            $isMatch = $clickable !== null && (
+            $isMatch = (
                 ($expectedSeqId !== '' && $expectedSeqId === $lotSeqId) ||
                 ($expectedSeqName !== '' && $expectedSeqName === $lotSeqName)
             );
@@ -278,9 +318,7 @@ class GembaInput extends Component
             }
         }
 
-        if ($clickable) {
-            $this->sequenceNo = (int) $clickable['sequence_no'];
-        }
+        $this->sequenceNo = (int) $clickable['sequence_no'];
         $this->loadContext($service, $result);
         $this->flash('Konteks lot dan proses aktif berhasil dimuat.', 'success');
         $this->dispatch('stopwatch-sync');

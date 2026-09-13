@@ -33,12 +33,17 @@
         .akakami-page th, .akakami-page td { padding:11px 10px; }
         .akakami-page td { color:var(--legacy_d9e0e3); }
         .akakami-page .empty-state { padding:36px 20px; color:var(--muted); text-align:center; }
-        .akakami-page .detail-banner { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; padding:14px; margin-bottom:18px; border-radius:8px; background:linear-gradient(100deg,var(--legacy_0754bd),var(--legacy_00a6bf); }
+        .akakami-page .detail-banner { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; padding:14px 16px; margin-bottom:18px; border-radius:8px; border-left:3px solid var(--cyan); background:linear-gradient(120deg,var(--legacy_0754bd),var(--legacy_00a6bf)); box-shadow:inset 0 14px 30px rgba(0,0,0,.14); }
         .akakami-page .detail-banner span { display:block; font-size:.62rem; opacity:.8; text-transform:uppercase; }
         .akakami-page .detail-banner strong { display:block; margin-top:4px; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .akakami-page .form-columns { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+        .akakami-page .form-columns { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:16px; align-items:start; }
+        .akakami-page .form-columns > .form-section:last-child { position:sticky; top:84px; }
+        @media (min-width:721px) and (max-width:1060px){ .akakami-page .form-columns{ grid-template-columns:1fr; } .akakami-page .form-columns > .form-section:last-child{ position:static; } }
         .akakami-page .form-section { padding:15px; border:1px solid var(--line); border-radius:8px; background:var(--legacy_111a1f); }
         .akakami-page .form-section h3 { margin:0 0 14px; color:var(--cyan); font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; }
+        .akakami-page .form-fields { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:13px 16px; }
+        .akakami-page .form-fields .field { margin-bottom:0; }
+        .akakami-page .form-fields .span-2 { grid-column:1 / -1; }
         .akakami-page .field { margin-bottom:13px; }
         .akakami-page .radio-line { display:flex; gap:10px; align-items:flex-start; padding:10px 0; color:var(--legacy_f5f7f8); font-size:.78rem; }
         .akakami-page .radio-line input, .akakami-page .rank-check input { accent-color:var(--cyan); margin-top:3px; }
@@ -46,16 +51,16 @@
         .akakami-page .sequence-box { margin-top:14px; padding:13px; border:1px solid var(--line); border-radius:8px; }
         .akakami-page .sequence-box.disabled { opacity:.45; pointer-events:none; }
         .akakami-page .sequence-grid { display:grid; grid-template-columns:minmax(0,1fr) 44px minmax(0,1fr); align-items:center; gap:9px; }
-        .akakami-page .sequence-grid select { min-height:160px; }
+        .akakami-page .sequence-grid select { min-height:214px; }
         .akakami-page .move-buttons { display:grid; gap:8px; }
         .akakami-page .progress { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; padding:12px; border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:.74rem; }
         .akakami-page .progress-step { color:var(--legacy_f5f7f8); }
         .akakami-page .progress-step.approved { color:var(--legacy_2dd4bf); }
         .akakami-page .progress-arrow { color:var(--legacy_65747b); }
-        .akakami-page .action-footer { display:flex; justify-content:flex-end; gap:9px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+        .akakami-page .action-footer { display:flex; align-items:center; justify-content:flex-end; gap:9px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); } .akakami-page .footer-note { margin-right:auto; color:var(--muted); font-size:.7rem; }
         .akakami-page .flash { margin-bottom:14px; padding:11px 13px; border:1px solid var(--legacy_1e8f6d); border-radius:7px; background:rgba(45,212,191,.12); color:var(--legacy_8ff5df); font-size:.78rem; }
         .akakami-page .danger-text { color:var(--red); } .akakami-page .warning-text { color:var(--orange); } .akakami-page .success-text { color:var(--legacy_2dd4bf); }
-        @media (max-width:720px) { .akakami-page { padding:12px; } .akakami-page .pagination-wrap { display:block; } .akakami-page .results-summary { display:block; margin-bottom:8px; } .akakami-page .pagination { justify-content:flex-start; } .akakami-page .pagination .page-link, .akakami-page .pagination .page-current, .akakami-page .pagination .page-disabled { min-width:30px; } .akakami-page .action-cell { width:92px; min-width:92px; } .akakami-page .action-cell .btn { width:76px; } .akakami-page .action-cell .akakami-print-btn { width:108px; } .akakami-page .export-period-grid { grid-template-columns:1fr; } .akakami-page .export-actions { display:grid; grid-template-columns:1fr 1fr; } .akakami-page .export-actions .btn { width:100%; } .akakami-page .approval-header { align-items:flex-start; padding:14px; } .akakami-page .approval-header h2 { font-size:.82rem; } .akakami-page .approval-body { padding:12px; } .akakami-page .grid-tools { display:block; } .akakami-page .grid-tools > div:first-child { margin-bottom:10px; } .akakami-page .grid-tools .btn { width:100%; } .akakami-page .detail-banner { grid-template-columns:repeat(2,minmax(0,1fr)); } .akakami-page .form-columns { grid-template-columns:1fr; } .akakami-page .sequence-grid { grid-template-columns:1fr; } .akakami-page .move-buttons { grid-template-columns:1fr 1fr; } .akakami-page .move-buttons .btn:first-child { order:0; } .akakami-page .move-buttons .btn:last-child { order:1; } .akakami-page .action-footer { display:grid; grid-template-columns:1fr 1fr; } .akakami-page .action-footer .btn { width:100%; } }
+        @media (max-width:720px) { .akakami-page { padding:12px; } .akakami-page .pagination-wrap { display:block; } .akakami-page .results-summary { display:block; margin-bottom:8px; } .akakami-page .pagination { justify-content:flex-start; } .akakami-page .pagination .page-link, .akakami-page .pagination .page-current, .akakami-page .pagination .page-disabled { min-width:30px; } .akakami-page .action-cell { width:92px; min-width:92px; } .akakami-page .action-cell .btn { width:76px; } .akakami-page .action-cell .akakami-print-btn { width:108px; } .akakami-page .export-period-grid { grid-template-columns:1fr; } .akakami-page .export-actions { display:grid; grid-template-columns:1fr 1fr; } .akakami-page .export-actions .btn { width:100%; } .akakami-page .approval-header { align-items:flex-start; padding:14px; } .akakami-page .approval-header h2 { font-size:.82rem; } .akakami-page .approval-body { padding:12px; } .akakami-page .grid-tools { display:block; } .akakami-page .grid-tools > div:first-child { margin-bottom:10px; } .akakami-page .grid-tools .btn { width:100%; } .akakami-page .detail-banner { grid-template-columns:repeat(2,minmax(0,1fr)); } .akakami-page .banner-more { display:none; } .akakami-page .form-columns { grid-template-columns:1fr; } .akakami-page .form-fields { grid-template-columns:1fr; } .akakami-page .sequence-grid { grid-template-columns:1fr; } .akakami-page .move-buttons { grid-template-columns:1fr 1fr; } .akakami-page .move-buttons .btn:first-child { order:0; } .akakami-page .move-buttons .btn:last-child { order:1; } .akakami-page .action-footer { display:grid; grid-template-columns:1fr 1fr; } .akakami-page .action-footer .btn { width:100%; } }
         @media (max-width:430px) { .akakami-page .approval-tabs { padding-left:8px; padding-right:8px; } .akakami-page .approval-tab { padding:9px 10px; font-size:.67rem; } .akakami-page .detail-banner { padding:11px; } .akakami-page .detail-banner strong { font-size:.78rem; } .akakami-page th, .akakami-page td { padding:8px 7px; font-size:.7rem; } }
     </style>
 
@@ -111,21 +116,27 @@
                         <div><span>Lot</span><strong>{{ $activeDetail['no_lots'] ?? '-' }}</strong></div>
                         <div><span>Customer</span><strong>{{ $activeDetail['nm_customer'] ?? 'INTERNAL' }}</strong></div>
                         <div><span>Pelapor</span><strong>{{ $activeDetail['nama_kary'] ?? 'INTERNAL' }}</strong></div>
+                        <div class="banner-more"><span>Tanggal Problem</span><strong>{{ $activeDetail['tgl_problem'] ?? '-' }}</strong></div>
+                        <div class="banner-more"><span>Part / Item</span><strong>{{ $activeDetail['nm_part'] ?? $activeDetail['no_brg_asli'] ?? '-' }}</strong></div>
+                        <div class="banner-more"><span>Qty Problem</span><strong>{{ $activeDetail['qty_problem'] ?? '-' }}</strong></div>
+                        <div class="banner-more"><span>PIC Dept</span><strong>{{ $activeDetail['pic_dept'] ?? '-' }}</strong></div>
                     </div>
 
                     <div class="form-columns">
                         <div class="form-section">
                             <h3>Detail masalah</h3>
-                            <div class="field"><label class="form-label">PIC Dept Pelaksana</label><select class="dark-control" wire:model="picDept"><option value="">-- Pilih Dept --</option>@foreach ($departments as $department)<option value="{{ $department['Id_Dept'] }}">{{ $department['Dept'] }}</option>@endforeach</select></div>
-                            <div class="field"><label class="form-label">Tindakan</label><select class="dark-control" wire:model="idProblem"><option value="">-- Pilih Problem --</option>@foreach ($problems as $problem)<option value="{{ $problem['idrankproblem'] }}">{{ $problem['nmrankproblem'] }}</option>@endforeach</select></div>
-                            <div class="field"><label class="form-label">Nama Part / Item</label><input class="dark-control" value="{{ $activeDetail['nm_part'] ?? $activeDetail['no_brg_asli'] ?? '' }}" readonly></div>
-                            <div class="field"><label class="form-label">Qty Problem</label><input class="dark-control" type="number" wire:model="qty"></div>
-                            <div class="field"><label class="form-label">Jenis Problem</label><textarea class="dark-control" readonly>{{ $activeDetail['nmproblem'] ?? '' }}</textarea></div>
-                            <div class="field"><label class="form-label">Deskripsi Detail <span class="danger-text">*</span></label><textarea class="dark-control" wire:model="masalah" placeholder="Detail masalah yang ditemukan..."></textarea>@error('masalah')<div class="error">{{ $message }}</div>@enderror</div>
-                            <div class="field"><label class="form-label">Fishbone Category</label><div style="display:flex;flex-wrap:wrap;gap:12px;color:var(--legacy_d9e0e3);font-size:.76rem">@foreach (['Man','Machine','Material','Method'] as $category)<label><input type="radio" wire:model="fishbone" value="{{ $category }}"> {{ $category }}</label>@endforeach</div></div>
-                            <div class="field"><label class="form-label">Analisa Penyebab <span class="danger-text">*</span></label><textarea class="dark-control" wire:model="analisa" placeholder="Detail analisa penyebab..."></textarea>@error('analisa')<div class="error">{{ $message }}</div>@enderror</div>
-                            <div class="field"><label class="form-label">Tindakan Sementara</label><textarea class="dark-control" wire:model="tempAction" placeholder="Apa yang dilakukan saat kejadian?"></textarea></div>
-                            <div class="field" style="margin-bottom:0"><label class="form-label">Tindakan Pencegahan</label><textarea class="dark-control" wire:model="correctiveAction" placeholder="Langkah agar tidak terulang kembali..."></textarea></div>
+                            <div class="form-fields">
+                                <div class="field"><label class="form-label">PIC Dept Pelaksana</label><select class="dark-control" wire:model="picDept"><option value="">-- Pilih Dept --</option>@foreach ($departments as $department)<option value="{{ $department['Id_Dept'] }}">{{ $department['Dept'] }}</option>@endforeach</select></div>
+                                <div class="field"><label class="form-label">Tindakan</label><select class="dark-control" wire:model="idProblem"><option value="">-- Pilih Problem --</option>@foreach ($problems as $problem)<option value="{{ $problem['idrankproblem'] }}">{{ $problem['nmrankproblem'] }}</option>@endforeach</select></div>
+                                <div class="field"><label class="form-label">Nama Part / Item</label><input class="dark-control" value="{{ $activeDetail['nm_part'] ?? $activeDetail['no_brg_asli'] ?? '' }}" readonly></div>
+                                <div class="field"><label class="form-label">Qty Problem</label><input class="dark-control" type="number" wire:model="qty"></div>
+                                <div class="field span-2"><label class="form-label">Jenis Problem</label><textarea class="dark-control" readonly>{{ $activeDetail['nmproblem'] ?? '' }}</textarea></div>
+                                <div class="field span-2"><label class="form-label">Deskripsi Detail <span class="danger-text">*</span></label><textarea class="dark-control" wire:model="masalah" placeholder="Detail masalah yang ditemukan..."></textarea>@error('masalah')<div class="error">{{ $message }}</div>@enderror</div>
+                                <div class="field span-2"><label class="form-label">Fishbone Category</label><div style="display:flex;flex-wrap:wrap;gap:12px;color:var(--legacy_d9e0e3);font-size:.76rem">@foreach (['Man','Machine','Material','Method'] as $category)<label><input type="radio" wire:model="fishbone" value="{{ $category }}"> {{ $category }}</label>@endforeach</div></div>
+                                <div class="field span-2"><label class="form-label">Analisa Penyebab <span class="danger-text">*</span></label><textarea class="dark-control" wire:model="analisa" placeholder="Detail analisa penyebab..."></textarea>@error('analisa')<div class="error">{{ $message }}</div>@enderror</div>
+                                <div class="field span-2"><label class="form-label">Tindakan Sementara</label><textarea class="dark-control" wire:model="tempAction" placeholder="Apa yang dilakukan saat kejadian?"></textarea></div>
+                                <div class="field span-2"><label class="form-label">Tindakan Pencegahan</label><textarea class="dark-control" wire:model="correctiveAction" placeholder="Langkah agar tidak terulang kembali..."></textarea></div>
+                            </div>
                         </div>
 
                         <div class="form-section">
@@ -147,7 +158,7 @@
                         </div>
                     </div>
 
-                    <div class="action-footer"><button type="button" class="btn btn-ghost" wire:click="selectTab('pengajuan')">Batal</button><button type="button" class="btn btn-cyan" wire:click="commitFlpp" wire:confirm="Apakah Anda yakin ingin memproses data FLPP ini?" wire:loading.attr="disabled" wire:target="commitFlpp">COMMIT FLPP</button></div>
+                    <div class="action-footer"><span class="footer-note">Pastikan detail masalah, analisa, dan urutan judgment sudah benar sebelum COMMIT.</span><button type="button" class="btn btn-ghost" wire:click="selectTab('pengajuan')">Batal</button><button type="button" class="btn btn-cyan" wire:click="commitFlpp" wire:confirm="Apakah Anda yakin ingin memproses data FLPP ini?" wire:loading.attr="disabled" wire:target="commitFlpp">COMMIT FLPP</button></div>
                 @else
                     <div class="empty-state">Pilih data dari tab Pengajuan atau Ditolak untuk membuka form action.</div>
                 @endif

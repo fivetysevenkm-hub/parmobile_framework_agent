@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -71,20 +72,83 @@ class RoutingService
             $payload[$column] = $value !== '' ? $value : null;
         }
 
-        DB::transaction(function () use ($idRouting, $payload, $isEditMode): void {
+        DB::transaction(function () use ($idRouting, $name, $payload, $isEditMode): void {
             $exists = DB::table('tblrouting')->where('id_routing', $idRouting)->exists();
-            if ($isEditMode) {
-                if (! $exists) {
-                    throw new RuntimeException('Routing yang akan diperbarui tidak ditemukan.');
+            if (! $isEditMode) {
+                if ($exists) {
+                    throw new RuntimeException('ID Routing sudah digunakan. Pilih ID lain atau muat data untuk Update.');
                 }
-                DB::table('tblrouting')->where('id_routing', $idRouting)->update($payload);
+                DB::table('tblrouting')->insert(array_merge(['id_routing' => $idRouting], $payload));
+
                 return;
             }
 
-            if ($exists) {
-                throw new RuntimeException('ID Routing sudah digunakan. Pilih ID lain atau muat data untuk Update.');
+            if (! $exists) {
+                throw new RuntimeException('Routing yang akan diperbarui tidak ditemukan.');
             }
-            DB::table('tblrouting')->insert(array_merge(['id_routing' => $idRouting], $payload));
+            $existing = DB::table('tblrouting')->where('id_routing', $idRouting)->first();
+            DB::table('tblrouting')->where('id_routing', $idRouting)->update($payload);
+            $this->recordSequenceChanges($idRouting, $name, $existing, $payload);
         });
+    }
+
+    private function recordSequenceChanges(string $idRouting, string $name, object $existing, array $payload): void
+    {
+        if (! Schema::hasTable('tbl_routing_history')) {
+            return;
+        }
+
+        $changes = [];
+        for ($index = 1; $index <= 26; $index++) {
+            $column = 'Seq_'.str_pad((string) $index, 2, '0', STR_PAD_LEFT);
+            $before = trim((string) ($existing->{$column} ?? ''));
+            $after = trim((string) ($payload[$column] ?? ''));
+            if ($before === $after) {
+                continue;
+            }
+            $changes[] = [
+                'slot_no' => $index,
+                'seq_before' => $before !== '' ? $before : null,
+                'seq_after' => $after !== '' ? $after : null,
+            ];
+        }
+
+        if ($changes === []) {
+            return;
+        }
+
+        $ids = collect($changes)
+            ->flatMap(fn (array $change) => [$change['seq_before'], $change['seq_after']])
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $names = DB::table('tblsequence')
+            ->whereIn('id_seq', $ids)
+            ->pluck('nm_sequence', 'id_seq')
+            ->map(fn ($nm) => (string) $nm)
+            ->all();
+
+        $rows = array_map(function (array $change) use ($idRouting, $name, $names): array {
+            return [
+                'id_routing' => $idRouting,
+                'nm_routing' => $name,
+                'slot_no' => $change['slot_no'],
+                'seq_before' => $change['seq_before'],
+                'nama_before' => $change['seq_before'] !== null ? ($names[$change['seq_before']] ?? null) : null,
+                'seq_after' => $change['seq_after'],
+                'nama_after' => $change['seq_after'] !== null ? ($names[$change['seq_after']] ?? null) : null,
+                'changed_by' => $this->currentActor(),
+                'changed_at' => now('Asia/Jakarta'),
+            ];
+        }, $changes);
+
+        DB::table('tbl_routing_history')->insert($rows);
+    }
+
+    private function currentActor(): string
+    {
+        return (string) (auth()->user()?->username ?? session('username') ?? 'System');
     }
 }

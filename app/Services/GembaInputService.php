@@ -699,9 +699,9 @@ class GembaInputService
         }
 
         $sequenceCode = 'seq_'.str_pad((string) $sequenceNo, 2, '0', STR_PAD_LEFT);
-        $validatorResult = $this->validateAndAdvanceValidator($noLot, $noSrp, $idRouting, $sequenceCode);
-        if (! ($validatorResult['ok'] ?? false)) {
-            return $validatorResult;
+        $validatorCheck = $this->validateStartOrder($noLot, $noSrp, $idRouting, $sequenceNo, $sequenceCode);
+        if (! ($validatorCheck['ok'] ?? false)) {
+            return $validatorCheck;
         }
 
         $now = now()->format('Y-m-d H:i:s');
@@ -714,62 +714,69 @@ class GembaInputService
         }
         $machineName = $this->machineName($machineNo);
 
-        DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $now, $trayNo, $traySmall, $machineNo, $machineName, $ojt, $operatorNiks, $operatorNames, $context, $sequenceNo): void {
-            $processPayload = $this->onlyExistingColumns($processTable, [
-                'no_lot' => $noLot,
-                'no_srp' => $noSrp,
-                'sequence' => $idSeq,
-                'start_time' => $now,
-                'finish_time' => null,
-                'tray_no' => $trayNo,
-                'tray_nokecil' => $traySmall !== '' ? $traySmall : null,
-                'duration' => 0,
-                'pic_01' => $operatorNiks[0] !== '' ? $operatorNiks[0] : null,
-                'pic_02' => $operatorNiks[1] !== '' ? $operatorNiks[1] : null,
-                'pic_03' => $operatorNiks[2] !== '' ? $operatorNiks[2] : null,
-                'pic_04' => $operatorNiks[3] !== '' ? $operatorNiks[3] : null,
-                'akakami' => 'no',
-                'ojt' => $ojt,
-                'hold' => 'no',
-                'finish' => 'no',
-                'no_mesin' => $machineNo !== '' ? $machineNo : null,
-            ]);
-            DB::table($processTable)->updateOrInsert(['no_lot' => $noLot], $processPayload);
-
-            if (SchemaCache::hasTable('tbl_seq_all')) {
-                $lot = $this->lotContext($noLot) ?? [];
-                $allPayload = $this->onlyExistingColumns('tbl_seq_all', [
+        try {
+            DB::transaction(function () use ($processTable, $noLot, $noSrp, $idSeq, $name, $now, $trayNo, $traySmall, $machineNo, $machineName, $ojt, $operatorNiks, $operatorNames, $context, $sequenceNo, $idRouting, $sequenceCode): void {
+                $this->persistValidatorAdvance($noLot, $noSrp, $idRouting, $sequenceNo, $sequenceCode);
+                $processPayload = $this->onlyExistingColumns($processTable, [
                     'no_lot' => $noLot,
                     'no_srp' => $noSrp,
-                    'seq' => $sequenceNo,
-                    'id_seq' => $idSeq,
-                    'nm_seq' => $name,
-                    'id_routing' => (string) ($context['id_routing'] ?? ''),
+                    'sequence' => $idSeq,
                     'start_time' => $now,
                     'finish_time' => null,
-                    'duration' => 0,
                     'tray_no' => $trayNo,
                     'tray_nokecil' => $traySmall !== '' ? $traySmall : null,
-                    'pic_01' => $operatorNames[0] !== '' ? $operatorNames[0] : ($operatorNiks[0] !== '' ? $operatorNiks[0] : null),
-                    'pic_02' => $operatorNames[1] !== '' ? $operatorNames[1] : ($operatorNiks[1] !== '' ? $operatorNiks[1] : null),
-                    'pic_03' => $operatorNames[2] !== '' ? $operatorNames[2] : ($operatorNiks[2] !== '' ? $operatorNiks[2] : null),
-                    'pic_04' => $operatorNames[3] !== '' ? $operatorNames[3] : ($operatorNiks[3] !== '' ? $operatorNiks[3] : null),
+                    'duration' => 0,
+                    'pic_01' => $operatorNiks[0] !== '' ? $operatorNiks[0] : null,
+                    'pic_02' => $operatorNiks[1] !== '' ? $operatorNiks[1] : null,
+                    'pic_03' => $operatorNiks[2] !== '' ? $operatorNiks[2] : null,
+                    'pic_04' => $operatorNiks[3] !== '' ? $operatorNiks[3] : null,
                     'akakami' => 'no',
                     'ojt' => $ojt,
                     'hold' => 'no',
                     'finish' => 'no',
-                    'no_mesin' => $machineName !== '' ? $machineName : null,
-                    'no_part' => $lot['no_part'] ?? null,
-                    'nm_part' => $lot['nm_part'] ?? null,
-                    'customer' => $lot['customer'] ?? null,
-                    'no_sj_cust' => $lot['no_sj_cust'] ?? null,
-                    'no_lot_cust' => $lot['no_lot_cust'] ?? null,
-                    'qty' => $lot['qty'] ?? null,
-                    'updated_at' => $now,
+                    'no_mesin' => $machineNo !== '' ? $machineNo : null,
                 ]);
-                DB::table('tbl_seq_all')->updateOrInsert(['no_lot' => $noLot, 'seq' => $sequenceNo], $allPayload);
-            }
-        });
+                DB::table($processTable)->updateOrInsert(['no_lot' => $noLot], $processPayload);
+
+                if (SchemaCache::hasTable('tbl_seq_all')) {
+                    $lot = $this->lotContext($noLot) ?? [];
+                    $allPayload = $this->onlyExistingColumns('tbl_seq_all', [
+                        'no_lot' => $noLot,
+                        'no_srp' => $noSrp,
+                        'seq' => $sequenceNo,
+                        'id_seq' => $idSeq,
+                        'nm_seq' => $name,
+                        'id_routing' => (string) ($context['id_routing'] ?? ''),
+                        'start_time' => $now,
+                        'finish_time' => null,
+                        'duration' => 0,
+                        'tray_no' => $trayNo,
+                        'tray_nokecil' => $traySmall !== '' ? $traySmall : null,
+                        'pic_01' => $operatorNames[0] !== '' ? $operatorNames[0] : ($operatorNiks[0] !== '' ? $operatorNiks[0] : null),
+                        'pic_02' => $operatorNames[1] !== '' ? $operatorNames[1] : ($operatorNiks[1] !== '' ? $operatorNiks[1] : null),
+                        'pic_03' => $operatorNames[2] !== '' ? $operatorNames[2] : ($operatorNiks[2] !== '' ? $operatorNiks[2] : null),
+                        'pic_04' => $operatorNames[3] !== '' ? $operatorNames[3] : ($operatorNiks[3] !== '' ? $operatorNiks[3] : null),
+                        'akakami' => 'no',
+                        'ojt' => $ojt,
+                        'hold' => 'no',
+                        'finish' => 'no',
+                        'no_mesin' => $machineName !== '' ? $machineName : null,
+                        'no_part' => $lot['no_part'] ?? null,
+                        'nm_part' => $lot['nm_part'] ?? null,
+                        'customer' => $lot['customer'] ?? null,
+                        'no_sj_cust' => $lot['no_sj_cust'] ?? null,
+                        'no_lot_cust' => $lot['no_lot_cust'] ?? null,
+                        'qty' => $lot['qty'] ?? null,
+                        'updated_at' => $now,
+                    ]);
+                    DB::table('tbl_seq_all')->updateOrInsert(['no_lot' => $noLot, 'seq' => $sequenceNo], $allPayload);
+                }
+            });
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return ['ok' => false, 'message' => 'Gagal menyimpan data proses. Silakan coba lagi.'];
+        }
 
         return ['ok' => true, 'message' => 'Proses berhasil di-start.', 'start_time' => $now];
     }
@@ -854,33 +861,23 @@ class GembaInputService
         return ['ok' => true, 'message' => 'Lot berhasil diubah ke status HOLD.'];
     }
 
-    private function validateAndAdvanceValidator(string $noLot, string $noSrp, string $idRouting, string $sequenceCode): array
+    private function validateStartOrder(string $noLot, string $noSrp, string $idRouting, int $sequenceNo, string $sequenceCode): array
     {
         if (! SchemaCache::hasTable('tbl_validator')) {
             return ['ok' => false, 'message' => 'Tabel validator tidak tersedia.'];
         }
 
         $validator = DB::table('tbl_validator')->where('no_lot', $noLot)->first();
-        $sequenceNo = (int) str_replace('seq_', '', strtolower($sequenceCode));
         if (! $validator) {
-            if ($sequenceNo !== 1) {
-                return ['ok' => false, 'message' => 'Kamu sedang LOMPAT PROSES. Proses pertama harus dimulai dari sequence 1.'];
+            $firstUnfinished = $this->firstUnfinishedSequence($noLot, $idRouting);
+            if ($firstUnfinished !== $sequenceNo) {
+                return [
+                    'ok' => false,
+                    'message' => $firstUnfinished >= 1
+                        ? 'Kamu sedang LOMPAT PROSES. Proses aktif yang harus dikerjakan adalah sequence '.$firstUnfinished.'.'
+                        : 'Kamu sedang LOMPAT PROSES. Proses pertama yang belum selesai tidak ditemukan.',
+                ];
             }
-            $next = $this->routingProcessAt($idRouting, 2);
-            DB::table('tbl_validator')->insert([
-                'no_lot' => $noLot,
-                'no_srp' => $noSrp,
-                'id_routing' => $idRouting,
-                'Current_seq_code' => $sequenceCode,
-                'next_seq_code' => $next ? 'seq_02' : 'seq_02',
-                'Curr_process' => $this->routingProcessAt($idRouting, 1) ?? '',
-                'next_process' => $next ?? 'FIN',
-                'current_seq_count' => 1,
-                'next_seq_count' => 2,
-                'total_seq_count' => $this->routingCount($idRouting),
-                'total_seq_remain' => max(0, $this->routingCount($idRouting) - 1),
-                'finish' => 'no',
-            ]);
 
             return ['ok' => true];
         }
@@ -894,10 +891,15 @@ class GembaInputService
             return ['ok' => false, 'message' => 'Kamu sedang LOMPAT PROSES. Pilih sequence aktif sesuai flow.'];
         }
 
+        return ['ok' => true];
+    }
+
+    private function persistValidatorAdvance(string $noLot, string $noSrp, string $idRouting, int $sequenceNo, string $sequenceCode): void
+    {
         $nextNo = $sequenceNo + 1;
         $next = $this->routingProcessAt($idRouting, $nextNo);
         $total = $this->routingCount($idRouting);
-        DB::table('tbl_validator')->where('no_lot', $noLot)->update([
+        $payload = [
             'Current_seq_code' => $sequenceCode,
             'next_seq_code' => 'seq_'.str_pad((string) $nextNo, 2, '0', STR_PAD_LEFT),
             'Curr_process' => $this->routingProcessAt($idRouting, $sequenceNo) ?? '',
@@ -907,9 +909,36 @@ class GembaInputService
             'total_seq_count' => $total,
             'total_seq_remain' => max(0, $total - $sequenceNo),
             'finish' => 'no',
-        ]);
+        ];
 
-        return ['ok' => true];
+        if (DB::table('tbl_validator')->where('no_lot', $noLot)->exists()) {
+            DB::table('tbl_validator')->where('no_lot', $noLot)->update($payload);
+
+            return;
+        }
+
+        DB::table('tbl_validator')->insert([
+            'no_lot' => $noLot,
+            'no_srp' => $noSrp,
+            'id_routing' => $idRouting,
+        ] + $payload);
+    }
+
+    private function firstUnfinishedSequence(string $noLot, string $idRouting): int
+    {
+        $total = $this->routingCount($idRouting);
+        for ($index = 1; $index <= $total; $index++) {
+            $table = $this->processTable($index);
+            if (! SchemaCache::hasTable($table) || ! SchemaCache::hasColumn($table, 'finish')) {
+                return $index;
+            }
+            $finish = strtolower(trim((string) (DB::table($table)->where('no_lot', $noLot)->value('finish') ?? '')));
+            if (! in_array($finish, ['yes', '1', 'true', 'finish', 'finished'], true)) {
+                return $index;
+            }
+        }
+
+        return 0;
     }
 
     private function routingProcessAt(string $idRouting, int $sequenceNo): ?string

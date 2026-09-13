@@ -4,13 +4,13 @@
     $abnormalOpen = request()->routeIs('abnormal.report');
     $instructionOpen = request()->routeIs('instruction.rank.a');
     $manpowerOpen = request()->routeIs('manpower.control');
-    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp', 'routing.machine.mapping');
+    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp', 'routing.machine.mapping', 'routing.history-change');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
     $lotVerifikatorOpen = request()->routeIs('lot.verifikator', 'gemba.input');
     $pttnEngineeringOpen = request()->routeIs('pttn.add-item-satuan', 'pttn.maker', 'pttn.pairing.srp');
     $pttnOperatorOpen = request()->routeIs('pttn.omes.input');
-    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization', 'user-management.hide-menu', 'user-management.audit-trail', 'user-management.customer-portal-users');
+    $userManagementOpen = request()->routeIs('user-management.role-akses', 'user-management.user-control', 'user-management.qr-code', 'user-management.menu-authorization', 'user-management.pic-approver', 'user-management.hide-menu', 'user-management.audit-trail', 'user-management.customer-portal-users');
     $qualityOpen = request()->routeIs('akakami.qaqc');
 
     $sessionUser = auth()->user();
@@ -93,6 +93,7 @@
                 {!! $menuLink('routing-process', 'routing.process', 'Susun Routing Proses', '⇄') !!}
                 {!! $menuLink('routing-pairing-srp', 'routing.pairing.srp', 'Pairing Routing & SRP', '⇆') !!}
                 {!! $menuLink('routing-machine-mapping', 'routing.machine.mapping', 'Machine Mapping', '⚙') !!}
+                {!! $menuLink('routing-history-change', 'routing.history-change', 'History Perubahan', '◔') !!}
             </div>
         </div>
 
@@ -149,6 +150,7 @@
                 {!! $menuLink('user-management-control', 'user-management.user-control', 'User Control', '♟') !!}
                 {!! $menuLink('user-management-qr', 'user-management.qr-code', 'Buat QR Code User', '▣') !!}
                 {!! $menuLink('user-management-authorization', 'user-management.menu-authorization', 'Otorisasi Menu', '☑') !!}
+                {!! $menuLink('user-management-pic-approver', 'user-management.pic-approver', 'PIC Approver', '♚') !!}
                 {!! $menuLink('user-management-hide-menu', 'user-management.hide-menu', 'Hide Menu', '◌') !!}
                 {!! $menuLink('user-management-audit', 'user-management.audit-trail', 'Audit Trail', '◔') !!}
                 {!! $menuLink('customer-portal-users', 'user-management.customer-portal-users', 'Customer Portal Users', '◎') !!}

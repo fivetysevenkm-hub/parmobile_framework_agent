@@ -98,6 +98,24 @@ class GembaInputModeTest extends TestCase
             $table->string('finish', 50)->nullable();
         });
 
+        Schema::create('tbl_seq_03', function (Blueprint $table): void {
+            $table->string('no_lot', 50)->primary();
+            $table->string('start_time', 50)->nullable();
+            $table->string('finish_time', 50)->nullable();
+            $table->string('duration', 50)->nullable();
+            $table->string('tray_no', 50)->nullable();
+            $table->string('tray_nokecil', 50)->nullable();
+            $table->string('no_mesin', 50)->nullable();
+            $table->string('pic_01', 50)->nullable();
+            $table->string('pic_02', 50)->nullable();
+            $table->string('pic_03', 50)->nullable();
+            $table->string('pic_04', 50)->nullable();
+            $table->string('akakami', 50)->nullable();
+            $table->string('ojt', 50)->nullable();
+            $table->string('hold', 50)->nullable();
+            $table->string('finish', 50)->nullable();
+        });
+
         Schema::create('tbl_seq_all', function (Blueprint $table): void {
             $table->id();
             $table->string('no_lot', 50)->nullable();
@@ -143,6 +161,7 @@ class GembaInputModeTest extends TestCase
             $table->string('ojt_a', 20)->nullable();
             $table->string('class_01', 20)->nullable();
             $table->string('class_02', 20)->nullable();
+            $table->string('class_03', 20)->nullable();
         });
 
         Schema::create('tblmesin', function (Blueprint $table): void {
@@ -681,5 +700,174 @@ class GembaInputModeTest extends TestCase
         // Active process is sequence 01 (CARBURIZING); must pick the latest doc for 01, ignore sequence 02.
         $this->assertTrue($component->instance()->hasWorkInstruction);
         $this->assertSame(2, $component->get('wiDocumentId'));
+    }
+
+    public function test_legacy_lot_without_validator_resumes_at_first_unfinished_sequence(): void
+    {
+        DB::table('tblkaryawan')->insert([
+            'nik' => 'KARY01',
+            'nama_kary' => 'Operator Test',
+            'ojt_a' => 'no',
+            'class_01' => '01',
+            'class_02' => '02',
+            'class_03' => '03',
+        ]);
+
+        // Seq 01 sudah selesai di masa lalu, tidak ada record tbl_validator sama sekali.
+        $this->markSequenceFinished(1);
+
+        // Scan lot harus langsung menunjuk sequence 02 yang belum selesai (bukan lompat proses).
+        Livewire::test(GembaInput::class)
+            ->set('processMode', 'berpindah')
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput')
+            ->assertSet('sequenceNo', 2)
+            ->assertSet('flashMessage', 'Konteks lot dan proses aktif berhasil dimuat.')
+            ->assertNotDispatched('jumping-process-alert');
+
+        $component = Livewire::test(GembaInput::class, [
+            'noLot' => 'LOT-12345',
+            'sequenceNo' => 2,
+        ]);
+
+        $component->assertSet('noLot', 'LOT-12345')
+            ->assertSet('sequenceNo', 2)
+            ->assertNotDispatched('jumping-process-alert');
+
+        $this->assertTrue($component->instance()->canStart());
+
+        $component->set('operatorNik', 'KARY01')
+            ->call('addOperator')
+            ->set('trayNo', 'TRAY-2')
+            ->set('machineNo', 'MC001')
+            ->call('startProcess')
+            ->assertSet('flashMessage', 'Proses berhasil di-start.')
+            ->assertSet('flashType', 'success');
+
+        $this->assertDatabaseHas('tbl_validator', [
+            'no_lot' => 'LOT-12345',
+            'Current_seq_code' => 'seq_02',
+            'next_seq_code' => 'seq_03',
+            'Curr_process' => '02',
+            'next_process' => '03',
+            'current_seq_count' => 2,
+            'next_seq_count' => 3,
+            'total_seq_count' => 3,
+            'total_seq_remain' => 1,
+            'finish' => 'no',
+        ]);
+        $this->assertDatabaseHas('tbl_seq_02', ['no_lot' => 'LOT-12345', 'finish' => 'no']);
+        $this->assertNotSame('', DB::table('tbl_seq_02')->where('no_lot', 'LOT-12345')->value('start_time'));
+    }
+
+    public function test_validator_moves_in_sync_with_start_finish_cycle_on_legacy_lot(): void
+    {
+        DB::table('tblkaryawan')->insert([
+            'nik' => 'KARY01',
+            'nama_kary' => 'Operator Test',
+            'ojt_a' => 'no',
+            'class_01' => '01',
+            'class_02' => '02',
+            'class_03' => '03',
+        ]);
+
+        $this->markSequenceFinished(1);
+
+        // Start sequence 02 (insert validator)
+        $component = Livewire::test(GembaInput::class, [
+            'noLot' => 'LOT-12345',
+            'sequenceNo' => 2,
+        ]);
+        $component->set('operatorNik', 'KARY01')
+            ->call('addOperator')
+            ->set('trayNo', 'TRAY-2')
+            ->set('machineNo', 'MC001')
+            ->call('startProcess')
+            ->assertSet('flashMessage', 'Proses berhasil di-start.');
+
+        $this->assertDatabaseHas('tbl_validator', [
+            'no_lot' => 'LOT-12345',
+            'Current_seq_code' => 'seq_02',
+            'next_seq_code' => 'seq_03',
+            'finish' => 'no',
+        ]);
+
+        // Finish sequence 02 -> validator menandai selesai
+        $component->call('finishProcess');
+        $this->assertDatabaseHas('tbl_validator', [
+            'no_lot' => 'LOT-12345',
+            'finish' => 'yes',
+        ]);
+
+        // Bukaan berikutnya dari LotVerifikator harus menunjuk sequence 03
+        $component2 = Livewire::test(GembaInput::class, [
+            'noLot' => 'LOT-12345',
+            'sequenceNo' => 3,
+        ]);
+        $component2->assertSet('sequenceNo', 3);
+
+        $component2->set('operatorNik', 'KARY01')
+            ->call('addOperator')
+            ->set('trayNo', 'TRAY-3')
+            ->set('machineNo', 'MC002')
+            ->call('startProcess')
+            ->assertSet('flashMessage', 'Proses berhasil di-start.');
+
+        // Validator di-update ke seq_03 (bukan insert baru / desync)
+        $this->assertDatabaseHas('tbl_validator', [
+            'no_lot' => 'LOT-12345',
+            'Current_seq_code' => 'seq_03',
+            'next_seq_code' => 'seq_04',
+            'Curr_process' => '03',
+            'next_process' => 'FIN',
+            'current_seq_count' => 3,
+            'next_seq_count' => 4,
+            'total_seq_count' => 3,
+            'total_seq_remain' => 0,
+            'finish' => 'no',
+        ]);
+
+        // Start kedua pada sequence yang sama harus ditolak (tidak menimbulkan state desync)
+        $startTime = DB::table('tbl_seq_03')->where('no_lot', 'LOT-12345')->value('start_time');
+        $component2->call('startProcess');
+        $this->assertSame($startTime, DB::table('tbl_seq_03')->where('no_lot', 'LOT-12345')->value('start_time'));
+        $this->assertDatabaseHas('tbl_validator', ['no_lot' => 'LOT-12345', 'finish' => 'no']);
+    }
+
+    public function test_fully_finished_lot_warns_clearly_instead_of_jumping_process(): void
+    {
+        $this->markSequenceFinished(1);
+        $this->markSequenceFinished(2);
+        $this->markSequenceFinished(3);
+
+        // Via scan / loadLot
+        Livewire::test(GembaInput::class)
+            ->set('processMode', 'tetap')
+            ->set('selectedSequence', '01')
+            ->set('scanInput', 'LOT-12345')
+            ->call('processScanInput')
+            ->assertSet('flashMessage', 'Lot sudah selesai diproses. Tidak ada proses aktif yang dapat diinput.')
+            ->assertSet('flashType', 'warning')
+            ->assertNotDispatched('jumping-process-alert');
+
+        // Via mount / bukaan dari LotVerifikator
+        Livewire::test(GembaInput::class, [
+            'noLot' => 'LOT-12345',
+            'sequenceNo' => 1,
+        ])
+            ->assertSet('flashMessage', 'Lot sudah selesai diproses. Tidak ada proses aktif yang dapat diinput.')
+            ->assertSet('flashType', 'warning')
+            ->assertNotDispatched('jumping-process-alert');
+    }
+
+    private function markSequenceFinished(int $sequence): void
+    {
+        $table = 'tbl_seq_'.str_pad((string) $sequence, 2, '0', STR_PAD_LEFT);
+        DB::table($table)->updateOrInsert(['no_lot' => 'LOT-12345'], [
+            'start_time' => '2026-01-01 08:00:00',
+            'finish_time' => '2026-01-01 09:00:00',
+            'duration' => '60',
+            'finish' => 'yes',
+        ]);
     }
 }

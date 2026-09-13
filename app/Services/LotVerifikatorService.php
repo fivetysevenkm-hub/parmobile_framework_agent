@@ -168,7 +168,7 @@ class LotVerifikatorService
 
         $validator = DB::table('tbl_validator')->where('no_lot', $lotNo)->first();
         if (! $validator) {
-            return $first;
+            return $this->resolveFirstUnfinished($lotNo, $processes) ?? $first;
         }
 
         $nextProcess = trim((string) $this->validatorValue($validator, 'next_process'));
@@ -203,6 +203,23 @@ class LotVerifikatorService
 
         foreach ($processes as $process) {
             if ($value === strtolower((string) $process['id_seq']) || $value === strtolower((string) $process['name'])) {
+                return $process;
+            }
+        }
+
+        return null;
+    }
+
+    private function resolveFirstUnfinished(string $lotNo, array $processes): ?array
+    {
+        foreach ($processes as $process) {
+            $sequenceNo = (int) ($process['sequence_no'] ?? 0);
+            $table = 'tbl_seq_'.str_pad((string) max(1, min(self::MAX_SEQUENCE, $sequenceNo)), 2, '0', STR_PAD_LEFT);
+            $finish = '';
+            if (SchemaCache::hasTable($table) && SchemaCache::hasColumn($table, 'finish')) {
+                $finish = strtolower(trim((string) (DB::table($table)->where('no_lot', $lotNo)->value('finish') ?? '')));
+            }
+            if (! in_array($finish, ['yes', '1', 'true', 'finish', 'finished'], true)) {
                 return $process;
             }
         }

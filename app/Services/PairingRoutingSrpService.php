@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 
 class PairingRoutingSrpService
@@ -73,13 +74,51 @@ class PairingRoutingSrpService
                 throw new RuntimeException('ID Routing tidak terdaftar.');
             }
 
+            $before = DB::table('tblsrp')->where('no_srp', $noSrp)->first();
             $updated = DB::table('tblsrp')
                 ->where('no_srp', $noSrp)
                 ->update(['id_routing' => $routingId]);
 
-            if ($updated === 0 && ! DB::table('tblsrp')->where('no_srp', $noSrp)->exists()) {
+            if ($updated === 0 && ! $before) {
                 throw new RuntimeException('Data SRP tidak ditemukan.');
             }
+
+            $this->recordPairingChange($noSrp, $before ? (string) ($before->id_routing ?? '') : '', $routingId);
         });
+    }
+
+    private function recordPairingChange(string $noSrp, string $routingBefore, string $routingAfter): void
+    {
+        if (! Schema::hasTable('tbl_pairing_routing_history') || $routingBefore === $routingAfter) {
+            return;
+        }
+
+        $srp = DB::table('vw_srp_complete_routing')
+            ->select(['no_srp', 'no_brg_asli', 'nm_part'])
+            ->where('no_srp', $noSrp)
+            ->first();
+
+        $names = DB::table('tblrouting')
+            ->whereIn('id_routing', array_filter([$routingBefore, $routingAfter]))
+            ->pluck('nm_routing', 'id_routing')
+            ->map(fn ($nm) => (string) $nm)
+            ->all();
+
+        DB::table('tbl_pairing_routing_history')->insert([
+            'no_srp' => $noSrp,
+            'no_part' => $srp->no_brg_asli ?? null,
+            'nm_part' => $srp->nm_part ?? null,
+            'routing_before' => $routingBefore !== '' ? $routingBefore : null,
+            'nama_before' => $routingBefore !== '' ? ($names[$routingBefore] ?? null) : null,
+            'routing_after' => $routingAfter,
+            'nama_after' => $names[$routingAfter] ?? null,
+            'changed_by' => $this->currentActor(),
+            'changed_at' => now('Asia/Jakarta'),
+        ]);
+    }
+
+    private function currentActor(): string
+    {
+        return (string) (auth()->user()?->username ?? session('username') ?? 'System');
     }
 }
