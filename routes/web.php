@@ -52,6 +52,7 @@ use App\Livewire\PairingPttnToSrp;
 use App\Livewire\PairingRoutingSrp;
 use App\Livewire\PicApprover;
 use App\Livewire\ProcessProductivity;
+use App\Livewire\ProcessSkipCorrection;
 use App\Livewire\PttnMaker;
 use App\Livewire\RankAApproval;
 use App\Livewire\RankAInstructionSheet;
@@ -111,6 +112,7 @@ Route::middleware(['auth', EnsurePasswordChanged::class, AuditMenuAccess::class,
     Route::get('/routing/pairing-routing-srp', PairingRoutingSrp::class)->name('routing.pairing.srp');
     Route::get('/routing/machine-mapping', MachineMapping::class)->name('routing.machine.mapping');
     Route::get('/routing/history-change', RoutingHistoryChange::class)->name('routing.history-change');
+    Route::get('/routing/koreksi-lompat-proses', ProcessSkipCorrection::class)->name('routing.skip-correction');
     Route::get('/cycle-time/adjust', AdjustCycleTime::class)->name('cycle-time.adjust');
     Route::get('/document-process/upload-wi', UploadWiProses::class)->name('document.process.upload');
     Route::get('/input-lot/lot-verifikator', LotVerifikator::class)->name('lot.verifikator');

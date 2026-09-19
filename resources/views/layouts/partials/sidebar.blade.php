@@ -4,7 +4,7 @@
     $abnormalOpen = request()->routeIs('abnormal.report');
     $instructionOpen = request()->routeIs('instruction.rank.a');
     $manpowerOpen = request()->routeIs('manpower.control');
-    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp', 'routing.machine.mapping', 'routing.history-change');
+    $routingOpen = request()->routeIs('routing.process', 'routing.pairing.srp', 'routing.machine.mapping', 'routing.history-change', 'routing.skip-correction');
     $cycleTimeOpen = request()->routeIs('cycle-time.adjust');
     $documentProcessOpen = request()->routeIs('document.process.upload');
     $lotVerifikatorOpen = request()->routeIs('lot.verifikator', 'gemba.input');
@@ -94,6 +94,7 @@
                 {!! $menuLink('routing-pairing-srp', 'routing.pairing.srp', 'Pairing Routing & SRP', '⇆') !!}
                 {!! $menuLink('routing-machine-mapping', 'routing.machine.mapping', 'Machine Mapping', '⚙') !!}
                 {!! $menuLink('routing-history-change', 'routing.history-change', 'History Perubahan', '◔') !!}
+                {!! $menuLink('routing-skip-correction', 'routing.skip-correction', 'Koreksi Lompat Proses', '✎') !!}
             </div>
         </div>
 
