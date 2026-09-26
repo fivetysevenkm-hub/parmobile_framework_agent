@@ -31,6 +31,9 @@ return [
         'carb_temper' => [
             'token' => env('TELEGRAM_BOT_TOKEN_CARB_TEMPER'),
         ],
+        'production_bot' => [
+            'token' => env('TELEGRAM_BOT_TOKEN_PRODUCTION'),
+        ],
     ],
 
     'chat_ids' => [
@@ -59,4 +62,54 @@ return [
 
     'parse_mode' => 'HTML',
     'timeout' => 8,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Production Bot (interaktif)
+    |--------------------------------------------------------------------------
+    |
+    | Berbeda dengan bot notifikasi di atas, production bot dipakai dua arah:
+    | Telegram mengirim webhook ke aplikasi, lalu aplikasi membalas chat.
+    | Semua answer di-render sendiri oleh PHP (tidak memakai TelegramAdService)
+    | supaya jawaban data produksi tetap bersih dan dapat dikoreksi.
+    |
+    */
+
+    'production_bot' => [
+        'enabled' => filter_var(env('TELEGRAM_PRODUCTION_BOT_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
+
+        // Secret token yang dibandingkan dengan header X-Telegram-Bot-Api-Secret-Token.
+        'webhook_secret' => env('TELEGRAM_BOT_WEBHOOK_SECRET', ''),
+
+        // Prefix URL webhook, relatif terhadap APP_URL.
+        'webhook_path' => env('TELEGRAM_BOT_WEBHOOK_PATH', 'api/telegram/webhook'),
+
+        // Antrian untuk memproses update di luar request (butuh php artisan queue:work).
+        'queue' => env('TELEGRAM_BOT_QUEUE', 'telegram'),
+
+        // Batas jumlah update per request webhook (Telegram mengirim maksimal 100).
+        'max_updates_per_request' => (int) env('TELEGRAM_BOT_MAX_UPDATES', 20),
+
+        /*
+        | Whitelist akses. Pesan dari chat/user di luar daftar ini diabaikan
+        | tanpa balasan. Kosongkan kedua daftar hanya untuk trial di lokal,
+        | dan pastikan require_whitelist ikut dimatikan.
+        */
+        'allowed_chats' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('TELEGRAM_BOT_ALLOWED_CHATS', ''))
+        ))),
+
+        'allowed_users' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('TELEGRAM_BOT_ALLOWED_USERS', ''))
+        ))),
+
+        // Saat daftar di atas kosong, tolak semua request kecuali di allowances
+        // eksplisit lewat env. Ini mencegah webhook terbuka tanpa sengaja.
+        'require_whitelist' => filter_var(env('TELEGRAM_BOT_REQUIRE_WHITELIST', true), FILTER_VALIDATE_BOOLEAN),
+
+        // Masa tunggu state percakapan (menunggu user mengetik nomor lot) dalam menit.
+        'state_ttl_minutes' => (int) env('TELEGRAM_BOT_STATE_TTL', 15),
+    ],
 ];
