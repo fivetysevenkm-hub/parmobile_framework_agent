@@ -456,21 +456,21 @@ class ProductionMessageFormatter
     public function help(): array
     {
         $lines = [];
-        $lines[] = '<b>PAR PRODUCTION BOT</b>';
+        $lines[] = '<b>🤖 PAR PRODUCTION BOT</b>';
         $lines[] = 'Menjawab data real time produksi langsung dari sistem.';
 
-        $lines[] = $this->section('CARA PAKAI');
+        $lines[] = $this->section('CARA PAKAI', '💡');
         $lines[] = 'Kirim <b>nomor lot</b> dan bot akan reporting posisi, proses, PIC, tray, serta waktunya.';
         $lines[] = 'Boleh juga pakai kalimat bebas, misalnya <i>"dimana lot CF3-030626-20"</i>.';
 
-        $lines[] = $this->section('YANG BISA DICARI');
+        $lines[] = $this->section('YANG BISA DICARI', '🔎');
         $lines[] = '• <b>Nomor lot</b> — posisi &amp; riwayat proses';
         $lines[] = '• <b>Surat jalan</b> — lot atas satu SJ';
         $lines[] = '• <b>Lot customer</b> — lot atas nomor lot customer';
         $lines[] = '• <b>No / Nama part</b> — lot yang memakai part tersebut';
         $lines[] = '• <b>Customer</b> — lot milik customer';
 
-        $lines[] = $this->section('PERINTAH');
+        $lines[] = $this->section('PERINTAH', '⌨️');
         $lines[] = '<code>/lot &lt;no lot&gt;</code> — posisi real time';
         $lines[] = '<code>/ht &lt;no lot&gt;</code> — detail Heat Treatment';
         $lines[] = '<code>/tray &lt;no lot&gt;</code> — nomor tray';
@@ -482,7 +482,7 @@ class ProductionMessageFormatter
         $lines[] = '<code>/refresh</code> — ulang data lot terakhir';
         $lines[] = '<code>/batal</code> — batalkan pencarian';
 
-        $lines[] = $this->section('CONTOH');
+        $lines[] = $this->section('CONTOH', '💬');
         $lines[] = '<i>cek lot CF3-030626-20</i>';
         $lines[] = '<i>tray lot VW4-300626-40-B</i>';
         $lines[] = '<i>cari sj HPM/CR-CO/08/26</i>';
@@ -778,9 +778,13 @@ class ProductionMessageFormatter
         return self::STATUS_ICON[$process['status'] ?? 'waiting'] ?? '⚪';
     }
 
-    private function section(string $title): string
+    /**
+     * Judul bagian. Emoji opsional supaya pemanggil bisa memilih bagian yang
+     * perlu ikon tanpa memaksakan ikon di semua laporan.
+     */
+    private function section(string $title, string $emoji = ''): string
     {
-        return "\n".'<b>'.$this->e($title).'</b>';
+        return "\n".'<b>'.$emoji.$this->e($title).'</b>';
     }
 
     private function field(string $label, ?string $value): string

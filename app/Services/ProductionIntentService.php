@@ -130,18 +130,98 @@ class ProductionIntentService
     /**
      * Sapaan dan obrolan ringan yang jelas bukan pertanyaan produksi.
      *
-     * Daftar ini dilewati lebih dulu supaya "halo" tidak spends 20 detik hanya
-     * untuk dijawab "tidak paham".
+     * Dikelompokkan per jenis, bukan satu daftar datar, supaya handler bisa
+     * membalas "terima kasih" dan "sampai jumpa" dengan cara yang berbeda.
+     * Kalau digabung, semua obrolan akan mendapat kalimat yang sama dan bot
+     * langsung terbaca sebagai script.
+     *
+     * Daftar ini dilewati lebih dulu supaya "halo" tidak menghabiskan 20 detik
+     * hanya untuk dijawab "tidak paham".
      */
     private const SMALLTALK = [
-        'halo', 'hai', 'hallo', 'hello', 'hi', 'hey', 'hei', 'pagi', 'siang',
-        'sore', 'malam', 'selamat pagi', 'selamat siang', 'selamat sore',
-        'selamat malam', 'assalamualaikum', 'terima kasih', 'thanks', 'thank you',
-        'makasih', 'oke thanks', 'bye', 'daah', 'sampai jumpa', 'good morning',
-        'apa kabar', 'apa kabar?', 'gimana kabar', 'gimana kabar?',
-        'botnya siapa', 'kamu siapa', 'who are you', 'apa ini', 'apa ini?',
-        'test', 'tes', 'ping', 'pong',
+        'greeting' => [
+            'halo', 'hai', 'hallo', 'hello', 'hi', 'hey', 'hei', 'pagi', 'siang',
+            'sore', 'malam', 'selamat pagi', 'selamat siang', 'selamat sore',
+            'selamat malam', 'assalamualaikum', 'assalamu alaikum', 'good morning',
+            'good afternoon', 'good evening', 'met pagi', 'selamatsiang',
+        ],
+        'thanks' => [
+            'terima kasih', 'terimaksih', 'terima kasih banyak', 'terima kasih banyak sekali',
+            'thanks', 'thank you', 'thank', 'makasih', 'oke thanks', 'oke makasih',
+            'thanks ya', 'tq', 'thanks a lot',
+        ],
+        'bye' => [
+            'bye', 'bye bye', 'daah', 'dadah', 'daho', 'sampai jumpa', 'sampai jumpa ya',
+            'sampai nanti', 'see you', 'cu yu',
+        ],
+        'howareyou' => [
+            'apa kabar', 'gimana kabar', 'apa kabar?', 'gimana kabar?', 'apa news',
+            'kabar apa', 'how are you', 'apa Kabar', 'gimana Kabarnya',
+        ],
+        'identity' => [
+            'botnya siapa', 'kamu siapa', 'nama kamu siapa', 'kamu bot apa',
+            'who are you', 'apa ini', 'apa ini?', 'kamu apa',
+        ],
+        'probe' => [
+            'test', 'tes', 'ping', 'pong',
+        ],
     ];
+
+    /**
+     * Kata yang terlalu umum untuk dijadikan pemicu obrolan ringan.
+     *
+     * "sampai mana lotnya", "cek nama part", dan "oke cek lot" adalah
+     * pertanyaan produksi biasa, bukan perpisahan atau sapaan. Tanpa daftar ini,
+     * frasa seperti "nama kamu siapa" akan membuat setiap pesan ber Kata "nama"
+     * ikut dianggap obrolan ringan.
+     */
+    private const SMALLTALK_TRIGGER_BLOCKLIST = [
+        'nama', 'sampai', 'oke', 'ok', 'kamu', 'itu', 'sih', 'dong', 'itu',
+    ];
+
+    /**
+     * Pemicu per kata: kata pertama tiap frasa, dipetakan ke kategorinya.
+     *
+     * Hanya kata PERTAMA yang dipakai, bukan semua kata di dalam frasa.
+     * Kalau semua kata dipakai, frasa "thanks a lot" akan menjadikan kata
+     * "lot" sebagai pemicu - dan "lot" justru kata yang paling sering muncul
+     * di bot produksi ini, sehingga setiap pertanyaan lot akan salah klasifikasi
+     * menjadi obrolan ringan.
+     *
+     * @return array<string, string>
+     */
+    private function smalltalkTriggers(): array
+    {
+        static $triggers = null;
+
+        if ($triggers !== null) {
+            return $triggers;
+        }
+
+        $triggers = [];
+
+        foreach (self::SMALLTALK as $category => $phrases) {
+            foreach ($phrases as $phrase) {
+                $first = mb_strtolower((string) (preg_split('/\s+/', trim($phrase), 2)[0] ?? ''));
+
+                // Kata pendek seperti "hi" atau "tq" terlalu mudah menabrak
+                // kata lain, jadi hanya boleh cocok lewat pencocokan utuh.
+                if (mb_strlen($first) < 4 || in_array($first, self::SMALLTALK_TRIGGER_BLOCKLIST, true)) {
+                    continue;
+                }
+
+                $triggers[$first] = $category;
+            }
+        }
+
+        return $triggers;
+    }
+
+    /**
+     * Perintah yang selalu dijawab tanpa membaca database, sehingga tidak perlu
+     * indikator "typing" sama sekali.
+     */
+    private const INSTANT_COMMANDS = ['/start', '/menu', '/batal', '/cancel'];
 
     /**
      * @return array{intent: string, query: string, source: string}
@@ -154,8 +234,8 @@ class ProductionIntentService
             return $this->result(self::INTENT_UNKNOWN, '', 'empty');
         }
 
-        if ($pendingIntent === null && $this->isSmalltalk($text)) {
-            return $this->result(self::INTENT_UNKNOWN, '', 'rule:smalltalk');
+        if ($pendingIntent === null && ($smalltalk = $this->classifySmalltalk($text)) !== null) {
+            return $this->result(self::INTENT_UNKNOWN, '', 'rule:smalltalk:'.$smalltalk);
         }
 
         [$command, $argument] = $this->splitCommand($text);
@@ -411,6 +491,13 @@ class ProductionIntentService
                 continue;
             }
 
+            // Kata yang hanya salah ketik dari sebuah kata kunci tidak boleh
+            // ikut terbawa ke query, karena akan membuat pencarian LIKE
+            // tidak menemukan apa pun.
+            if ($this->closestKeyword($lower) !== null) {
+                continue;
+            }
+
             $kept[] = $token;
         }
 
@@ -471,12 +558,21 @@ class ProductionIntentService
         });
     }
 
-    private function isSmalltalk(string $text): bool
+    /**
+     * Kelompokkan obrolan ringan sesuai jenisnya, atau null bila bukan.
+     *
+     * Nilai kembalian ikut dibawa pada "source" supaya handler bisa membalas
+     * sesuai jenis. Hasil categori juga dipakai ProductionBotHandler::unknown,
+     * jadi jenis yang tidak dikenal harus tetap punya balasan default.
+     */
+    private function classifySmalltalk(string $text): ?string
     {
         $clean = mb_strtolower(trim($text, " \t\n\r\0\x0B.!?,;:-_"));
 
-        if (in_array($clean, self::SMALLTALK, true)) {
-            return true;
+        foreach (self::SMALLTALK as $category => $phrases) {
+            if (in_array($clean, $phrases, true)) {
+                return $category;
+            }
         }
 
         // Sapaan yang disusul kata lain, misalnya "halo bot" atau "hi admin".
@@ -485,18 +581,16 @@ class ProductionIntentService
         $words = preg_split('/\s+/', $clean, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         if (count($words) > 4) {
-            return false;
+            return null;
         }
 
-        foreach (self::SMALLTALK as $phrase) {
-            foreach (preg_split('/\s+/', $phrase, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word) {
-                if (in_array($word, $words, true)) {
-                    return true;
-                }
+        foreach ($this->smalltalkTriggers() as $word => $category) {
+            if (in_array($word, $words, true)) {
+                return $category;
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
@@ -691,6 +785,26 @@ class ProductionIntentService
         return $intent;
     }
 
+    /**
+     * Apakah pesan ini dijawab seketika, tanpa satu pun query database?
+     *
+     * Dipakai worker untuk menahan indikator "typing". Untuk jawaban yang sudah
+     * instan, mengirim "typing..." justru membuat jawaban terasa lebih lambat
+     * karena user sempat berharap ada sesuatu yang diproses.
+     */
+    public function isInstantReply(string $text): bool
+    {
+        $normalized = $this->normalize($text);
+
+        if ($this->classifySmalltalk($normalized) !== null) {
+            return true;
+        }
+
+        [$command] = $this->splitCommand($normalized);
+
+        return $command !== null && in_array($command, self::INSTANT_COMMANDS, true);
+    }
+
     private function intentFromKeywords(string $text): ?string
     {
         $haystack = mb_strtolower($text);
@@ -710,6 +824,134 @@ class ProductionIntentService
                     $best = $intent;
                     $bestLength = mb_strlen($word);
                 }
+            }
+        }
+
+        return $best ?? $this->intentFromFuzzyKeywords($haystack);
+    }
+
+    /**
+     * Cache kata yang sudah pernah diuji toleransinya, supaya tidak dihitung
+     * ulang untuk setiap pesan karena user sering mengetik kata yang sama.
+     *
+     * @var array<string, string|null>
+     */
+    private array $fuzzyMatches = [];
+
+    /**
+     * Kata kunci satu kata yang boleh dicocokkan dengan toleransi typo.
+     *
+     * @return array<int, string>
+     */
+    private function typoTolerantKeywords(): array
+    {
+        static $keys = null;
+
+        if ($keys !== null) {
+            return $keys;
+        }
+
+        $keys = [];
+
+        foreach (self::KEYWORDS as $words) {
+            foreach ($words as $word) {
+                $word = mb_strtolower($word);
+
+                // Frasa yang terdiri dari beberapa kata mustahil cocok dengan satu
+                // kata, dan kata pendek lebih sering menghasilkan intent
+                // yang salah daripada otomatis terkena.
+                if (mb_strlen($word) >= 6 && ! str_contains($word, ' ')) {
+                    $keys[$word] = $word;
+                }
+            }
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Kata kunci terdekat dengan satu kata, bila masih dalam batas toleransi.
+     *
+     * Dipakai dua kali: mengenali intent saat tidak ada cocok persis, dan
+     * membuang kata yang salah ketik dari query. Tanpa langkah kedua, intent
+     *-nya dikenali tetapi query tetap berisi "customr", sehingga pencarian
+     * LIKE tidak akan menemukan apa pun.
+     */
+    private function closestKeyword(string $word): ?string
+    {
+        if (array_key_exists($word, $this->fuzzyMatches)) {
+            return $this->fuzzyMatches[$word];
+        }
+
+        $best = null;
+        $bestLength = 0;
+
+        foreach (array_keys($this->typoTolerantKeywords()) as $keyword) {
+            $gap = mb_strlen($word) - mb_strlen($keyword);
+
+            // Panjang harus mirip, supaya "gamblong" tidak dianggap salah
+            // ketik dari "pelanggan".
+            if ($gap < -2 || $gap > 2) {
+                continue;
+            }
+
+            // Batas kesalahan ikut panjang kata: satu huruf untuk kata
+            // pendek, dua huruf untuk yang sudah panjang.
+            if (levenshtein($keyword, $word) > (mb_strlen($keyword) >= 9 ? 2 : 1)) {
+                continue;
+            }
+
+            if (mb_strlen($keyword) > $bestLength) {
+                $best = $keyword;
+                $bestLength = mb_strlen($keyword);
+            }
+        }
+
+        return $this->fuzzyMatches[$word] = $best;
+    }
+
+    /**
+     * Intent milik sebuah kata kunci.
+     */
+    private function intentOfKeyword(string $keyword): ?string
+    {
+        foreach (self::KEYWORDS as $intent => $words) {
+            foreach ($words as $word) {
+                if (mb_strtolower($word) === $keyword) {
+                    return $intent;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Cocokkan kata kunci dengan toleransi salah ketik satu-dua huruf.
+     *
+     * Hanya dipanggil setelah pencarian persis gagal, sehingga tidak pernah
+     * menimpa kecocokan yang sudah benar dan tidak menambah beban pada pesan
+     * normal.
+     */
+    private function intentFromFuzzyKeywords(string $haystack): ?string
+    {
+        $words = preg_split('/[^\p{L}\p{N}]+/u', $haystack, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        $best = null;
+        $bestLength = 0;
+
+        foreach ($words as $word) {
+            $keyword = $this->closestKeyword($word);
+
+            if ($keyword === null) {
+                continue;
+            }
+
+            $intent = $this->intentOfKeyword($keyword);
+
+            if ($intent !== null && mb_strlen($keyword) > $bestLength) {
+                $best = $intent;
+                $bestLength = mb_strlen($keyword);
             }
         }
 

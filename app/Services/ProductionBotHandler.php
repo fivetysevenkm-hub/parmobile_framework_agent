@@ -481,24 +481,121 @@ class ProductionBotHandler
      */
     private function unknown(string $source): array
     {
+        if (str_contains($source, 'smalltalk')) {
+            return $this->smalltalk($this->smalltalkCategory($source));
+        }
+
         $message = match (true) {
-            str_contains($source, 'smalltalk') => 'Halo! Saya bot data produksi. '
-                .'Kirim nomor lot, surat jalan, nomor part, atau nama customer untuk mulai.',
-            str_contains($source, 'llm:unavailable') => 'Layanan AI sedang tidak aktif, mode aturan dasar.',
-            str_contains($source, 'llm') => 'Maaf, pertanyaan itu belum bisa saya pahami.',
-            default => 'Saya belum memahami maksudnya.',
+            str_contains($source, 'llm:unavailable') => $this->vary([
+                'Layanan AI sedang tidak aktif, jadi saya pakai aturan dasar.',
+                'Mode aturan dasar aktif untuk sekarang. Data produksi tetap bisa dicek semua.',
+            ]),
+            str_contains($source, 'llm') => $this->vary([
+                'Maaf, pertanyaan itu belum saya pahami.',
+                'Hmm, maksudnya belum saya tangkap. Coba pakai kata yang lebih singkat ya.',
+                'Sepertinya saya belum paham maksudnya.',
+            ]),
+            default => $this->vary([
+                'Saya belum memahami maksudnya.',
+                'Hmm, belum ada yang cocok dari yang saya pahami.',
+                'Maaf, belum 스마트 soal itu. Boleh diulang dengan cara lain?',
+            ]),
         };
 
-        $suggestions = str_contains($source, 'smalltalk')
-            ? ['cek lot CF3-030626-20', 'hold', 'bantuan']
-            : [
-                'cek lot CF3-030626-20',
-                'cari sj HPM/CR-CO/08/26',
-                'customer DIAMETRAL',
-                'hold',
-            ];
+        return $this->formatter->fallback($message, [
+            'cek lot CF3-030626-20',
+            'cari sj HPM/CR-CO/08/26',
+            'customer DIAMETRAL',
+            'hold',
+        ]);
+    }
 
-        return $this->formatter->fallback($message, $suggestions);
+    /**
+     * Balasan untuk obrolan ringan, dibedakan per jenis.
+     *
+     * Semua obrolan ringan melewati jalur ini tanpa menyentuh database, jadi
+     * jawabannya boleh bervariasi tanpa risiko data yang salah. Setiap jenis punya
+     * beberapa kalimat agar percakapan tidak terasa diulang-ulang.
+     *
+     * @return array{text: string, keyboard: array<string, mixed>}
+     */
+    private function smalltalk(string $category): array
+    {
+        $replies = match ($category) {
+            'thanks' => [
+                '🙏 Sama-sama. Kalau butuh data lot, panggil saja.',
+                '🙏 Tidak masalah. Senang bisa bantu.',
+                '🙏 Sama-sama. Semoga prosesnya lancar.',
+            ],
+            'bye' => [
+                '👋 Sampai jumpa. Semoga claimant-nya lancar.',
+                '👋 Oke, have a good day.',
+                '👌 Oke. Panggil lagi kalau butuh data produksi.',
+            ],
+            'howareyou' => [
+                '🙂 Baik, terima kasih! Kamu baik-baik saja?',
+                '🙂 Lancar. Produksinya aman, kamu bagaimana?',
+                '🙂 Alhamdulillah baik. Ada yang bisa kubantu?',
+            ],
+            'identity' => [
+                '🤖 Aku bot data produksi. Aku bisa cek status lot, cari surat jalan, part, atau customer.',
+                '🤖 Aku bot data produksi. Kirim nomor lot dan aku carikan posisinya.',
+            ],
+            'probe' => [
+                '🙂 Bot aktif. Kirim nomor lot kalau mau cek produksi.',
+                '🙂 Tes berhasil, aku di sini. Ada yang mau ditanyakan soal produksi?',
+            ],
+            default => [
+                'Halo! 👋 Aku bot data produksi. Kirim nomor lot untuk mulai.',
+                'Hai! 👋 Selamat datang. Aku bot data produksi, siap bantu cek lot.',
+                'Halo! 👋 Aku bot data produksi. Ada yang mau dicek hari ini?',
+            ],
+        };
+
+        return $this->formatter->fallback(
+            $this->vary($replies),
+            ['cek lot CF3-030626-20', 'hold', 'bantuan']
+        );
+    }
+
+    /**
+     * Ambil jenis obrolan ringan dari "source", mis. "rule:smalltalk:thanks".
+     */
+    private function smalltalkCategory(string $source): string
+    {
+        $segments = explode(':', $source);
+        $last = end($segments);
+
+        $known = ['greeting', 'thanks', 'bye', 'howareyou', 'identity', 'probe'];
+
+        return in_array($last, $known, true) ? $last : 'greeting';
+    }
+
+    /**
+     * Pilih salah satu kalimat agar balasan tidak selalu identik.
+     *
+     * Pilihan memakai penghitung yang disimpan per chat, bukan acak, supaya
+     * bot tetap bisa diuji dan dua percakapan berbeda tidak selalu mendapat
+     * kalimat yang sama urutan.
+     *
+     * @param  array<int, string>  $options
+     */
+    private function vary(array $options): string
+    {
+        if ($options === []) {
+            return '';
+        }
+
+        if (count($options) === 1) {
+            return $options[0];
+        }
+
+        $key = 'bot:variation:'.($this->chatId ?? 0);
+        $index = (int) Cache::get($key, 0);
+
+        Cache::put($key, $index + 1, now()->addHours(6));
+
+        return $options[$index % count($options)];
     }
 
     /**

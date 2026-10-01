@@ -443,4 +443,66 @@ class ProductionBotWebhookTest extends TestCase
         $this->assertStringContainsString('tidak ditemukan', $text);
         $this->assertStringContainsString('Format nomor lot', $text);
     }
+
+    public function test_balasan_sapaan_bervariasi_antarsesi(): void
+    {
+        $this->fakeTelegram();
+
+        foreach ([900031, 900032, 900033] as $updateId) {
+            $this->postUpdate($this->textUpdate('halo', $updateId))->assertOk();
+        }
+
+        $texts = array_map(
+            fn (array $call): string => (string) $call['payload']['text'],
+            $this->telegramCalls('sendMessage')
+        );
+
+        $this->assertCount(3, $texts);
+        $this->assertGreaterThan(
+            1,
+            count(array_unique($texts)),
+            'Balasan sapaan tidak boleh selalu sama, kalau tidak bot terbaca seperti script.'
+        );
+
+        // Variasinya kalimat, bukan isi: semua versi tetap menyebut diri bot.
+        foreach ($texts as $text) {
+            $this->assertStringContainsString('bot data produksi', $text);
+        }
+    }
+
+    public function test_terima_kasih_dijawab_berbeda_dari_sapaan(): void
+    {
+        $this->fakeTelegram();
+
+        $this->postUpdate($this->textUpdate('terima kasih', 900034))->assertOk();
+
+        $sent = $this->telegramCalls('sendMessage');
+        $text = (string) $sent[0]['payload']['text'];
+
+        $this->assertStringContainsString('Sama-sama', $text);
+    }
+
+    public function test_sapaan_tidak_mengirim_indikator_typing(): void
+    {
+        $this->fakeTelegram();
+
+        $this->postUpdate($this->textUpdate('halo bot', 900035))->assertOk();
+
+        $this->assertEmpty(
+            $this->telegramCalls('sendChatAction'),
+            'Sapaan dijawab seketika, jadi tidak perlu indikator typing.'
+        );
+    }
+
+    public function test_pencarian_lot_tetap_mengirim_indikator_typing(): void
+    {
+        $this->fakeTelegram();
+
+        $this->postUpdate($this->textUpdate('cek lot CF3-030626-20', 900036))->assertOk();
+
+        $this->assertNotEmpty(
+            $this->telegramCalls('sendChatAction'),
+            'Pencarian menyentuh database, jadi indikator typing tetap dikirim.'
+        );
+    }
 }

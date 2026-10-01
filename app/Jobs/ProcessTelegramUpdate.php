@@ -82,6 +82,22 @@ class ProcessTelegramUpdate implements ShouldQueue
     }
 
     /**
+     * Pesan yang dijawab seketika. Sapaan dan perintah "/batal" tidak menyentuh
+     * database, jadi tidak perlu indikator "typing" sama sekali.
+     */
+    private const INSTANT_REPLIES = [
+        'halo', 'hai', 'hallo', 'hello', 'hi', 'hey', 'hei', 'pagi', 'siang',
+        'sore', 'malam', 'selamat', 'assalamualaikum', 'good morning', 'good afternoon',
+        'good evening', 'terima kasih', 'terimaksih', 'makasih', 'thanks', 'thank you',
+        'thank', 'bye', 'daah', 'dadah', 'daho', 'sampai jumpa', 'sampai nanti',
+        'see you', 'cu yu', 'apa kabar', 'gimana kabar', 'kabar apa', 'how are you',
+        'botnya siapa', 'kamu siapa', 'nama kamu', 'kamu bot', 'kamu apa', 'who are you',
+        'apa ini', 'test', 'tes', 'ping', 'pong', 'oke', 'ok', 'iya',
+    ];
+
+    private const INSTANT_COMMANDS = ['/start', '/menu', '/batal', '/cancel'];
+
+    /**
      * @param  array<string, mixed>  $message
      */
     private function handleMessage(
@@ -102,7 +118,12 @@ class ProcessTelegramUpdate implements ShouldQueue
             return;
         }
 
-        $telegram->sendChatAction($chatId, 'typing');
+        // Indikator "typing" hanya membantu untuk pekerjaan yang memang
+        // butuh waktu. Untuk sapaan, mengirimnya membuat jawaban terasa
+        // lambat karena user sempat berharap ada yang diproses.
+        if (! $this->isInstantReply($text)) {
+            $telegram->sendChatAction($chatId, 'typing');
+        }
 
         $state = (string) Cache::get($this->stateKey($chatId), '');
 
@@ -210,6 +231,43 @@ class ProcessTelegramUpdate implements ShouldQueue
         $chatId = (int) $chat['id'];
 
         return $chatId !== 0 ? $chatId : null;
+    }
+
+    /**
+     * Tebakan kasar apakah pesan ini dijawab seketika.
+     *
+     * Saja-saja: kalau tebakan meleset, akibatnya paling buruk indikator
+     * "typing" muncul atau tidak pada jawaban yang tetap terkirim. Karena itu
+     * daftar kata di sini boleh tumpang tindih dengan IntentService tanpa
+     * perlu risau soal duplikasi.
+     */
+    private function isInstantReply(string $text): bool
+    {
+        $normalized = mb_strtolower(trim($text, " \t\n\r\0\x0B.!?,;:-_"));
+
+        if ($normalized === '') {
+            return false;
+        }
+
+        if (in_array($normalized, self::INSTANT_COMMANDS, true)) {
+            return true;
+        }
+
+        $words = preg_split('/[^\p{L}\p{N}]+/u', $normalized, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        // Sapaan singkat saja. Kalimat panjang dibiarkan lewat supaya
+        // "terima kasih, cek lot CF3-030626-20" tetap punya indikator typing.
+        if (count($words) > 4) {
+            return false;
+        }
+
+        foreach ($words as $word) {
+            if (in_array($word, self::INSTANT_REPLIES, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function stateKey(int $chatId): string
