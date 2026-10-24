@@ -161,10 +161,15 @@ class TelegramBotService
         }
 
         try {
-            $response = Http::asForm()
+            $http = Http::asForm()
                 ->timeout((int) config('telegram.timeout', 8))
-                ->connectTimeout(3)
-                ->post("https://api.telegram.org/bot{$token}/{$method}", $payload);
+                ->connectTimeout(3);
+
+            if (app()->environment('local')) {
+                $http = $http->withoutVerifying();
+            }
+
+            $response = $http->post("https://api.telegram.org/bot{$token}/{$method}", $payload);
 
             $json = $response->json();
 
